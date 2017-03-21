@@ -38,7 +38,7 @@ export class ZimbraDriveUploadManager {
 
   private static _reqIds: number = 0;
 
-  public upload(params: ZimbraDriveUploadParams) {
+  public upload(params: ZimbraDriveUploadParams): boolean {
     if (!params.formData) {
       return;
     }
@@ -93,7 +93,7 @@ export class ZimbraDriveUploadManager {
     }
   }
 
-  public _handleUploadResponse(request: XMLHttpRequest, params: ZimbraDriveUploadParams): void {
+  public _handleUploadResponse(request: XMLHttpRequest, params: ZimbraDriveUploadParams): boolean {
     if (params.stateChangeCallback) {
       return params.stateChangeCallback(request);
     }
@@ -106,6 +106,7 @@ export class ZimbraDriveUploadManager {
         msgDlg.popup();
       }
     }
+    return true;
   }
 
 

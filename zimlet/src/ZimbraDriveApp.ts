@@ -54,6 +54,7 @@ import {ZmMsg} from "./zimbra/zimbraMail/ZmMsg";
 import {ZmSettings} from "./zimbra/zimbraMail/share/model/ZmSettings";
 import {ZmSetting} from "./zimbra/zimbraMail/share/model/ZmSetting";
 import {ZimbraDriveAttachDialog} from "./view/ZimbraDriveAttachDialog";
+import {ZmComposeView} from "./zimbra/zimbraMail/mail/view/ZmComposeView";
 
 declare let com_zextras_drive_open: {[label: string]: string};
 
@@ -118,7 +119,7 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
     );
   }
 
-  public handleOp(operation: string) {
+  public handleOp(operation: string): void {
     this._zimbraDriveNewButtonMenu.getMenuItem(operation).notifyListeners(DwtEvent.SELECTION, DwtShell.selectionEvent);
   }
 
@@ -298,7 +299,7 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
   //   );
   // }
 
-  private getZimbraDriveController(sessionId: string, searchResultsController?: ZmSearchResultsController): ZimbraDriveController {
+  public getZimbraDriveController(sessionId: string, searchResultsController?: ZmSearchResultsController): ZimbraDriveController {
     return <ZimbraDriveController>this.getSessionController({
       controllerClass: "ZmZimbraDriveController",
       sessionId: sessionId || ZmApp.MAIN_SESSION,
@@ -360,7 +361,7 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
     };
   }
 
-  public activate(active: boolean, viewId: string) {
+  public activate(active: boolean, viewId: string): void {
     super.activate(active, viewId);
     let toolbarButton = (<ZmZimbraMail> appCtxt.getAppController()).getNewButton();
     if (active) {
@@ -391,11 +392,11 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
     }
   }
 
-  public popupAttachDialog(): void {
+  public popupAttachDialog(composeView: ZmComposeView): void {
     if (!this._attachDialog) {
       this._attachDialog = new ZimbraDriveAttachDialog(appCtxt.getShell(), ZimbraDriveAttachDialog.CLASSNAME);
     }
-    this._attachDialog.getDriveView();
+    this._attachDialog.getDriveView(composeView._controller);
     this._attachDialog.popup();
   }
 }

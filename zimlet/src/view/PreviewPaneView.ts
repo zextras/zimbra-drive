@@ -93,7 +93,7 @@ export class PreviewPaneView extends DwtComposite {
     return this._previewView;
   }
 
-  private setReadingPane() {
+  private setReadingPane(): void {
     let tlv = this._detailListView,
       tv = this._previewView;
     let readingPaneEnabled = this._controller.isReadingPaneOn();
@@ -109,16 +109,12 @@ export class PreviewPaneView extends DwtComposite {
       oldSash.setVisible(false);
       newSash.setVisible(true);
     }
-
     tlv.reRenderListView();
-
-
-    // tv.noTab = !readingPaneEnabled || AjxEnv.isIE;
     let sz = this.getSize();
     this._resetSize(sz.x, sz.y, true);
   }
 
-  public setBounds(x: number, y: number, width: number, height: number) {
+  public setBounds(x: number, y: number, width: number, height: number): void {
     super.setBounds(x, y, width, height);
     this._resetSize(width, height);
   };
@@ -155,7 +151,7 @@ export class PreviewPaneView extends DwtComposite {
     this._lastResetHeight = newHeight;
   }
 
-  public _sashCallback(delta: number) {
+  public _sashCallback(delta: number): number {
     let readingPaneOnRight = this._controller.isReadingPaneOnRight();
     if (delta > 0) {
       if (readingPaneOnRight) {
@@ -243,7 +239,6 @@ export class PreviewPaneView extends DwtComposite {
     this.setReadingPane();
 
     if (oldPreviewStatus === ZmSetting.RP_OFF) {
-      let items: ZmItem[] = this.getSelection();
       this._selectFirstItem();
     }
   }
@@ -257,18 +252,16 @@ export class PreviewPaneView extends DwtComposite {
     let selectedItem: ZimbraDriveItem = list ? list.get(0) : null;
     if (selectedItem && !selectedItem.isFolder()) {
       this._detailListView.setSelection(selectedItem);
-    // }else{
-    //   this._previewView.enablePreview(false);
     }
   }
 
-  public getSash() {
+  public getSash(): DwtSash {
     let readingPaneOnRight = this._controller.isReadingPaneOnRight();
     return readingPaneOnRight ? this._vertMsgSash : this._horizMsgSash;
   };
 
 
-  public _listSelectionListener(ev: DwtSelectionEvent, item?: ZimbraDriveItem) {
+  public _listSelectionListener(ev: DwtSelectionEvent, item?: ZimbraDriveItem): void {
     item = item || <ZimbraDriveItem> ev.item;
     if (!item) {
       return;
@@ -305,7 +298,7 @@ export class PreviewPaneView extends DwtComposite {
     this._previewView.set(this._delayedSelectionItem);
   };
 
-  public set(list: ZmList, sortField?: string) {
+  public set(list: ZmList, sortField?: string): void {
     this._detailListView.set(list, sortField);
     list = <ZmList> this._detailListView._zmList;
     if (list)
@@ -313,7 +306,7 @@ export class PreviewPaneView extends DwtComposite {
     this._previewView.set(null);
   };
 
-  public _listViewChangeListener(ev: DwtSelectionEvent) {
+  public _listViewChangeListener(ev: DwtSelectionEvent): void {
     let items: ZimbraDriveItem[] = this._detailListView.getSelection();
     let item = items[0];
     if (item) {

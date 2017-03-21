@@ -40,12 +40,11 @@ export class ZimbraDriveUploadDialog extends ZmUploadDialog {
   private static NOT_PERMITTED_EXCEPTION_STATUS_CODE: number = 2;
   private static NO_FILE_IN_THE_REQUEST: number = 3;
 
-  private _newForm: HTMLFormElement;
   private _uploadButton: DwtButton;
   private _fileMapIds: string[];
   private _fileMapIdName: {[id: string]: string};
 
-  public _upload() {
+  public _upload(): void {
     let form: HTMLFormElement = this._uploadForm,
       formData: FormData = new FormData();
     let elements     = form.elements,
@@ -98,7 +97,6 @@ export class ZimbraDriveUploadDialog extends ZmUploadDialog {
         (<AjxPost> ZimbraDriveController.getUploadManager()).execute(callback, this._uploadForm);
       }
       if (this._uploadButton) {
-        // this._uploadButton.setVisible(true);
         ZmToolBar._setButtonStyle(this._uploadButton, null, ZmMsg.uploading, "Upload0");
         this._inprogress = true;
       }
@@ -133,12 +131,6 @@ export class ZimbraDriveUploadDialog extends ZmUploadDialog {
   }
 
   public uploadCompleted(response: string, params: ZimbraDriveUploadParams, status: number): boolean {
-    /*
-     <html>
-     <head><meta name ='uploadedFilesStatus' content ='{"file_to_upload_0":{"statusCode":0},"file_to_upload_1":{"statusCode":1}}'></head>
-     <body onload ="window.parent.appCtxt.getUploadManager().loaded(200);"></body>
-     </html>
-     */
     let parsedResponse: {[fileId: string]: {statusCode: number}} = {};
     if (response.length > 0 && response.indexOf("name='uploadedFilesStatus'") !== -1) {
       // parse response
@@ -195,12 +187,7 @@ export class ZimbraDriveUploadDialog extends ZmUploadDialog {
         break;
       }
       case 405: {
-        // if (files.length > 0) {
-        //   msg = ZimbraDriveApp.getMessage("errorUploadFileAlreadyExists", [files]);
-        // }
-        // else  {
         msg = ZimbraDriveApp.getMessage("errorUploadFileAlreadyExistsGeneric");
-        // }
         break;
       }
       case 500: {
@@ -225,7 +212,7 @@ export class ZimbraDriveUploadDialog extends ZmUploadDialog {
     return true; // handled
   }
 
-  public _createUploadHtml() {
+  public _createUploadHtml(): void {
     this.setContent(
       AjxTemplate.expand(
         "com_zextras_drive_open.ZimbraDrive#UploadDialog",
@@ -239,7 +226,7 @@ export class ZimbraDriveUploadDialog extends ZmUploadDialog {
     this._tableEl = document.getElementById((this._htmlElId + "_table"));
   }
 
-  private _addHiddenField(referenceElement: Element, fieldName: string, fieldValue: string) {
+  private _addHiddenField(referenceElement: Element, fieldName: string, fieldValue: string): void {
     let hidden   = document.createElement("input");
     hidden.type  = "hidden";
     hidden.name  = fieldName;
@@ -247,7 +234,7 @@ export class ZimbraDriveUploadDialog extends ZmUploadDialog {
     referenceElement.parentNode.insertBefore(hidden, referenceElement);
   };
 
-  public popdown() {
+  public popdown(): void {
     // bypass useless ZmUploadDialog.popdown
     DwtDialog.prototype.popdown.call(this);
   }
@@ -257,15 +244,6 @@ export class ZimbraDriveUploadDialog extends ZmUploadDialog {
     this._enableUpload(this._uploadButton);
     if ((<ZimbraDriveFolder> this._uploadFolder).getPath(true) === ZimbraDriveController.getCurrentFolderPath()) {
       ZimbraDriveController.goToFolder(ZimbraDriveController.getCurrentFolderPath());
-      // let batchCommand = new ZmBatchCommand();
-      // batchCommand.add(
-      //   new AjxCallback(
-      //     null,
-      //     ZimbraDriveApp.loadSearchRequestParams,
-      //     [`in:"${ZimbraDriveController.getCurrentFolderPath()}"`]
-      //   )
-      // );
-      // batchCommand.run();
     }
   }
 
@@ -274,16 +252,4 @@ export class ZimbraDriveUploadDialog extends ZmUploadDialog {
     uploadButton.setText("");
     // uploadButton.setVisible(false);
   }
-
-  // private getCleanForm(): HTMLFormElement {
-  //   if (!this._newForm) {
-  //     this._newForm = document.createElement("form");
-  //     document.body.appendChild(this._newForm);
-  //   }
-  //   let elements: HTMLCollection = this._newForm.elements;
-  //   for (let i = elements.length; i > 0; i--) {
-  //     elements[i - 1].remove();
-  //   }
-  //   return this._newForm;
-  // }
 }

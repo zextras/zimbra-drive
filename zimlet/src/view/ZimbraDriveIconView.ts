@@ -19,16 +19,8 @@ import {ZimbraDriveBaseView} from "./ZimbraDriveBaseView";
 import {ZimbraDriveItem} from "../ZimbraDriveItem";
 import {ZmMimeTable, ZmMimeInfoData} from "../zimbra/zimbraMail/core/ZmMimeTable";
 import {AjxStringUtil} from "../zimbra/ajax/util/AjxStringUtil";
-import {Dwt} from "../zimbra/ajax/dwt/core/Dwt";
-import {ZmList} from "../zimbra/zimbraMail/share/model/ZmList";
 
 export class ZimbraDriveIconView extends ZimbraDriveBaseView {
-
-  private _list: ZmList;
-
-  public setList(list: ZmList): void {
-    this._list = list;
-  }
 
   public _createItemHtml(item: ZimbraDriveItem): HTMLElement {
 
@@ -44,9 +36,9 @@ export class ZimbraDriveIconView extends ZimbraDriveBaseView {
     if (item.isFolder()) {
       icon = "Briefcase_16";
     }
-    // if (name.length > 24) {
-    //   name = name.substring(0, 21) + "...";
-    // }
+    if (name.length > 27) {
+      name = name.substring(0, 24) + "...";
+    }
 
     let div = document.createElement("div");
     div.className = "ZimbraDriveItemSmall";

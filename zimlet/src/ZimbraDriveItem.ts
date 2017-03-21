@@ -61,7 +61,7 @@ export class ZimbraDriveItem extends ZmItem {
     return false;
   }
 
-  public static createFromDom(node: ZimbraDriveItemObj, args: {list: ZmList}) {
+  public static createFromDom(node: ZimbraDriveItemObj, args: {list: ZmList}): ZimbraDriveItem {
     let item = new ZimbraDriveItem(`${node.id}_zd`, args.list);
     item._loadFromDom(node);
     return item;

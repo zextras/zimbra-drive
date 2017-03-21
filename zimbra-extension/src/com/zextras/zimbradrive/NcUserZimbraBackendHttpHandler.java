@@ -17,7 +17,6 @@
 
 package com.zextras.zimbradrive;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.openzal.zal.*;
 import org.openzal.zal.exceptions.ZimbraException;

@@ -81,13 +81,13 @@ export class DetailListView extends ZimbraDriveBaseView {
     this._initDragAndDrop();
   }
 
-  public _dragListener(ev: DwtDragEvent) {
+  public _dragListener(ev: DwtDragEvent): void {
     if (ev.action === DwtDragEvent.SET_DATA) {
       ev.srcData = {data: ev.srcControl.getDnDSelection(), controller: this};
     }
   };
 
-  public _dropListener(ev: DwtDropEvent) {
+  public _dropListener(ev: DwtDropEvent): void {
     let data: ZimbraDriveItem| ZimbraDriveItem[]| ZimbraDriveFolder| ZimbraDriveFolder[] = ev.srcData.data;
     let div = this.getTargetItemDiv(ev.uiEvent);
     let dropFolder = this.getItemFromElement(div);
@@ -105,7 +105,7 @@ export class DetailListView extends ZimbraDriveBaseView {
     }
   };
 
-  public _initDragAndDrop() {
+  public _initDragAndDrop(): void {
     this._dnd = new ZmDragAndDrop(this);
   };
 
@@ -142,19 +142,13 @@ export class DetailListView extends ZimbraDriveBaseView {
   }
 
   private static _getHeaderList(isMultiColumn: boolean): DwtListHeaderItem[] {
-    // Columns: tag, name, type, size, date, owner, folder
     let headers: DwtListHeaderItem[] = [];
-    // let view = this._view;
-    // if (appCtxt.get(ZmSetting.SHOW_SELECTION_CHECKBOX)) {
-    //   headers.push(new DwtListHeaderItem({field:ZmItem.F_SELECTION, icon:"CheckboxUnchecked", width:ZmListView.COL_WIDTH_ICON,
-    //     name:ZmMsg.selection}));
-    // }
     if (isMultiColumn) {
-
+      // TODO: revision
       // if (this._revisionView) {
       //   headers.push(new DwtListHeaderItem({field:ZmItem.F_EXPAND, icon: "NodeCollapsed", width:ZmDetailListView.COLWIDTH_ICON, name:ZmMsg.expand}));
       // }
-
+      // TODO: add
       headers.push(
         new DwtListHeaderItem({ field: ZimbraDriveItem.F_EMPTY, width: DetailListView.COLWIDTH_ICON }),
         new DwtListHeaderItem({ field: ZimbraDriveItem.F_ICON,  icon: "GenericDoc", resizeable: false, name: ZmMsg.icon, width: DetailListView.COLWIDTH_ICON }),
@@ -170,22 +164,9 @@ export class DetailListView extends ZimbraDriveBaseView {
       headers.push(new DwtListHeaderItem({field: ZimbraDriveItem.F_SORTED_BY, text: AjxMessageFormat.format(ZmMsg.arrangedBy, ZmMsg._name), resizeable: false}));
     }
     return headers;
-    //
-    //
-    // return [
-    //   new DwtListHeaderItem({ field: ZimbraDriveItem.F_EMPTY, width: DetailListView.COLWIDTH_ICON }),
-    //   new DwtListHeaderItem({ field: ZimbraDriveItem.F_ICON,  icon: "GenericDoc", resizeable: false, name: ZmMsg.icon, width: DetailListView.COLWIDTH_ICON }),
-    //   new DwtListHeaderItem({ field: ZimbraDriveItem.F_NAME, text: ZmMsg._name, sortable: ZimbraDriveItem.F_NAME }),
-    //   new DwtListHeaderItem({ field: ZimbraDriveItem.F_FILE_TYPE, text: ZmMsg.type, width: ZmMsg.COLUMN_WIDTH_TYPE_DLV, sortable: ZimbraDriveItem.F_FILE_TYPE }),
-    //   new DwtListHeaderItem({ field: ZimbraDriveItem.F_SIZE, text: ZmMsg.size, align: "left", width: ZmMsg.COLUMN_WIDTH_SIZE_DLV, sortable: ZimbraDriveItem.F_SIZE}),
-    //   new DwtListHeaderItem({ field: ZimbraDriveItem.F_DATE, text: ZmMsg.modified, align: "left", width: ZmMsg.COLUMN_WIDTH_DATE_DLV, sortable: ZimbraDriveItem.F_DATE}),
-    //   new DwtListHeaderItem({ field: ZimbraDriveItem.F_FROM, text: ZmMsg.author, align: "left", width: ZmMsg.COLUMN_WIDTH_FOLDER_DLV}),
-    //   new DwtListHeaderItem({ field: ZimbraDriveItem.F_FOLDER, text: ZmMsg.folder, align: "left", width: ZmMsg.COLUMN_WIDTH_FOLDER_DLV}),
-    //   new DwtListHeaderItem({ field: ZimbraDriveItem.F_LOCK, icon: "", width: DetailListView.COLWIDTH_ICON })
-    // ];
   }
 
-  public resetSize(newWidth: number, newHeight: number) {
+  public resetSize(newWidth: number, newHeight: number): void {
     this.setSize(newWidth, newHeight);
     let height = (newHeight === Dwt.DEFAULT) ? newHeight : newHeight - DwtListView.HEADERITEM_HEIGHT;
     Dwt.setSize(this._parentEl, newWidth, height);
@@ -242,15 +223,16 @@ export class DetailListView extends ZimbraDriveBaseView {
     return idx;
   }
 
-  public _getAbridgedContent(zimbraDriveItem: ZimbraDriveItem, colIdx: number) {
+  public _getAbridgedContent(zimbraDriveItem: ZimbraDriveItem, colIdx: number): string {
     let idx: number = 0, html: string[] = [];
     let width = (AjxEnv.isIE || AjxEnv.isSafari) ? 22 : 16;
     html[idx++] = "<table width=100% class='TopRow'><tr>";
-    // // if (this._revisionView) {
-    //   html[idx++] = "<td width=" + width + " id='" + zimbraDriveItem.getNameElId() + "'>";
-    // //   idx = this._getCellContents(html, idx, item, ZmItem.F_EXPAND, colIdx);
+    // TODO: revision
+    // if (this._revisionView) {
+    //   html[idx++] = "<td width=" + width + " id='" + zimbraDriveItem.getNameElId() + "_revision'>";
+    //     idx = this._getCellContents(html, idx, item, ZmItem.F_EXPAND, colIdx);
     //   html[idx++] = "</td>";
-    // // }
+    // }
 
     html[idx++] = "<td width=20 id='" + this._getFieldId(zimbraDriveItem, ZmItem.F_FOLDER) + "'>";
     idx = this._getCellContents(html, idx, zimbraDriveItem, ZimbraDriveItem.F_ICON, colIdx); // AjxImg.getImageHtml(mimeInfo.image);
@@ -280,23 +262,10 @@ export class DetailListView extends ZimbraDriveBaseView {
     idx = this._getImageHtml(html, idx, "Blank_16", this._getFieldId(zimbraDriveItem, ZimbraDriveItem.F_LOCK), []);
     html[idx++] = "</td>";
     html[idx++] = "</tr></table>";
-
     return html.join("");
   }
 
-  public _sortColumn(columnItem: DwtListHeaderItem, sortAsc: boolean) {
-    super._sortColumn(columnItem, sortAsc);
-    // let query = this._controller.getSearchString();
-    // let queryHint = this._controller.getSearchStringHint();
-    //
-    // if (this._sortByString && (query || queryHint)) {
-    //   let params = {
-    //     query: query,
-    //     queryHint: queryHint,
-    //     types: [ZmItem.BRIEFCASE_ITEM],
-    //     sortBy: this._sortByString
-    //   };
-    //   appCtxt.getSearchController().search(params);
-    // }
-  }
+  // public _sortColumn(columnItem: DwtListHeaderItem, sortAsc: boolean) {
+  //   super._sortColumn(columnItem, sortAsc);
+  // }
 }

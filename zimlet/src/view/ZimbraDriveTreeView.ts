@@ -29,7 +29,4 @@ export class ZimbraDriveTreeView extends ZmTreeView {
     return this.getTreeItemById((<ZimbraDriveTreeController>this._controller).getCurrentFolder().id);
   }
 
-  // public _getHeaderTreeItemImage(): string {
-  //   return "ZimbraDrive-icon";
-  // }
 }

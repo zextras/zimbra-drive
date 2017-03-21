@@ -46,12 +46,10 @@ export class ZimbraDriveChooseFolderDialog extends ZmChooseFolderDialog {
     this._accountId = account.id;
     let folderTree: ZimbraDriveFolderTree = <ZimbraDriveFolderTree> this._treeController.getDataTree(),
       acctTreeView: {[treeViewId: string]: ZmTreeView} = this._treeView[this._accountId]  = {};
-
     acctTreeView[ZimbraDriveApp.TREE_ID] = this._treeController._treeView[ZimbraDriveApp.TREE_ID];
-    // treeView = acctTreeView[ZimbraDriveApp.TREE_ID] = overview.getTreeView(ZimbraDriveApp.TREE_ID);
 
     let headerItem = acctTreeView[ZimbraDriveApp.TREE_ID].getHeaderItem();
-    headerItem.setVisible(true, true);
+    headerItem.setVisible(false, true);
 
     let ti: DwtTreeItem = acctTreeView[ZimbraDriveApp.TREE_ID].getTreeItemById(folderTree.root.id);
     ti.setExpanded(true);
@@ -82,7 +80,7 @@ export class ZimbraDriveChooseFolderDialog extends ZmChooseFolderDialog {
     }
   };
 
-  public setActionedItem(actionedItem: DwtTreeItem|ZimbraDriveFolderItem) {
+  public setActionedItem(actionedItem: DwtTreeItem|ZimbraDriveFolderItem): void {
     this._actionedItem = actionedItem;
   }
 

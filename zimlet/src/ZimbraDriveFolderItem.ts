@@ -39,11 +39,11 @@ export class ZimbraDriveFolderItem extends ZimbraDriveItem {
     return true;
   }
 
-  public getName() {
+  public getName(): string {
     return this.folder.name;
   }
 
-  public getAuthor() {
+  public getAuthor(): string {
     return this.folder.owner;
   }
 

@@ -35,6 +35,4 @@ export class ZDId {
   public static F_TARGET_PATH: string = "target_path";
   public static F_NEW_NAME: string = "new_name";
   public static F_NEW_FOLDER: string = "new_folder";
-
-  public static F_FILES_PATHS_HEADER: string = "Files-Paths";
 }

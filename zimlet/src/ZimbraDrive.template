@@ -103,7 +103,7 @@
 
 <template id='com_zextras_drive_open.ZimbraDrive#AttachDialog'>
     <div class='AttachDialog'>
-        <table class='ZimbraDriveTabView_Table' id='${id} cellspacing='0' cellpadding='0' border='0'>
+        <table class='ZimbraDriveTabView_Table' id='${id}' cellspacing='0' cellpadding='0' border='0'>
             <tr>
                 <td width='30%' valign='top'  id='${folderTreeCellId}'>
                 <td width='70%' valign='top' id='${folderListId}'>

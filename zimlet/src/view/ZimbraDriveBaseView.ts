@@ -61,12 +61,9 @@ export class ZimbraDriveBaseView extends ZmListView {
   }
 
   public renameFile(item: ZimbraDriveItem): void {
-    // if preview else
     this._fileItemNameEl = document.getElementById(item.getNameElId());
     let fileNameBounds: DwtRectangle = Dwt.getBounds(this._fileItemNameEl),
       fileInput: DwtInputField = this._enableRenameInput(true, fileNameBounds);
-
-    // fileInput.setValue(item.isRevision ? item.parent.name : item.name);
     fileInput.setValue(item.getName());
     this._fileItem = item;
   };
@@ -141,7 +138,7 @@ export class ZimbraDriveBaseView extends ZmListView {
     }
   }
 
-  private _sendRenameRequest(fileName: string, item: ZimbraDriveItem) {
+  private _sendRenameRequest(fileName: string, item: ZimbraDriveItem): void {
     let soapDoc = AjxSoapDoc.create("RenameRequest", "urn:zimbraDrive");
     soapDoc.set(ZDId.F_NEW_NAME, fileName);
     soapDoc.set(ZDId.F_SOURCE_PATH, item.getPath());
@@ -187,7 +184,7 @@ export class ZimbraDriveBaseView extends ZmListView {
     this._fileItem = null;
   };
 
-  private _redrawItem(item: ZimbraDriveItem) {
+  private _redrawItem(item: ZimbraDriveItem): void {
     this.resetRenameFile();
     this.redrawItem(item);
   };

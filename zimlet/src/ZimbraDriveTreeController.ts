@@ -64,11 +64,6 @@ export class ZimbraDriveTreeController extends ZmTreeController {
   private _newFolderDialog: ZimbraDriveNewFolderDialog;
   private _currentFolder: ZimbraDriveFolder;
   private _moveToDialog: ZimbraDriveChooseFolderDialog;
-  // private _behaviour: string;
-  // private _attachTabView: ZimbraDriveTabView;
-
-  // public static STANDARD_BEHAVIOUR: string = "standard";
-  // public static ATTACH_DIALOG_BEHAVIOUR: string = "attachDialog";
 
   constructor(type: string) {
     super(type || ZimbraDriveApp.APP_NAME);
@@ -107,12 +102,7 @@ export class ZimbraDriveTreeController extends ZmTreeController {
   }
 
   public _itemClicked(folder: ZimbraDriveFolder) {
-    // if (this._behaviour === ZimbraDriveTreeController.STANDARD_BEHAVIOUR) {
-      ZimbraDriveController.goToFolder(folder.getPath(true));
-    // }
-    // else if (this._behaviour === ZimbraDriveTreeController.ATTACH_DIALOG_BEHAVIOUR) {
-    //   this._attachTabView.showFolderContent(folder.getPath(true));
-    // }
+    ZimbraDriveController.goToFolder(folder.getPath(true));
   }
 
   public _getActionMenuOps(): string[] {
@@ -204,7 +194,7 @@ export class ZimbraDriveTreeController extends ZmTreeController {
   }
 
   // Rename folder
-  public renameFolderItemListener(ev: DwtUiEvent, item: ZimbraDriveFolderItem) {
+  public renameFolderItemListener(ev: DwtUiEvent, item: ZimbraDriveFolderItem): void {
     let backupActionData: ZmFolder = this._actionedOrganizer;
     this._actionedOrganizer = item.getFolder();
     this._renameListener(ev);
@@ -266,10 +256,6 @@ export class ZimbraDriveTreeController extends ZmTreeController {
 
   // Action menu
   public _treeViewListener(ev: DwtUiEvent): void {
-    // if ((<DwtSelectionEvent>ev).item && (<DwtSelectionEvent>ev).item.isDwtTreeItem) {
-    //   (<ZmOverview>this._treeView["ZIMBRA_DRIVE"].parent).itemSelected((<DwtSelectionEvent>ev).item);
-    //   this._treeView["ZIMBRA_DRIVE"].setSelection((<DwtSelectionEvent>ev).item, true, false, true);
-    // }
     super._treeViewListener(ev);
     if ((<DwtSelectionEvent>ev).detail === DwtTree.ITEM_ACTIONED) {
       let itemActioned: any = (<DwtSelectionEvent>ev).item;
@@ -280,7 +266,7 @@ export class ZimbraDriveTreeController extends ZmTreeController {
   }
 
   // Drop Folder Listener
-  public _dropListener(ev: DwtDropEvent) {
+  public _dropListener(ev: DwtDropEvent): void {
     let dropFolder = ev.targetControl.getData(Dwt.KEY_OBJECT);
     let data = ev.srcData.data;
     if (ev.action === DwtDropEvent.DRAG_DROP) {
@@ -290,7 +276,7 @@ export class ZimbraDriveTreeController extends ZmTreeController {
   }
 
   // Move Folder Listener
-  public _moveListener(ev: DwtSelectionEvent) {
+  public _moveListener(ev: DwtSelectionEvent): void {
     this._pendingActionData = <ZimbraDriveFolder> this._getActionedOrganizer(ev);
     this._moveToDialog = this.getChooseFolderDialog();
     this._moveToDialog.setActionedItem(this._getActionMenu(ev, ev.item).getData(ZDId.ZIMBRADRIVE_ITEM_ACTIONED));
@@ -305,7 +291,9 @@ export class ZimbraDriveTreeController extends ZmTreeController {
     this._moveToDialog.registerCallback(DwtDialog.CANCEL_BUTTON, this._clearDialog, this, this._moveToDialog);
   };
 
-  public _doMove(movingFolder: ZimbraDriveFolder, targetFolder: ZimbraDriveFolder) {
+  /** Used by
+   *  @see ZmTreeController._moveCallback */
+  public _doMove(movingFolder: ZimbraDriveFolder, targetFolder: ZimbraDriveFolder): void {
     if (this._moveToDialog.getActionedItem().isDwtTreeItem) {
       ZimbraDriveController.doMove([movingFolder], targetFolder);
     }
@@ -385,11 +373,4 @@ export class ZimbraDriveTreeController extends ZmTreeController {
   public _setupOptButton(params: ZmTreeControllerShowParams): void {
     params.optButton = null;
   }
-
-  // public setBehaviour(behaviour: string, attachTabView?: ZimbraDriveTabView) {
-  //   this._behaviour = behaviour;
-  //   if (behaviour === ZimbraDriveTreeController.ATTACH_DIALOG_BEHAVIOUR) {
-  //     this._attachTabView = attachTabView;
-  //   }
-  // }
 }

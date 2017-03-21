@@ -112,17 +112,14 @@ export class PreviewView extends DwtComposite {
     }
   };
 
-  public set(item: ZimbraDriveItem) {
-
+  public set(item: ZimbraDriveItem): void {
     if (!item) {
       this.enablePreview(false);
       return;
     }
-
     if (item === this._previewItem) {
       return;
     }
-
     this._oldItem = this._previewItem;
     this._previewItem = item;
     this.enablePreview(true);
@@ -133,8 +130,6 @@ export class PreviewView extends DwtComposite {
       this._setFolder(item);
       return;
     }
-
-
     this._setHeader(item);
 
     let url: string = `${ZimbraDriveApp.DOWNLOAD_URL}${ZimbraDriveController.getCurrentFolderPath()}${item.getName()}`;
@@ -148,7 +143,7 @@ export class PreviewView extends DwtComposite {
     url = PreviewView._addRequestParam(url, "viewonly", "1");
 
     this._iframePreview.setSrc(url);
-    Dwt.setLoadedTime(ZDId.ITEM_ZIMBRADRIVE); // iframe src set but item may not be downloaded by browser
+    Dwt.setLoadedTime(ZDId.ITEM_ZIMBRADRIVE);
   };
 
   public _setupLoading(): void {
@@ -170,11 +165,11 @@ export class PreviewView extends DwtComposite {
     return PreviewView._addRequestParam(url, "previewcallback", "ZmZimbraDrivePreviewView._previewCallback");
   };
 
-  private static _addRequestParam(url: string, key: string, value: string) {
+  private static _addRequestParam(url: string, key: string, value: string): string {
     return url + ( url.match(/\?/) ? "&" : "?" ) + key + "=" + value;
   }
 
-  public static _previewCallback(errorCode?: number, error?: Error) {
+  public static _previewCallback(errorCode?: number, error?: Error): void {
     let previewView = PreviewView._instance;
     previewView._handlePreview(previewView._previewItem, previewView._frameUrl);
   };
@@ -182,7 +177,6 @@ export class PreviewView extends DwtComposite {
   private _handlePreview(item: ZimbraDriveItem, url: string): void {
     this.enablePreview(true);
     if (item && url) {
-      // url = AjxStringUtil.fixCrossDomainReference(url);
       if (ZmMimeTable.isRenderable(item.getMimetype()) || ZmMimeTable.isMultiMedia(item.getMimetype())) {
         url = PreviewView._addRequestParam(url, "viewonly", "1");
         this._iframePreview.setSrc(url);
@@ -198,7 +192,7 @@ export class PreviewView extends DwtComposite {
     }
   };
 
-  public static _errorCallback(errorCode?: number, error?: Error) {
+  public static _errorCallback(errorCode?: number, error?: Error): void {
     let previewView = PreviewView._instance;
     previewView._handleError(previewView._previewItem);
   };
@@ -215,7 +209,7 @@ export class PreviewView extends DwtComposite {
     }
   };
 
-  private _setHeader(item: ZimbraDriveItem) {
+  private _setHeader(item: ZimbraDriveItem): void {
     // Name
     this.getElement("name").innerHTML = AjxStringUtil.htmlEncode(item.getName());
 
@@ -244,8 +238,7 @@ export class PreviewView extends DwtComposite {
     this._onResize();
   };
 
-  public setNotes(item: ZimbraDriveItem) {
-    // let visible = item.getSubject();
+  public setNotes(item: ZimbraDriveItem): void {
     let visible = "";
     Dwt.setVisible(this.getElement("notes_section"), (typeof visible !== "undefined"));
     if (visible && this.getElement("notes")) {
@@ -279,7 +272,7 @@ export class PreviewView extends DwtComposite {
     }
   };
 
-  private _setFolder(item: ZimbraDriveItem) {
+  private _setFolder(item: ZimbraDriveItem): void {
     this._cleanup();
     this.getElement("name").innerHTML = AjxStringUtil.htmlEncode(item.getName());
     this.getElement("image").className = "ImgBriefcase_48";

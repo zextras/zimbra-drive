@@ -27,10 +27,7 @@ import {ZDId} from "../ZDId";
 import {ZmSearch} from "../zimbra/zimbraMail/share/model/ZmSearch";
 import {ZmSearchResult} from "../zimbra/zimbraMail/share/model/ZmSearchResult";
 import {ZmCsfeResult} from "../zimbra/zimbra/csfe/ZmCsfeResult";
-import {ZimbraDriveFolderTree} from "../ZimbraDriveFolderTree";
 import {appCtxt} from "../zimbra/zimbraMail/appCtxt";
-import {ZimbraDriveFolder} from "../ZimbraDriveFolder";
-import {ZimbraDriveTreeController} from "../ZimbraDriveTreeController";
 import {AjxListener} from "../zimbra/ajax/events/AjxListener";
 import {DwtSelectionEvent} from "../zimbra/ajax/dwt/events/DwtSelectionEvent";
 import {DwtTreeItem} from "../zimbra/ajax/dwt/widgets/DwtTreeItem";
@@ -38,6 +35,8 @@ import {ZmList} from "../zimbra/zimbraMail/share/model/ZmList";
 import {ZimbraDriveIconView} from "./ZimbraDriveIconView";
 import {ZimbraDriveBaseViewParams} from "./ZimbraDriveBaseView";
 import {ZimbraDriveController} from "../ZimbraDriveController";
+import {ZmComposeController} from "../zimbra/zimbraMail/mail/controller/ZmComposeController";
+import {ZmApp} from "../zimbra/zimbraMail/core/ZmApp";
 
 export class ZimbraDriveTabView extends DwtComposite {
 
@@ -47,14 +46,13 @@ export class ZimbraDriveTabView extends DwtComposite {
   private _tableID: string;
   private _folderTreeCellId: string;
   private _folderListId: string;
-  private _folderDisplayed: string = "/";
-  private _isLoadingFolder: boolean = false;
-  private _listView: ZimbraDriveIconView;
+  private _folderDisplayed: string;
+  private _isLoadingFolder: boolean;
+  private _controller: ZimbraDriveController;
 
   constructor(zimbraDriveAttachDialog: ZimbraDriveAttachDialog, className?: string) {
     super({parent: zimbraDriveAttachDialog, className: className, posStyle: Dwt.STATIC_STYLE});
     this._createHtml();
-    // this.showMe();
   }
 
   public loadSearchRequestParams(query: string, searchCallback: AjxCallback, batchCommand?: ZmBatchCommand): void {
@@ -75,14 +73,7 @@ export class ZimbraDriveTabView extends DwtComposite {
     });
   }
 
-  private _handleResponseDoSearch(result: ZmCsfeResult) {
-    let results: ZmSearchResult = <ZmSearchResult> (result && result.getResponse());
-    let query: string = results.getAttribute("query"),
-      currentFolderPath = query.replace("in:\"", "").replace("\"", "");
-    let tree: ZimbraDriveFolderTree = <ZimbraDriveFolderTree> appCtxt.getTree(ZimbraDriveApp.APP_NAME),
-      treeFolder: ZimbraDriveFolder = <ZimbraDriveFolder> tree.root.getChildByPath("Drive" + currentFolderPath.slice(0, -1)),
-      treeController: ZimbraDriveTreeController = <ZimbraDriveTreeController> appCtxt.getOverviewController().getTreeController(ZimbraDriveApp.APP_NAME);
-    treeController.setCurrentFolder(treeFolder);
+  private _handleResponseDoSearch(result: ZmCsfeResult): boolean {
     // Overview
     let opc = appCtxt.getOverviewController();
     let overview = opc.getOverview(ZimbraDriveTabView.OVERVIEW_ID);
@@ -100,34 +91,42 @@ export class ZimbraDriveTabView extends DwtComposite {
       overview = opc.createOverview(ovParams);
       overview.set([ZimbraDriveApp.APP_NAME]);
       document.getElementById(this._folderTreeCellId).appendChild(overview.getHtmlElement());
-      let treeView = overview.getTreeView(ZimbraDriveApp.APP_NAME);
-      treeView.addSelectionListener(new AjxListener(this, this._treeListener));
-      treeView.getHeaderItem().setVisible(false, true);
-      treeView.setSelection(<DwtTreeItem> treeView.getHeaderItem().getChild(0), true, false, true);
     }
+    else {
+      overview.set([ZimbraDriveApp.APP_NAME]);
+    }
+    let treeView = overview.getTreeView(ZimbraDriveApp.APP_NAME);
+    treeView.addSelectionListener(new AjxListener(this, this._treeListener));
+    treeView.getHeaderItem().setVisible(false, true);
+    treeView.setSelection(<DwtTreeItem> treeView.getHeaderItem().getChild(0), true, false, true);
     // Listview
-    let app: ZimbraDriveApp = <ZimbraDriveApp> appCtxt.getApp(ZimbraDriveApp.APP_NAME),
-      controller = new ZimbraDriveController(app._container, app);
+    let app: ZimbraDriveApp = <ZimbraDriveApp> appCtxt.getApp(ZimbraDriveApp.APP_NAME);
+    if (!this._controller ) {
+      this._controller = app.getZimbraDriveController(ZmApp.MAIN_SESSION);
+    }
+    if (!this._controller._listView[ZimbraDriveTabView.view]) {
+      let listParams: ZimbraDriveBaseViewParams = {
+        parent: this._controller._container,
+        className: "ZimbraDriveTabBox ZimbraDriveListBox",
+        type: ZDId.ZIMBRADRIVE_ITEM,
+        view: ZimbraDriveTabView.view,
+        controller: this._controller
+      };
+      this._controller._listView[ZimbraDriveTabView.view] = new ZimbraDriveIconView(listParams);
+      document.getElementById(this._folderListId).appendChild(this._controller._listView[ZimbraDriveTabView.view].getHtmlElement());
+    }
 
-    let listParams: ZimbraDriveBaseViewParams = {
-      parent: controller._container,
-      className: "ZimbraDriveTabBox ZimbraDriveListBox",
-      type: ZDId.ZIMBRADRIVE_ITEM,
-      view: ZimbraDriveTabView.view,
-      controller: controller
-    };
-    this._listView = controller._listView[ZimbraDriveTabView.view] =  new ZimbraDriveIconView(listParams);
-    document.getElementById(this._folderListId).appendChild(this._listView.getHtmlElement());
-    let itemsResults: ZmList = results.getResults(ZDId.ZIMBRADRIVE_ITEM);
-    this._listView.set(itemsResults);
+    this._handleResponseDoSearchUpdateList(result);
+    document.getElementById(this._tableID).style.display = "block";
+    return true;
   }
 
-  private _handleResponseDoSearchUpdateList(result: ZmCsfeResult) {
+  private _handleResponseDoSearchUpdateList(result: ZmCsfeResult): boolean {
     this._isLoadingFolder = false;
     let results: ZmSearchResult = <ZmSearchResult> (result && result.getResponse()),
       itemsResults: ZmList = results.getResults(ZDId.ZIMBRADRIVE_ITEM);
-    this._listView.set(itemsResults);
-    console.log("Update called, folder:" + results.getAttribute("query"));
+    this._controller._listView[ZimbraDriveTabView.view].set(itemsResults);
+    return true;
   }
 
   private _treeListener(ev: DwtSelectionEvent): void {
@@ -155,18 +154,20 @@ export class ZimbraDriveTabView extends DwtComposite {
         }
       )
     );
-    this.showFolderContent("/");
-
-    // var loadCallback = new AjxCallback(this, this._createHtml1);
-    // AjxDispatcher.require(["BriefcaseCore", "Briefcase"], false, loadCallback);
   };
 
-  public showFolderContent(path: string): void {
+  public showFolderContent(): void {
+    document.getElementById(this._tableID).style.display = "none";
+    this._folderDisplayed = "/";
+    this._isLoadingFolder = true;
     let batchCommand: ZmBatchCommand = new ZmBatchCommand();
     batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadGetAllFolderRequestParams));
-    batchCommand.add(new AjxCallback(this, this.loadSearchRequestParams, [`in:"${path}"`, new AjxCallback(this, this._handleResponseDoSearch)]));
+    batchCommand.add(new AjxCallback(this, this.loadSearchRequestParams, [`in:"${this._folderDisplayed}"`, new AjxCallback(this, this._handleResponseDoSearch)]));
     batchCommand.run();
   }
 
-  public uploadFiles(): void {}
+  public uploadFiles(composeController: ZmComposeController): void {
+    this._controller.sendFilesAsAttachment(this._controller._listView[ZimbraDriveTabView.view].getSelection(), composeController);
+  }
+
 }

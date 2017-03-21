@@ -19,33 +19,31 @@ import {ZmAttachDialog} from "../zimbra/zimbraMail/share/view/dialog/ZmAttachDia
 import {ZmMsg} from "../zimbra/zimbraMail/ZmMsg";
 import {ZimbraDriveTabView} from "./ZimbraDriveTabView";
 import {AjxCallback} from "../zimbra/ajax/boot/AjxCallback";
+import {ZmComposeController} from "../zimbra/zimbraMail/mail/controller/ZmComposeController";
 
 export class ZimbraDriveAttachDialog extends ZmAttachDialog {
 
   public static CLASSNAME: string = "ZimbraDriveAttachDialog";
   private _driveView: ZimbraDriveTabView;
+  private _currentComposeController: ZmComposeController;
 
-  public getDriveView() {
+  public getDriveView(composeController: ZmComposeController): ZimbraDriveTabView {
     this.setTitle(ZmMsg.attachFile);
 
+    this._currentComposeController = composeController;
     if (!this._driveView) {
       this._driveView = new ZimbraDriveTabView(this);
     }
-
     this._driveView.reparentHtmlElement(this._getContentDiv().childNodes[0], 0);
-    this.setOkListener(new AjxCallback(this._driveView, this._driveView.uploadFiles));
-    this.setCancelListener((new AjxCallback(this, this.cancelUploadFiles)));
+    this.setOkListener(new AjxCallback(this, this._okButtonListener));
+    this.setCancelListener(new AjxCallback(this, this.popdown));
 
-
+    this._driveView.showFolderContent();
     return this._driveView;
   }
 
-  private cancelUploadFiles(): void {
+  private _okButtonListener(): void {
+    this._driveView.uploadFiles(this._currentComposeController);
     this.popdown();
   }
-
-  // public goToFolder(folderPath: string) {
-  //   let batchCommand: ZmBatchCommand = new ZmBatchCommand();
-  //
-  // }
 }

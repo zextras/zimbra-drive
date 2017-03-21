@@ -34,12 +34,7 @@ import {AjxListener} from "./zimbra/ajax/events/AjxListener";
 import {DwtSelectionEvent} from "./zimbra/ajax/dwt/events/DwtSelectionEvent";
 import {ZmMainSearchToolBar} from "./zimbra/zimbraMail/share/view/ZmSearchToolBar";
 import {AjxCallback} from "./zimbra/ajax/boot/AjxCallback";
-import {ZmCsfeResult} from "./zimbra/zimbra/csfe/ZmCsfeResult";
-import {GetAllFoldersResponse} from "./GetAllFoldersResponse";
-import {ZmCsfeException} from "./zimbra/zimbra/csfe/ZmCsfeException";
-import {ZmRequestMgrSendRequestParams} from "./zimbra/zimbraMail/core/ZmRequestMgr";
-import {ZimbraDriveFolderObj, ZimbraDriveFolder} from "./ZimbraDriveFolder";
-import {ZimbraDriveFolderTree} from "./ZimbraDriveFolderTree";
+import {ZimbraDriveFolder} from "./ZimbraDriveFolder";
 import {ZmMsg} from "./zimbra/zimbraMail/ZmMsg";
 import {ZmTreeView} from "./zimbra/zimbraMail/share/view/ZmTreeView";
 import {ZmBatchCommand} from "./zimbra/zimbra/csfe/ZmBatchCommand";
@@ -86,15 +81,6 @@ export class ZimbraDriveZimlet extends ZmZimletBase implements CreateAppZimlet {
       index: index
     };
     controller.getAppChooser().addButton(ZimbraDriveApp.APP_NAME, params);
-    // appCtxt.getSettings().registerSetting(
-    //   ZimbraDriveApp.APP_NAME,
-    //   {
-    //     name: "zimbraFeatureZimbraDriveEnabled",
-    //     type: ZmSetting.T_COS,
-    //     dataType: ZmSetting.D_BOOLEAN,
-    //     defaultValue: true
-    //   }
-    // );
     ZmApp.CLASS[ZimbraDriveApp.APP_NAME] = "ZmZimbraDriveApp";
     this._app = new ZimbraDriveApp(this, DwtShell.getShell(window));
     controller.addApp(this._app);
@@ -112,18 +98,10 @@ export class ZimbraDriveZimlet extends ZmZimletBase implements CreateAppZimlet {
   public appActive(appName: string, active: boolean): void {}
   public appLaunch(appName: string): void {}
   public onSelectApp(id: string): void {}
-  public onAction(id: string, action: string, currentViewId: string, lastViewId: string): void {}
 
   private onSearchRequested(ev: KeyboardEvent|DwtSelectionEvent): void {
     const searchToolbar: ZmMainSearchToolBar = appCtxt.getSearchController().getSearchToolbar();
     let searchValue: string = searchToolbar.getSearchFieldValue().trim();
-    let hasDoubleQuotesString: string = `in:"`;
-    if (searchValue.indexOf(hasDoubleQuotesString) === -1) {
-      searchValue = `${searchValue.replace(`in:`, hasDoubleQuotesString)}"`;
-    }
-    if (searchValue.substring(searchValue.length - 2, searchValue.length - 1) !== "/") {
-      searchValue = `${searchValue.substring(0, searchValue.length - 1)}/"`;
-    }
 
     let batchCommand = new ZmBatchCommand();
     batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadGetAllFolderRequestParams));
@@ -131,19 +109,8 @@ export class ZimbraDriveZimlet extends ZmZimletBase implements CreateAppZimlet {
     batchCommand.run();
   }
 
-  private onGetAllFolders(result: ZmCsfeResult) {
-    const root: ZimbraDriveFolderObj = (<GetAllFoldersResponse>result.getResponse()[ZimbraDriveApp.GET_ALL_FOLDERS_RESP]).root[0];
-    const tree = new ZimbraDriveFolderTree();
-    tree.root = ZimbraDriveFolder.createFromDom(root, {tree: tree});
-    appCtxt.setTree(ZimbraDriveApp.APP_NAME, tree);
-  }
-
-  private onGetAllFoldersError(err: ZmCsfeException, req: ZmRequestMgrSendRequestParams) {
-    console.log(err, req);
-  }
-
-  public initializeAttachPopup(attachMenu: DwtMenu, composeView: ZmComposeView) {
-    composeView._createAttachMenuItem(attachMenu, ZimbraDriveApp.getMessage("zimletLabel"), new AjxListener(this._app, this._app.popupAttachDialog));
+  public initializeAttachPopup(attachMenu: DwtMenu, composeView: ZmComposeView): void {
+    composeView._createAttachMenuItem(attachMenu, ZimbraDriveApp.getMessage("zimletLabel"), new AjxListener(this._app, this._app.popupAttachDialog, composeView));
   }
 
 }
