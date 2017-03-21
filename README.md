@@ -8,6 +8,12 @@ Features:
 
 ## Installation
 
+### 0. Check package integrity
+Verify the files using the provided `md5` file:
+```bash
+md5sum -c zimbra-drive.md5
+```
+
 ### 1. Install the Zimbra Extension
 Install the Zimbra Extension and restart the mailbox to let the extension to be loaded correctly.
 

@@ -80,7 +80,7 @@ clean:
 	rm -f build/com_zextras_drive_open*.properties
 	rm -f build/ZimbraDrive.template
 	rm -rf build/assets/
-	rm -f LICENSE
+	rm -f build/LICENSE
 	rm -f dist/com_zextras_drive_open.zip
 
 install: guard-ZIMLET_DEV_SERVER dist/com_zextras_drive_open.zip

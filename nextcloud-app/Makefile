@@ -20,8 +20,8 @@ app_name=zimbradrive
 all: dist/zimbradrive.tar.gz
 
 clean:
-	rm -rf build/
-	rm -rf dist/zimbradrive.tar.gz
+	rm -rf build/*
+	rm -f dist/zimbradrive.tar.gz
 
 dist/zimbradrive.tar.gz:
 	mkdir -p build/

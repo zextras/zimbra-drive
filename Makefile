@@ -15,7 +15,7 @@
 # If not, see <http://www.gnu.org/licenses/>.
 #
 
-all: dist/zimbra_drive.tgz
+all: dist/zimbra_drive.tgz dist/zimbra-drive.md5
 
 clean:
 	rm -rf build/nextcloud-app
@@ -23,6 +23,7 @@ clean:
 	rm -rf build/zimlet
 	rm -f build/LICENSE
 	rm -f build/README.md
+	rm -f build/zimbra-drive.md5
 	rm -f dist/zimbra_drive.tgz
 	rm -f dist/zimbra-drive.md5
 	cd nextcloud-app && make clean
@@ -72,10 +73,12 @@ build/LICENSE:
 
 build/zimbra-drive.md5: build/README.md build/LICENSE build/nextcloud-app/zimbradrive.tar.gz build/zimbra-extension/zimbradrive-extension.jar dist/com_zextras_drive_open.zip
 	mkdir -p build
-	cd build && find . -type f -not -name "zimbra-drive.md5" -not -name "README.md" -not -name "zimbradrive-extension.conf.example" -exec md5sum "{}" + > zimbra-drive.md5
+	cd build && find . -type f -not -name "zimbra-drive.md5" -exec md5sum "{}" + > zimbra-drive.md5
 
 dist/zimbra_drive.tgz: build/README.md build/LICENSE build/nextcloud-app/zimbradrive.tar.gz build/zimbra-extension/zimbradrive-extension.jar dist/com_zextras_drive_open.zip build/zimbra-drive.md5
 	mkdir -p build
 	mkdir -p dist
 	cd build && tar -czvf ../dist/zimbra_drive.tgz nextcloud-app/ zimbra-extension/ zimlet/ README.md LICENSE zimbra-drive.md5
+
+dist/zimbra-drive.md5: dist/zimbra_drive.tgz
 	cd dist && md5sum zimbra_drive.tgz > zimbra-drive.md5

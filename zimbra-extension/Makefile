@@ -60,7 +60,7 @@ dist/zimbradrive-extension.jar: lib/commons-io-1.4.jar \
 	ant jar-bundle
 
 clean:
-	rm -rf build/
+	rm -rf build/*
 	rm -f dist/zimbradrive-extension.jar
 
 install: guard-ZIMLET_DEV_SERVER dist/zimbradrive-extension.jar lib/zal-${ZAL_VERSION_EXTENDED}-${ZIMBRA_VERSION}.jar
