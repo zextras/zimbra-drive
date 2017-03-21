@@ -1,0 +1,95 @@
+#
+# Copyright (C) 2017 ZeXtras S.r.l.
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation, version 2 of
+# the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License.
+# If not, see <http://www.gnu.org/licenses/>.
+#
+
+all: dist/com_zextras_drive_open.zip
+
+.PHONY: clean
+
+node_modules:
+	npm install
+
+build/yuicompressor.jar:
+	# In Zimbra 8.6 is used `yuicompressor-2.4.2-zimbra.jar`, but We will use the latest.
+	rm -f build/yuicompressor.jar
+	wget https://github.com/yui/yuicompressor/releases/download/v2.4.8/yuicompressor-2.4.8.jar -O build/yuicompressor.jar
+
+build/com_zextras_drive_open_hdlr.min.js: build/yuicompressor.jar build/com_zextras_drive_open_hdlr.js
+	# Test the bundle file against the YUI Compressor
+	java -jar build/yuicompressor.jar --type js --nomunge --preserve-semi --disable-optimizations build/com_zextras_drive_open_hdlr.js -o build/com_zextras_drive_open_hdlr.min.js
+
+build/com_zextras_drive_open.css:
+	cp src/com_zextras_drive_open.css build/
+	cp -r src/assets/ build/ && cp src/*.properties build/
+
+build/LICENSE:
+	cp ../LICENSE build/LICENSE
+
+build/t4z.js:
+	mkdir -p build
+	./src/zimbra/generateRequiredPackage src/com_zextras_drive_open_hdlr.ts > build/t4z.js
+
+build/ZimbraDrive.template:
+	cp src/ZimbraDrive.template build/ZimbraDrive.template
+
+build/com_zextras_drive_open.xml:
+	cp src/com_zextras_drive_open.template.xml build/com_zextras_drive_open.xml
+	./applyVersion
+
+build/com_zextras_drive_open_hdlr.js: node_modules
+	npm update
+	./node_modules/.bin/tslint -c tslint.json --project tsconfig.json
+	./node_modules/.bin/webpack
+
+dist/com_zextras_drive_open.zip: build/com_zextras_drive_open_hdlr.min.js build/t4z.js build/com_zextras_drive_open.css build/com_zextras_drive_open_hdlr.js build/com_zextras_drive_open.xml build/ZimbraDrive.template build/LICENSE
+	mkdir -p dist
+	rm -f dist/com_zextras_drive_open.zip
+	cd build && zip ../dist/com_zextras_drive_open.zip \
+		assets/* \
+		t4z.js \
+		com_zextras_drive_open.css \
+		com_zextras_drive_open_hdlr.js \
+		com_zextras_drive_open_hdlr.js.map \
+		com_zextras_drive_open.xml \
+		com_zextras_drive_open.properties \
+		com_zextras_drive_open*.properties \
+		ZimbraDrive.template \
+		LICENSE
+
+clean:
+	rm -f build/t4z.js
+	rm -f build/com_zextras_drive_open.css
+	rm -f build/com_zextras_drive_open_hdlr.js
+	rm -f build/com_zextras_drive_open_hdlr.js.map
+	rm -f build/com_zextras_drive_open_hdlr.min.js
+	rm -f build/com_zextras_drive_open.xml
+	rm -f build/com_zextras_drive_open.properties
+	rm -f build/com_zextras_drive_open*.properties
+	rm -f build/ZimbraDrive.template
+	rm -rf build/assets/
+	rm -f LICENSE
+	rm -f dist/com_zextras_drive_open.zip
+
+install: guard-ZIMLET_DEV_SERVER dist/com_zextras_drive_open.zip
+	scp dist/com_zextras_drive_open.zip root@${ZIMLET_DEV_SERVER}:/tmp/
+	ssh root@${ZIMLET_DEV_SERVER} "chown zimbra:zimbra /tmp/com_zextras_drive_open.zip"
+	ssh root@${ZIMLET_DEV_SERVER} "su - zimbra -c '/opt/zimbra/bin/zmzimletctl deploy /tmp/com_zextras_drive_open.zip'"
+
+guard-%:
+	@ if [ "${${*}}" = "" ]; then \
+		echo "Environment variable $* not set"; \
+		exit 1; \
+	fi

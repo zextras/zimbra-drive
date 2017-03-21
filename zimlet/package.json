@@ -1,0 +1,22 @@
+{
+  "name": "com-zextras-zimbra-drive",
+  "version": "0.0.1",
+  "description": "A Zimlet for Zimbra",
+  "main": "./src/com_zextras_drive_open_hdlr.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Zimbra",
+    "Zimlet"
+  ],
+  "author": "ZeXtras <info@zextras.com>",
+  "license": "GPL-2.0",
+  "devDependencies": {
+    "awesome-typescript-loader": "^3.0.0-beta.18",
+    "tslint": "^4.5.1",
+    "typescript": "^2.1.5",
+    "webpack": "^2.2.0"
+  },
+  "dependencies": {}
+}

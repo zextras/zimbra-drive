@@ -1,0 +1,3 @@
+[submodule "zimlet/src/zimbra"]
+	path = zimlet/src/zimbra
+	url = ssh://git@dev.zextras.com:7999/zx/zimbra-lib-ts.git

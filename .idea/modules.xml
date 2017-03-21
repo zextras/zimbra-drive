@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/nextcloud-app/nextcloud-app.iml" filepath="$PROJECT_DIR$/nextcloud-app/nextcloud-app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/zimbra-extension/zimbra-extension.iml" filepath="$PROJECT_DIR$/zimbra-extension/zimbra-extension.iml" />
+      <module fileurl="file://$PROJECT_DIR$/zimlet/zimlet.iml" filepath="$PROJECT_DIR$/zimlet/zimlet.iml" />
+    </modules>
+  </component>
+</project>

@@ -1,0 +1,5 @@
+{
+  "domains": {
+    "example.com": "https://nextcloud.example.com"
+  }
+}
