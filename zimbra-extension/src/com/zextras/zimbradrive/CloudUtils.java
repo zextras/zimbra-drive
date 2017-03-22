@@ -45,7 +45,7 @@ public class CloudUtils
     mTokenManager = tokenManager;
   }
 
-  public List<NameValuePair> createDriveOnCloudParams(final ZimbraContext zimbraContext) {
+  public List<NameValuePair> createDriveOnCloudAuthenticationParams(final ZimbraContext zimbraContext) {
     Account account = mProvisioning.getAccountById(zimbraContext.getAuthenticatedAccontId());
 
     AccountToken token = mTokenManager.getAccountToken(account);

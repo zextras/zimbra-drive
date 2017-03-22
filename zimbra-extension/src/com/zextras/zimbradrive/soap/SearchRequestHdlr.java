@@ -30,6 +30,8 @@ import org.openzal.zal.soap.*;
 import java.io.IOException;
 import java.util.List;
 
+import com.zextras.zimbradrive.soap.ZimbraDriveItem;
+
 public class SearchRequestHdlr implements SoapHandler
 {
   private static final String COMMAND = "Search";
@@ -39,7 +41,7 @@ public class SearchRequestHdlr implements SoapHandler
 
   private final CloudUtils mCloudUtils;
 
-  SearchRequestHdlr(CloudUtils cloudUtils)
+  public SearchRequestHdlr(CloudUtils cloudUtils)
   {
     mCloudUtils = cloudUtils;
   }
@@ -51,15 +53,29 @@ public class SearchRequestHdlr implements SoapHandler
     {
       String query = zimbraContext.getParameter("query", "");
       if (query.equals("")) { return; }
-
-
-      HttpResponse response = queryDriveOnCloudServerService(zimbraContext, query);
+      soapResponse.setValue("query", query);
+  
+      String requestedTypesCsv = zimbraContext.getParameter("types", "");
+      soapResponse.setValue("types", requestedTypesCsv);
+  
+      String[] requestedTypesArray = requestedTypesCsv.split(",");
+      if(requestedTypesArray.length == 0)
+      {
+        requestedTypesArray = new String[]{ZimbraDriveItem.F_NODE_TYPE_FILE,
+          ZimbraDriveItem.F_NODE_TYPE_FOLDER};
+      }
+      
+      JSONArray defaultTypesJsonArray = new JSONArray(requestedTypesArray);
+      requestedTypesCsv = defaultTypesJsonArray.toString();
+      
+  
+      HttpResponse response = queryDriveOnCloudServerService(zimbraContext,
+                                                             query,
+                                                             requestedTypesCsv);
       BasicResponseHandler basicResponseHandler = new BasicResponseHandler();
       String responseBody = basicResponseHandler.handleResponse(response);  //throw HttpResponseException if status code >= 300
-
+      
       soapResponse.setQName(RESPONSE_QNAME);
-      soapResponse.setValue("query", query);
-
       appendSoapResponseFromDriveResponse(soapResponse, responseBody);
 
     } catch (Exception e)
@@ -68,9 +84,12 @@ public class SearchRequestHdlr implements SoapHandler
     }
   }
 
-  private HttpResponse queryDriveOnCloudServerService(final ZimbraContext zimbraContext, final String query) throws IOException {
-    List<NameValuePair> driveOnCloudParameters = mCloudUtils.createDriveOnCloudParams(zimbraContext);
+  private HttpResponse queryDriveOnCloudServerService(final ZimbraContext zimbraContext,
+                                                      final String query,
+                                                      final String types) throws IOException {
+    List<NameValuePair> driveOnCloudParameters = mCloudUtils.createDriveOnCloudAuthenticationParams(zimbraContext);
     driveOnCloudParameters.add(new BasicNameValuePair("query", query));
+    driveOnCloudParameters.add(new BasicNameValuePair("types", types));
     return mCloudUtils.sendRequestToCloud(zimbraContext, driveOnCloudParameters, COMMAND + "Request");
   }
 
@@ -91,14 +110,21 @@ public class SearchRequestHdlr implements SoapHandler
       nodeSoap.setValue(ZimbraDriveItem.F_ID, nodeJson.getInt(ZimbraDriveItem.F_ID));
       nodeSoap.setValue(ZimbraDriveItem.F_AUTHOR, nodeJson.getString(ZimbraDriveItem.F_AUTHOR));
       nodeSoap.setValue(ZimbraDriveItem.F_SIZE, nodeJson.getInt(ZimbraDriveItem.F_SIZE));
-      nodeSoap.setValue(ZimbraDriveItem.F_MIMETYPE, nodeJson.getString(ZimbraDriveItem.F_MIMETYPE));
       nodeSoap.setValue(ZimbraDriveItem.F_PATH, nodeJson.getString(ZimbraDriveItem.F_PATH));
-
+  
       JSONObject driveOnCloudNodePermissions = nodeJson.getJSONObject(ZimbraDriveItem.F_PERMISSIONS);
       SoapResponse nodeSoapPermission = nodeSoap.createNode(ZimbraDriveItem.F_PERMISSIONS);
       nodeSoapPermission.setValue(ZimbraDriveItem.F_PERM_READABLE, driveOnCloudNodePermissions.getBoolean(ZimbraDriveItem.F_PERM_READABLE));
       nodeSoapPermission.setValue(ZimbraDriveItem.F_PERM_WRITABLE, driveOnCloudNodePermissions.getBoolean(ZimbraDriveItem.F_PERM_WRITABLE));
       nodeSoapPermission.setValue(ZimbraDriveItem.F_PERM_SHAREABLE, driveOnCloudNodePermissions.getBoolean(ZimbraDriveItem.F_PERM_SHAREABLE));
+      
+      String nodeType = nodeJson.getString(ZimbraDriveItem.F_NODE_TYPE);
+      nodeSoap.setValue(ZimbraDriveItem.F_NODE_TYPE, nodeType);
+      if(nodeType.equals(ZimbraDriveItem.F_NODE_TYPE_FILE))
+      {
+        nodeSoap.setValue(ZimbraDriveItem.F_MIMETYPE, nodeJson.getString(ZimbraDriveItem.F_MIMETYPE));
+      }
+      
     }
     if (driveOnCloudResponseJsons.length() == 0) {
       soapResponse.createNode(ZimbraDriveItem.NODE_NAME);

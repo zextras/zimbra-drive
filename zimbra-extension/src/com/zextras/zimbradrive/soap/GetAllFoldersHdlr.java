@@ -62,7 +62,7 @@ public class GetAllFoldersHdlr implements SoapHandler
   }
 
   private HttpResponse queryDriveOnCloudServerServiceFolder(final ZimbraContext zimbraContext) throws IOException {
-    List<NameValuePair> driveOnCloudParameters = mCloudUtils.createDriveOnCloudParams(zimbraContext);
+    List<NameValuePair> driveOnCloudParameters = mCloudUtils.createDriveOnCloudAuthenticationParams(zimbraContext);
     return mCloudUtils.sendRequestToCloud(zimbraContext, driveOnCloudParameters, COMMAND);
   }
 
