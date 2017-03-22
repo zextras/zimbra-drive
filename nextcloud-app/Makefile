@@ -24,7 +24,8 @@ clean:
 	rm -f dist/zimbradrive.tar.gz
 
 dist/zimbradrive.tar.gz:
-	mkdir -p build/
+	mkdir -p build
+	mkdir -p dist
 	rsync -rv \
 		--exclude=Makefile \
 		--exclude=*.iml \
