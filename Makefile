@@ -15,6 +15,11 @@
 # If not, see <http://www.gnu.org/licenses/>.
 #
 
+# Remember to edit these values also in `zimbra-extension/Makefile`
+ZAL_VERSION=1.11
+ZAL_VERSION_EXTENDED=1.11.8
+ZIMBRA_VERSION=8.6.0
+
 all: dist/zimbra_drive.tgz dist/zimbra-drive.md5
 
 clean:
@@ -43,14 +48,17 @@ build/zimbra-extension/zimbradrive-extension.conf.example:
 	mkdir -p build/zimbra-extension
 	cp zimbra-extension/zimbradrive-extension.conf.example build/zimbra-extension/
 
-build/zimbra-extension/zal-*.jar:
+build/zimbra-extension/zal-${ZAL_VERSION_EXTENDED}-${ZIMBRA_VERSION}.jar:
 	mkdir -p build/zimbra-extension
-	cp zimbra-extension/lib/zal-*.jar build/zimbra-extension/
+	cd zimbra-extension && make lib/zal-${ZAL_VERSION_EXTENDED}-${ZIMBRA_VERSION}.jar
+	cp zimbra-extension/lib/zal-${ZAL_VERSION_EXTENDED}-${ZIMBRA_VERSION}.jar build/zimbra-extension/
 
 zimbra-extension/dist/zimbradrive-extension.jar:
 	cd zimbra-extension && make dist/zimbradrive-extension.jar
 
-build/zimbra-extension/zimbradrive-extension.jar: build/zimbra-extension/zimbradrive-extension.conf.example build/zimbra-extension/zal-*.jar zimbra-extension/dist/zimbradrive-extension.jar
+build/zimbra-extension/zimbradrive-extension.jar: build/zimbra-extension/zimbradrive-extension.conf.example \
+													build/zimbra-extension/zal-${ZAL_VERSION_EXTENDED}-${ZIMBRA_VERSION}.jar \
+													zimbra-extension/dist/zimbradrive-extension.jar
 	mkdir -p build/zimbra-extension
 	cp zimbra-extension/dist/zimbradrive-extension.jar build/zimbra-extension/
 
