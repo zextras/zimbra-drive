@@ -66,7 +66,7 @@ build/zimbra-extension/zimbradrive-extension.jar: build/zimbra-extension/zimbrad
 zimlet/dist/com_zextras_drive_open.zip:
 	cd zimlet && make dist/com_zextras_drive_open.zip
 
-dist/com_zextras_drive_open.zip: zimlet/dist/com_zextras_drive_open.zip
+build/zimlet/com_zextras_drive_open.zip: zimlet/dist/com_zextras_drive_open.zip
 	mkdir -p build/zimlet
 	cp zimlet/dist/com_zextras_drive_open.zip build/zimlet/
 
@@ -79,11 +79,19 @@ build/LICENSE:
 	mkdir -p build
 	cp LICENSE build/
 
-build/zimbra-drive.md5: build/README.md build/LICENSE build/nextcloud-app/zimbradrive.tar.gz build/zimbra-extension/zimbradrive-extension.jar dist/com_zextras_drive_open.zip
+build/zimbra-drive.md5: build/README.md \
+						build/LICENSE \
+						build/nextcloud-app/zimbradrive.tar.gz \
+						build/zimbra-extension/zimbradrive-extension.jar \
+						build/zimlet/com_zextras_drive_open.zip
 	mkdir -p build
 	cd build && find . -type f -not -name "zimbra-drive.md5" -exec md5sum "{}" + > zimbra-drive.md5
 
-dist/zimbra_drive.tgz: build/README.md build/LICENSE build/nextcloud-app/zimbradrive.tar.gz build/zimbra-extension/zimbradrive-extension.jar dist/com_zextras_drive_open.zip build/zimbra-drive.md5
+dist/zimbra_drive.tgz: build/README.md \
+						build/LICENSE \
+						build/nextcloud-app/zimbradrive.tar.gz \
+						build/zimbra-extension/zimbradrive-extension.jar \
+						build/zimlet/com_zextras_drive_open.zip build/zimbra-drive.md5
 	mkdir -p build
 	mkdir -p dist
 	cd build && tar -czvf ../dist/zimbra_drive.tgz nextcloud-app/ zimbra-extension/ zimlet/ README.md LICENSE zimbra-drive.md5
