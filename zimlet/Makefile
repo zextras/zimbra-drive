@@ -23,19 +23,23 @@ node_modules:
 	npm install
 
 build/yuicompressor.jar:
+	mkdir -p build
 	# In Zimbra 8.6 is used `yuicompressor-2.4.2-zimbra.jar`, but We will use the latest.
 	rm -f build/yuicompressor.jar
 	wget https://github.com/yui/yuicompressor/releases/download/v2.4.8/yuicompressor-2.4.8.jar -O build/yuicompressor.jar
 
 build/com_zextras_drive_open_hdlr.min.js: build/yuicompressor.jar build/com_zextras_drive_open_hdlr.js
+	mkdir -p build
 	# Test the bundle file against the YUI Compressor
 	java -jar build/yuicompressor.jar --type js --nomunge --preserve-semi --disable-optimizations build/com_zextras_drive_open_hdlr.js -o build/com_zextras_drive_open_hdlr.min.js
 
 build/com_zextras_drive_open.css:
+	mkdir -p build
 	cp src/com_zextras_drive_open.css build/
 	cp -r src/assets/ build/ && cp src/*.properties build/
 
 build/LICENSE:
+	mkdir -p build
 	cp ../LICENSE build/LICENSE
 
 build/t4z.js:
@@ -43,18 +47,22 @@ build/t4z.js:
 	./src/zimbra/generateRequiredPackage src/com_zextras_drive_open_hdlr.ts > build/t4z.js
 
 build/ZimbraDrive.template:
+	mkdir -p build
 	cp src/ZimbraDrive.template build/ZimbraDrive.template
 
 build/com_zextras_drive_open.xml:
+	mkdir -p build
 	cp src/com_zextras_drive_open.template.xml build/com_zextras_drive_open.xml
 	./applyVersion
 
 build/com_zextras_drive_open_hdlr.js: node_modules
 	npm update
+	mkdir -p build
 	./node_modules/.bin/tslint -c tslint.json --project tsconfig.json
 	./node_modules/.bin/webpack
 
 dist/com_zextras_drive_open.zip: build/com_zextras_drive_open_hdlr.min.js build/t4z.js build/com_zextras_drive_open.css build/com_zextras_drive_open_hdlr.js build/com_zextras_drive_open.xml build/ZimbraDrive.template build/LICENSE
+	mkdir -p build
 	mkdir -p dist
 	rm -f dist/com_zextras_drive_open.zip
 	cd build && zip ../dist/com_zextras_drive_open.zip \
