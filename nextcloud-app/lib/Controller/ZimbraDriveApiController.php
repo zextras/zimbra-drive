@@ -18,14 +18,14 @@
 
 namespace OCA\ZimbraDrive\Controller;
 
+use OCA\ZimbraDrive\Service\ResponseVarName;
+use OCA\ZimbraDrive\Service\SearchService;
 use OCA\ZimbraDrive\Service\StorageService;
 use OCA\ZimbraDrive\Service\LogService;
-use OCA\ZimbraDrive\Service\QueryService;
 use OCA\ZimbraDrive\Service\BadRequestException;
 
 use OCA\ZimbraDrive\Service\UserService;
 use OCP\AppFramework\ApiController;
-use OCP\Http\Client\IResponse;
 use OCP\IRequest;
 use OCP\AppFramework\Http\JSONResponse;
 
@@ -38,14 +38,7 @@ use OCP\AppFramework\Http;
 use OCA\ZimbraDrive\Service\MethodNotAllowedException;
 use \Exception;
 
-use \OC\Files\Filesystem;
-use \OCP\Response;
-
-use OCP\AppFramework\Http\StreamResponse;
-
 use OCP\Files\NotPermittedException;
-
-use OCA\ZimbraDrive\Controller\EmptyResponse;
 
 
 class ZimbraDriveApiController extends ApiController
@@ -58,14 +51,14 @@ class ZimbraDriveApiController extends ApiController
     private $logger;
     private $loginService;
     private $storageService;
-    private $queryService;
+    private $searchService;
 
     public function __construct(
         $appName,
         IRequest $request,
         LoginService $loginService,
         StorageService $storageService,
-        QueryService $queryService,
+        SearchService $searchService,
         LogService $logger
     )
     {
@@ -78,7 +71,7 @@ class ZimbraDriveApiController extends ApiController
         $this->logger = $logger;
         $this->loginService = $loginService;
         $this->storageService = $storageService;
-        $this->queryService = $queryService;
+        $this->searchService = $searchService;
     }
 
     /**
@@ -86,7 +79,7 @@ class ZimbraDriveApiController extends ApiController
      * @NoCSRFRequired
      * @PublicPage
      */
-    public function searchRequest($username, $token, $query)
+    public function searchRequest($username, $token, $query, $types)
     {
         $this->logger->info($username . ' call searchRequest.');
         try {
@@ -96,25 +89,53 @@ class ZimbraDriveApiController extends ApiController
             return new EmptyResponse(Http::STATUS_UNAUTHORIZED);
         }
 
-        try {
-            $path = $this->queryService->getPath($query);
-        } catch (BadRequestException $badRequestException) {
-            $this->logger->info($badRequestException->getMessage());
-            return new EmptyResponse(Http::STATUS_BAD_REQUEST);
-        }
+        $types = json_decode($types, false);
 
         try {
-            $searchedFolder = $this->storageService->getFolder($path);
+            $wantedFiles =  $this->searchService->search($query);
+        } catch (BadRequestException $badRequestException) {
+            $this->logger->info($badRequestException->getMessage());
+            return new EmptyResponse(Http::STATUS_FORBIDDEN);
         }
-         catch (MethodNotAllowedException $methodNotAllowedException) {
+        catch (MethodNotAllowedException $methodNotAllowedException) {
             $this->logger->info($methodNotAllowedException->getMessage());
-             return new EmptyResponse(Http::STATUS_METHOD_NOT_ALLOWED);
+            return new EmptyResponse(Http::STATUS_METHOD_NOT_ALLOWED);
         } catch (Exception $exception) {
             $this->logger->info($exception->getMessage());
             return new EmptyResponse(Http::STATUS_FORBIDDEN);
         }
-        $folderAsArray = $this->storageService->folderChildNodeNoFolderAttributes($searchedFolder);
-        return new JSONResponse($folderAsArray);
+
+        $results = $this->filterTypes($wantedFiles, $types);
+        return new JSONResponse($results);
+    }
+
+    /**
+     * @param $mapsToBeFilter array
+     * @param $types array of string
+     * @return array
+     */
+    private function filterTypes($mapsToBeFilter, $types)
+    {
+        $results = array();
+        foreach($mapsToBeFilter as $mapToBeFilter)
+        {
+            if($this->isAValidType($mapToBeFilter, $types))
+            {
+                $results[] = $mapToBeFilter;
+            }
+        }
+        return $results;
+
+    }
+
+    /**
+     * @param $mapToBeFilter string
+     * @param $types array
+     * @return bool
+     */
+    private function isAValidType($mapToBeFilter, $types)
+    {
+        return in_array($mapToBeFilter[ResponseVarName::NODE_TYPE_VAR_NAME], $types, true);
     }
 
     /**
@@ -138,7 +159,7 @@ class ZimbraDriveApiController extends ApiController
             $this->logger->info($exception->getMessage());
             return new EmptyResponse(Http::STATUS_FORBIDDEN);
         }
-        $folderAsArray = $this->storageService->getFolderAttributeTree($searchedFolder);
+        $folderAsArray = $this->storageService->getFolderTreeAttributes($searchedFolder);
         return new JSONResponse($folderAsArray);
     }
 
@@ -273,7 +294,7 @@ class ZimbraDriveApiController extends ApiController
             $this->logger->info($methodNotAllowedException->getMessage());
             return new EmptyResponse(Http::STATUS_METHOD_NOT_ALLOWED);
         }
-        $newFolderAttributes = $this->storageService->getFolderAttributeTree($newFolder);
+        $newFolderAttributes = $this->storageService->getFolderTreeAttributes($newFolder);
         return new JSONResponse($newFolderAttributes);
     }
 

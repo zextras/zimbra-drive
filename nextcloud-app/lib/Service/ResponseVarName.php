@@ -32,4 +32,6 @@ class ResponseVarName
     const SIZE_VAR_NAME = 'size';
     const ID_VAR_NAME = 'id';
     const PATH_VAR_NAME = 'path';
+    const NODE_FILE = 'file';
+    const NODE_FOLDER = 'folder';
 }

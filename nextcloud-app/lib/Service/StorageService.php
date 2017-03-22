@@ -68,6 +68,7 @@ class StorageService
             $errorMessage = $path . 'is not a folder.';
             throw new MethodNotAllowedException($errorMessage);
         }
+        /** @var Folder $searchedNode */
         return $searchedNode;
     }
 
@@ -84,6 +85,7 @@ class StorageService
             $errorMessage = $path . 'is not a file.';
             throw new MethodNotAllowedException($errorMessage);
         }
+        /** @var File $searchedNode */
         return $searchedNode;
     }
 
@@ -109,38 +111,12 @@ class StorageService
      * @param Folder $folder
      * @return array
      */
-    public function folderChildAttributes(Folder $folder)
+    public function folderChildNodesAttributes(Folder $folder)
     {
         $folderAsArray = array();
         $nodes = $folder->getDirectoryListing();
         foreach ($nodes as $nodeKey => $nodeValue) {
-            $nodeType = $nodeValue->getType();
-            if ($nodeType === Folder::TYPE_FOLDER) {
-                $nodeResponseMap = $this->childFolderToArray($nodeValue);
-            } else {
-                $nodeResponseMap = folderContentsToArray($nodeValue);
-            }
-            $folderAsArray[] = $nodeResponseMap;
-        }
-        return $folderAsArray;
-    }
-
-    /**
-     * @param Folder $folder
-     * @return array
-     */
-    public function folderChildNodeNoFolderAttributes(Folder $folder)
-    {
-        $folderAsArray = array();
-        $nodes = $folder->getDirectoryListing();
-        foreach ($nodes as $nodeKey => $nodeValue) {
-            $nodeType = $nodeValue->getType();
-            if ($nodeType === Folder::TYPE_FILE) {
-                $nodeResponseMap = $this->getNodesAttributes($nodeValue);
-                //$nodeResponseMap[ResponseVarName::NODE_TYPE_VAR_NAME] = $nodeType;
-                $nodeResponseMap[ResponseVarName::MIME_TYPE_VAR_NAME] = $nodeValue->getMimetype();
-                $folderAsArray[] = $nodeResponseMap;
-            }
+            $folderAsArray[] = $this->getNodesAttributes($nodeValue);
         }
         return $folderAsArray;
     }
@@ -150,16 +126,17 @@ class StorageService
      * @param Folder $folder
      * @return array
      */
-    public function getFolderAttributeTree(Folder $folder)
+    public function getFolderTreeAttributes(Folder $folder)
     {
-        $folderAttributes = $this->getNodesAttributes($folder);
+        $folderAttributes = $this->getNodesCommonAttributes($folder);
 
         $folderChildrenAttributeForest = array();
         $folderChildren = $folder->getDirectoryListing();
         foreach ($folderChildren as $childKey => $childNode) {
             $childNodeType = $childNode->getType();
             if ($childNodeType === Folder::TYPE_FOLDER) {
-                $folderChildrenAttributeForest[] = $this->getFolderAttributeTree($childNode);
+                /** @var Folder $childNode */
+                $folderChildrenAttributeForest[] = $this->getFolderTreeAttributes($childNode);
             }
         }
         $folderAttributes[ResponseVarName::CHILDREN_VAR_NAME] = $folderChildrenAttributeForest;
@@ -170,7 +147,7 @@ class StorageService
      * @param Node $node
      * @return array
      */
-    public function getNodesAttributes(Node $node)
+    public function getNodesCommonAttributes(Node $node)
     {
         $nodeOwner = $node->getOwner();
         $nodeAttributeMap = [
@@ -185,6 +162,31 @@ class StorageService
         ];
         return $nodeAttributeMap;
     }
+
+    /**
+     * @param Node $node
+     * @return array
+     */
+    public function getNodesAttributes(Node $node)
+    {
+        $nodeAttributeMap = $this->getNodesCommonAttributes($node);
+        $type = "";
+        switch ($node->getType()){
+            case Folder::TYPE_FOLDER:
+                /** @var  Folder $node */
+                $type = ResponseVarName::NODE_FOLDER;
+                break;
+            case Folder::TYPE_FILE:
+                /** @var  File $node */
+                $type = ResponseVarName::NODE_FILE;
+                $nodeAttributeMap[ResponseVarName::MIME_TYPE_VAR_NAME] = $node->getMimetype();
+                break;
+        }
+        $nodeAttributeMap[ResponseVarName::NODE_TYPE_VAR_NAME] = $type;
+        return $nodeAttributeMap;
+    }
+
+
 
     /**
      * @param FileInfo $fileInfo
