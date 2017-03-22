@@ -41,7 +41,7 @@ module.exports = {
     com_zextras_drive_open_hdlr: "./src/com_zextras_drive_open_hdlr.ts"
   },
   output: {
-    path: './build/',
+    path: path.resolve(__dirname, "build"),
     filename: '[name].js'
   },
   resolve: {

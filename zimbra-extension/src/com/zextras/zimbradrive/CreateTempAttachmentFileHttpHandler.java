@@ -17,7 +17,6 @@
 
 package com.zextras.zimbradrive;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
@@ -80,20 +79,6 @@ public class CreateTempAttachmentFileHttpHandler implements HttpHandler {
   
   public void doInternalPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException, KeyStoreException, NoSuchAlgorithmException, KeyManagementException
   {
-//    Map<String, String> paramsMap = new HashMap<>();
-//    String queryString = httpServletRequest.getQueryString();
-//    if (queryString != null)
-//    {
-//      String[] params = queryString.split("&");
-//      for (String param : params)
-//      {
-//        String[] paramPair = param.split("=");
-//        if (paramPair.length > 1)
-//        {
-//          paramsMap.put(paramPair[0], paramPair[1]);
-//        }
-//      }
-//    }
     String zmAuthToken = null;
     Cookie[] cookies = httpServletRequest.getCookies();
     for(int i = 0; i < cookies.length; ++i)
@@ -114,29 +99,16 @@ public class CreateTempAttachmentFileHttpHandler implements HttpHandler {
         String accountId = authToken.getAccountId(); //todo what if the session is elapsed or the token is not valid?
         Account account = mProvisioning.getAccountById(accountId);
 
-        // discover files paths
-//        String[] filesPaths = httpServletRequest.getParameter("files").split(",");
         String path;
         BufferedReader reader = httpServletRequest.getReader();
         while ((path = reader.readLine()) != null) {
-//          jb.append(str);
-//        JSONObject jsonResponse = new JSONObject();
-//        JSONArray arrayFiles = new JSONArray();
-        // Don't trigger nextcloud if param preview=1
-//        for (String path: filesPaths)
-//        {
           HttpResponse fileRequestResponse = queryDriveOnCloudServerService(account, path);
 
           int responseCode = fileRequestResponse.getStatusLine().getStatusCode();
           if (responseCode < HTTP_LOWEST_ERROR_STATUS)
           {
-//            String contentType = null;
-//            String filename = null;
-            // here create temp file instead of outputting in response
-
             HttpPost post = new HttpPost(
               mProvisioning.getLocalServer().getServiceURL("/service/upload?fmt=extended,raw")
-//              "https://172.17.0.2/service/upload?fmt=extended,raw"
             );
             Header[] headers = fileRequestResponse.getAllHeaders();
             for (Header header : headers)
@@ -172,33 +144,7 @@ public class CreateTempAttachmentFileHttpHandler implements HttpHandler {
             
             HttpResponse response = client.execute(post);
 
-            IOUtils.copy(response.getEntity().getContent(), httpServletResponse.getOutputStream());
-
-//            if (filename != null && !filename.trim().equals(""))
-//            {
-//              DiskFileItemFactory diskFileItemFactory = new DiskFileItemFactory();
-//              diskFileItemFactory.setRepository(new File(LocalConfig.get("zimbra_tmp_directory") + "/upload"));
-//              FileItem fi = diskFileItemFactory.createItem("upload", contentType, false, filename);
-//              OutputStream itemOutputStream = fi.getOutputStream();
-//              try
-//              {
-//                fileRequestResponse.getEntity().writeTo(itemOutputStream);
-//              } finally
-//              {
-//                itemOutputStream.close();
-//              }
-//
-//              JSONObject fileInfo = new JSONObject();
-//              fileInfo.put("filename", filename);
-//              fileInfo.put("ct", contentType);
-//              fileInfo.put("aid", mProvisioning.getLocalServer().getId() + ":" + UUID.randomUUID().toString());
-//              fileInfo.put("s", fi.getSize());
-//              arrayFiles.put(fileInfo);
-//            } else
-//            {
-//              errorOccurred = true;
-//              break;
-//            }
+            response.getEntity().writeTo(httpServletResponse.getOutputStream());
           } else
           {
             httpServletResponse.setStatus(responseCode);
@@ -208,27 +154,8 @@ public class CreateTempAttachmentFileHttpHandler implements HttpHandler {
             break;
           }
         }
-//        if (!errorOccurred) {
-//          jsonResponse.put("docInfo", arrayFiles);
-//          httpServletResponse.getWriter().println(jsonResponse.toString());
-//        }
-//        else {
-//        }
       }
     }
-  }
-
-  private String getFilenameFromContentDispositionValue(String value)
-  {
-    String[] contentDispositionParts = value.split(";");
-    for (String part: contentDispositionParts)
-    {
-      if (part.contains("filename="))
-      {
-        return part.substring(part.indexOf("\"") + 1, part.lastIndexOf("\""));
-      }
-    }
-    return null;
   }
 
   private HttpResponse queryDriveOnCloudServerService(final Account account, final String filePath) throws IOException
