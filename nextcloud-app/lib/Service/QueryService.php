@@ -46,8 +46,7 @@ class QueryService
         $find = preg_match('/^in:"([\w \/]*)"$/', $query, $matches);
         if ($find == false)
         {
-            $message = 'Not valid query \'' . $query . '\'';
-            throw new BadRequestException($message);
+            throw new BadRequestException("Not a valid query '" . $query . "''" );
         }
         $path = $matches[1];
         return $path;

@@ -37,7 +37,6 @@ class LogService implements ILogger
      *
      * @param string $message
      * @param array $context
-     * @return null
      * @since 7.0.0
      */
     public function error($message, array $context = array())
@@ -51,7 +50,6 @@ class LogService implements ILogger
      *
      * @param string $message
      * @param array $context
-     * @return null
      * @since 7.0.0
      */
     public function emergency($message, array $context = array())
@@ -65,7 +63,6 @@ class LogService implements ILogger
      *
      * @param string $message
      * @param array $context
-     * @return null
      * @since 7.0.0
      */
     public function alert($message, array $context = array())
@@ -79,7 +76,6 @@ class LogService implements ILogger
      *
      * @param string $message
      * @param array $context
-     * @return null
      * @since 7.0.0
      */
     public function critical($message, array $context = array())
@@ -93,7 +89,6 @@ class LogService implements ILogger
      *
      * @param string $message
      * @param array $context
-     * @return null
      * @since 7.0.0
      */
     public function warning($message, array $context = array())
@@ -107,7 +102,6 @@ class LogService implements ILogger
      *
      * @param string $message
      * @param array $context
-     * @return null
      * @since 7.0.0
      */
     public function notice($message, array $context = array())
@@ -121,7 +115,6 @@ class LogService implements ILogger
      *
      * @param string $message
      * @param array $context
-     * @return null
      * @since 7.0.0
      */
     public function info($message, array $context = array())
@@ -135,7 +128,6 @@ class LogService implements ILogger
      *
      * @param string $message
      * @param array $context
-     * @return null
      * @since 7.0.0
      */
     public function debug($message, array $context = array())
@@ -150,7 +142,6 @@ class LogService implements ILogger
      * @param mixed $level
      * @param string $message
      * @param array $context
-     * @return mixed
      * @since 7.0.0
      */
     public function log($level, $message, array $context = array())
