@@ -23,7 +23,7 @@ the content like the example:
 ```json
 {
   "domains": {
-    "example.com": "https://nextcloud.example.com"
+    "example.com": "https://mycloud.example.com"
   }
 }
 ```

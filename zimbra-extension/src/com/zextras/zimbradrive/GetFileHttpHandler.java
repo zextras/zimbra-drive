@@ -87,7 +87,7 @@ public class GetFileHttpHandler implements HttpHandler {
         int lengthOfBaseUrl = this.getPath().length()+2; //   "/" + this.getPath() + "/"
         String path = requestedUrl.substring(lengthOfBaseUrl);
 
-        // Don't trigger nextcloud if param preview=1
+        // Don't trigger *cloud if param preview=1
         if (paramsMap.containsKey("previewcallback")) {
           httpServletResponse.getWriter().print(this.triggerCallback(paramsMap.get("previewcallback")));
         }

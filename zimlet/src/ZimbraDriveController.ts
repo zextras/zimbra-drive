@@ -484,7 +484,7 @@ export class ZimbraDriveController extends ZmListController {
   private _deleteListener(): void {
     const items = this.getSelectedItems();
     if (items.length < 1) { return; }
-    // TODO: These are not really deleted, are moved into the NextCloud trash
+    // TODO: These are not really deleted, are moved into the *Cloud trash
     let message: string;
     if (items.length > 1) {
       message = ZmMsg.confirmPermanentDeleteItemList;
