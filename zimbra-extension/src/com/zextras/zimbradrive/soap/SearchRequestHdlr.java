@@ -39,7 +39,7 @@ public class SearchRequestHdlr implements SoapHandler
 
   private final CloudUtils mCloudUtils;
 
-  SearchRequestHdlr(CloudUtils cloudUtils)
+  public SearchRequestHdlr(CloudUtils cloudUtils)
   {
     mCloudUtils = cloudUtils;
   }

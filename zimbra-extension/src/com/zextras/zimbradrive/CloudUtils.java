@@ -35,6 +35,7 @@ public class CloudUtils
 {
 
   private static final String DRIVE_ON_CLOUD_URL = "/apps/zimbradrive/api/1.0/";
+  private static final String GET_FILE_URL = DRIVE_ON_CLOUD_URL + "GetFile";
 
   private final Provisioning mProvisioning;
   private final TokenManager mTokenManager;
@@ -67,5 +68,26 @@ public class CloudUtils
 
     HttpClient client = HttpClientBuilder.create().build();
     return client.execute(post);
+  }
+
+  public HttpResponse queryCloudServerService(final Account account, final String filePath) throws IOException
+  {
+    AccountToken token = mTokenManager.getAccountToken(account);
+
+    List<NameValuePair> driveOnCloudParameters = new ArrayList<NameValuePair>();
+    driveOnCloudParameters.add(new BasicNameValuePair("username", token.getAccount().getId()));
+    driveOnCloudParameters.add(new BasicNameValuePair("token", token.getToken()));
+    driveOnCloudParameters.add(new BasicNameValuePair("path", filePath));
+
+    String driveOnCloudDomain = ConfigUtils.getNcDomain(account.getDomainName());
+    String searchRequestUrl = driveOnCloudDomain + GET_FILE_URL;
+
+    HttpPost post = new HttpPost(searchRequestUrl);
+    post.setEntity(BackendUtils.getEncodedForm(driveOnCloudParameters));
+
+    HttpClient client = HttpClientBuilder.create().build();
+    HttpResponse response = client.execute(post);
+
+    return response;
   }
 }

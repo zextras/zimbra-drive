@@ -50,19 +50,12 @@ public class UploadFileHttpHandler extends HttpServlet implements HttpHandler {
     mTokenManager = tokenManager;
   }
 
-  /**
-   * @throws RuntimeException
-   */
   @Override
   public void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException
   {
     throw new RuntimeException();
   }
 
-  /**
-   * @throws NotValidAuthTokenException
-   * @throws NoZmAuthTokenCookieFoundException
-   */
   @Override
   public void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException
   {
@@ -95,10 +88,12 @@ public class UploadFileHttpHandler extends HttpServlet implements HttpHandler {
   }
 
   private String htmlResponse(String response, int status) {
-    return "<html>\n<head>" +
-      "<meta name='uploadedFilesStatus' content='" + response + "'>" +
-            "</head>\n" +
-            "<body onload='window.parent.appCtxt.getUploadManager().loaded(" + status + ");'></body>\n" +
+    return "<html>\n" +
+            "\t<head>\n" +
+            "\t\t<meta name='uploadedFilesStatus' content='" + response + "'>\n" +
+            "\t</head>\n" +
+            "\t<body onload='window.parent.appCtxt.getUploadManager().loaded(" + status + ");'>\n" +
+            "\t</body>\n" +
             "</html>\n";
   }
 
@@ -133,13 +128,9 @@ public class UploadFileHttpHandler extends HttpServlet implements HttpHandler {
   }
 
   private String getFormPartsBoundary(HttpServletRequest httpServletRequest) throws IOException {
-    InputStream userRequestInputStream = httpServletRequest.getInputStream();
-    try {
-      String firstLineOfBodyForm = readFirstLineOf (userRequestInputStream);
-      String boundary = firstLineOfBodyForm.substring(2, firstLineOfBodyForm.length());
-      return boundary;
-    } finally {
-      userRequestInputStream.close();
+    try (InputStream userRequestInputStream = httpServletRequest.getInputStream()) {
+      String firstLineOfBodyForm = readFirstLineOf(userRequestInputStream);
+      return firstLineOfBodyForm.substring(2, firstLineOfBodyForm.length());
     }
   }
 
@@ -160,14 +151,10 @@ public class UploadFileHttpHandler extends HttpServlet implements HttpHandler {
     return firstLineBuilder.toString();
   }
 
-  /**
-   * @throws NotValidAuthTokenException
-   * @throws NoZmAuthTokenCookieFoundException
-   */
   private Account assertAccountFromAuthToken(HttpServletRequest httpServletRequest)
   {
     AuthToken authToken = assertAuthToken(httpServletRequest);
-    String accountId = authToken.getAccountId(); //todo what if the session is elapsed or the token is not valid?
+    String accountId = authToken.getAccountId(); // TODO: What if the session is elapsed or the token is not valid?
     Account account = mProvisioning.getAccountById(accountId);
     if(account == null)
     {
@@ -176,15 +163,9 @@ public class UploadFileHttpHandler extends HttpServlet implements HttpHandler {
     return account;
   }
 
-  /**
-   * @throws NotValidAuthTokenException
-   * @throws NoZmAuthTokenCookieFoundException
-   */
   private AuthToken assertAuthToken(HttpServletRequest httpServletRequest) {
     String zmAuthToken = assertZmAuthTokenFromCookies(httpServletRequest);
-
     AuthToken authToken = AuthToken.getAuthToken(zmAuthToken);
-
     if(authToken == null)
     {
       throw new NotValidAuthTokenException();
@@ -193,75 +174,50 @@ public class UploadFileHttpHandler extends HttpServlet implements HttpHandler {
   }
 
   private class NotValidAuthTokenException extends RuntimeException
-  {
-  }
+  {}
 
-  /**
-   * @throws NoZmAuthTokenCookieFoundException
-   */
   private String assertZmAuthTokenFromCookies(HttpServletRequest httpServletRequest)  {
     Cookie[] cookies = httpServletRequest.getCookies();
-    for (int i = 0; i < cookies.length; ++i)
-    {
-      Cookie cookie = cookies[i];
+    for (Cookie cookie : cookies) {
       if (cookie.getName().equals(AUTH_TOKEN)) {
-        String zmAuthToken = cookie.getValue();
-        return  zmAuthToken;
+        return cookie.getValue();
       }
     }
     throw new NoZmAuthTokenCookieFoundException();
   }
 
   private class NoZmAuthTokenCookieFoundException extends RuntimeException
-  {
-  }
+  {}
 
-  /**
-   * @throws NotValidAuthTokenException
-   * @throws NoZmAuthTokenCookieFoundException
-   */
   private HttpResponse uploadFileToDrive(HttpServletRequest httpServletRequest) throws IOException {
     String formBoundary = getFormPartsBoundary(httpServletRequest);
     Account userAccount = assertAccountFromAuthToken(httpServletRequest);
-
     HttpEntity requestToSendToDrive = createUploadFileRequest(httpServletRequest, formBoundary, userAccount);
-
     String driveOnCloudDomain = ConfigUtils.getNcDomain(userAccount.getDomainName());
     String fileUploadRequestUrl = driveOnCloudDomain + NEXT_CLOUD_UPLOAD_FILE_URL;
-
     HttpPost post = new HttpPost(fileUploadRequestUrl);
-
     post.setEntity(requestToSendToDrive);
     post.setHeader(HTTP.CONTENT_TYPE, "multipart/form-data; boundary=" + formBoundary);
-
     HttpClient client = HttpClientBuilder.create().build();
-
-    HttpResponse uploadFileRequestResponse = client.execute(post);
-
-    return uploadFileRequestResponse;
+    return client.execute(post);
   }
 
   private HttpEntity createUploadFileRequest(HttpServletRequest httpServletRequest, String formBoundary, Account userAccount) throws IOException {
-
     InputStream userRequestInputStream = httpServletRequest.getInputStream();
-
-
     String userInfoPartsString = createUserInfoInFormStyle(userAccount, formBoundary);
-
     String internalFormPartsBoundary = getInternalBodyBoundary(formBoundary);
-
     List<InputStream> payloadStreamToSendToDrive = Arrays.asList(
       new ByteArrayInputStream(userInfoPartsString.getBytes()),
       new ByteArrayInputStream(internalFormPartsBoundary.getBytes()),
-      userRequestInputStream); //TODO: this inputStreams will be closed?
+      userRequestInputStream // TODO: This inputStreams will be closed?
+    );
 
     SequenceInputStream payloadToSendToDriveInputStream = new SequenceInputStream(Collections.enumeration(payloadStreamToSendToDrive));
 
     int contentLength = httpServletRequest.getIntHeader(HTTP.CONTENT_LEN);
     int diffInternalFormPartsBoundaryAndFirstBodyBoundary = 2; // getFirstBodyBoundary(boundaryOfParts) - getInternalBodyBoundary(formBoundary)
     contentLength = contentLength + userInfoPartsString.length() + diffInternalFormPartsBoundaryAndFirstBodyBoundary;
-    HttpEntity requestToSendToDrive = new InputStreamEntity(payloadToSendToDriveInputStream, contentLength);
-    return requestToSendToDrive;
+    return new InputStreamEntity(payloadToSendToDriveInputStream, contentLength);
   }
 
 

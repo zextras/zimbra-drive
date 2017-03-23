@@ -40,7 +40,7 @@ public class DeleteHdlr implements SoapHandler
 
   private final CloudUtils mCloudUtils;
 
-  DeleteHdlr(CloudUtils cloudUtils)
+  public DeleteHdlr(CloudUtils cloudUtils)
   {
     mCloudUtils = cloudUtils;
   }
