@@ -53,8 +53,9 @@ public class SearchRequestHdlr implements SoapHandler
     {
       String query = zimbraContext.getParameter("query", "");
       if (query.equals("")) { return; }
+      soapResponse.setQName(RESPONSE_QNAME);
       soapResponse.setValue("query", query);
-  
+
       String requestedTypesCsv = zimbraContext.getParameter("types", "");
       soapResponse.setValue("types", requestedTypesCsv);
   
@@ -74,8 +75,7 @@ public class SearchRequestHdlr implements SoapHandler
                                                              requestedTypesCsv);
       BasicResponseHandler basicResponseHandler = new BasicResponseHandler();
       String responseBody = basicResponseHandler.handleResponse(response);  //throw HttpResponseException if status code >= 300
-      
-      soapResponse.setQName(RESPONSE_QNAME);
+
       appendSoapResponseFromDriveResponse(soapResponse, responseBody);
 
     } catch (Exception e)

@@ -35,6 +35,7 @@ export class ZimbraDriveItem extends ZmItem {
   public static F_SHARED: string = "shared";
 
   private nameElId: string;
+  private parentNameElId: string;
   private name: string;
   private children: ZimbraDriveItem[];
   private permissions: ZimbraDriveItemPermissions;
@@ -44,6 +45,7 @@ export class ZimbraDriveItem extends ZmItem {
   private modifiedTime: number;
   private author: string;
   private path: string;
+  private node_type: string;
 
   constructor(id: string, list: ZmList, noCache: boolean = true, type: string = ZDId.ZIMBRADRIVE_ITEM) {
     super(type, id, list, noCache);
@@ -54,7 +56,7 @@ export class ZimbraDriveItem extends ZmItem {
   }
 
   public isFolder(): boolean {
-    return false;
+    return (this.node_type !== "file");
   }
 
   public static createFromDom(node: ZimbraDriveItemObj, args: {list: ZmList}): ZimbraDriveItem {
@@ -86,6 +88,7 @@ export class ZimbraDriveItem extends ZmItem {
     }
     this.shared = node.shared;
     this.mimetype = node.mimetype;
+    this.node_type = node.node_type;
   }
 
   public getMimetype(): string {
@@ -126,12 +129,30 @@ export class ZimbraDriveItem extends ZmItem {
     return this.path.substring(0, lastIndex + 1);
   }
 
+  public getParentName(): string {
+    let parentPath = this.getParentPath();
+    // Remove last char that's a "/" and find last "/"
+    let lastIndex: number = parentPath.substring(0, parentPath.length - 1).lastIndexOf("/");
+    if (lastIndex === -1) {
+      return "";
+    }
+    return parentPath.substring(lastIndex).replace(/\//g, "");
+  }
+
   public getNameElId(): string {
     return this.nameElId;
   }
 
   public setNameElId(id: string): void {
     this.nameElId = id;
+  }
+
+  public getParentNameElId(): string {
+    return this.parentNameElId;
+  }
+
+  public setParentNameElId(id: string): void {
+    this.parentNameElId = id;
   }
 
   public containsTargetPath(targetPath: string): boolean {
@@ -163,4 +184,5 @@ export interface ZimbraDriveItemObj {
   author: string;
   path: string;
   children: ZimbraDriveItemObj[];
+  node_type: string;
 }

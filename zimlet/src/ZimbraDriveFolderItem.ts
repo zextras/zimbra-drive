@@ -24,7 +24,7 @@ export class ZimbraDriveFolderItem extends ZimbraDriveItem {
 
   private _data: {[id: string]: any} = {};
   private folder: ZimbraDriveFolder;
-  public isDwtTreeItem: boolean = false;
+  public readonly isDwtTreeItem: boolean = false;
 
   constructor(parent: ZimbraDriveFolder) {
     super(parent.id, new ZmList(ZDId.ZIMBRADRIVE_ITEM));
@@ -35,9 +35,9 @@ export class ZimbraDriveFolderItem extends ZimbraDriveItem {
     return this.folder;
   }
 
-  public isFolder(): boolean {
-    return true;
-  }
+  // public isFolder(): boolean {
+  //   return true;
+  // }
 
   public getName(): string {
     return this.folder.name;

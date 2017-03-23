@@ -43,8 +43,8 @@ export class ZimbraDriveFolder extends ZmOrganizer {
   }
 
   public static sortFcn(folderA: ZimbraDriveFolder, folderB: ZimbraDriveFolder): number {
-    if (folderA.name > folderB.name) { return 1; }
-    if (folderA.name < folderB.name) { return -1; }
+    if (folderA.getName() > folderB.getName()) { return 1; }
+    if (folderA.getName() < folderB.getName()) { return -1; }
     return 0; // TODO: Update this function.
   }
 

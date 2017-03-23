@@ -101,7 +101,8 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
         nameKey: ZimbraDriveApp.APP_NAME,
         icon: "ZimbraDrive-icon",
         textPrecedence: 50,
-        newItemOps: newItemsOps
+        newItemOps: newItemsOps,
+        searchResultsTab: true
       }
     );
   }
@@ -131,7 +132,7 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
     );
   }
 
-  public static loadSearchRequestParams(query: string, batchCommand?: ZmBatchCommand): void {
+  public static loadSearchRequestParams(query: string, userInitiated: boolean, batchCommand?: ZmBatchCommand): void {
     let params: ZmSearchControllerSearchParams = {query:  query};
     params.soapInfo = {
       method: ZimbraDriveApp.SEARCH_REQ,
@@ -142,6 +143,10 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
     params.searchFor = ZDId.ITEM_ZIMBRADRIVE;
     params.types = [ZDId.ZIMBRADRIVE_ITEM];
     params.checkTypes = true;
+    if (userInitiated) {
+      params.userInitiated = userInitiated;
+      params.types.push(ZDId.ZIMBRADRIVE_FOLDER);
+    }
     let search = new ZmSearch(params);
     search.execute(
       {
@@ -166,7 +171,7 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
     soapDoc.set(ZDId.F_TARGET_PATH, destinationFolder.getPath(true));
     batchCommand.addRequestParams(
       soapDoc,
-      new AjxCallback(null, ZimbraDriveController._moveCallback, [moveParams]),
+      new AjxCallback(null, ZimbraDriveController._moveCallback, [item, destinationFolder, moveParams]),
       new AjxCallback(null, ZimbraDriveController._moveErrorCallback, [item, moveParams])
     );
   }
@@ -187,13 +192,15 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
         node: "doc-drive",
         organizer: ZimbraDriveApp.APP_NAME,
         dropTargets: [], // ZmOrganizer.TAG, ZmOrganizer.BRIEFCASE
-        searchType: "document",
+        searchType: "file",
         resultsList: AjxCallback.simpleClosure(function(search: ZmSearch) {
             // AjxDispatcher.require("BriefcaseCore");
             return new ZmList(ZDId.ZIMBRADRIVE_ITEM, search);
           }, this)
       }
     );
+    ZmSearch.TYPE[ZDId.ZIMBRADRIVE_FOLDER] = "folder";
+    ZmItem.APP[ZDId.ZIMBRADRIVE_FOLDER] = ZimbraDriveApp.APP_NAME;
     // Register zimbra drive buttons
     ZimbraDriveApp._registerZimbraDriveOperationsButtons();
   }
@@ -281,6 +288,8 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
     if (loadCallback) {
       loadCallback.run(controller);
     }
+    // (<ZmSearchApp> appCtxt.getApp(ZmApp.SEARCH)).getSearchResultsController().show(results, controller);
+
   }
 
   // TODO: Invoked after the dropdown menu creation, this is not a "real app". Using the {@see ZmZimletBase} method
@@ -316,6 +325,7 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
       appCtxt.setTree(ZimbraDriveApp.APP_NAME, tree);
     }
     tree.root = ZimbraDriveFolder.createFromDom(root, {tree: tree});
+    // tree.getFolderById("id");
     // TODO save and apply axpand/collapsed folders
     appCtxt.getOverviewController().getTreeView("main_" + ZimbraDriveApp.APP_NAME, ZimbraDriveApp.APP_NAME);
     return true; // handled
@@ -399,4 +409,5 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
     this._attachDialog.getDriveView(composeView._controller);
     this._attachDialog.popup();
   }
+
 }

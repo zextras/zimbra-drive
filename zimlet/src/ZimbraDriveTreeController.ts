@@ -187,7 +187,7 @@ export class ZimbraDriveTreeController extends ZmTreeController {
     // send batch command due to refresh view
     if (parentFolder.getPath() === ZimbraDriveController.getCurrentFolder().getPath()) {
       let batchCommand = new ZmBatchCommand();
-      batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadSearchRequestParams, [`in:"${ZimbraDriveController.getCurrentFolder().getPath(true)}"`]));
+      batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadSearchRequestParams, [`in:"${ZimbraDriveController.getCurrentFolder().getPath(true)}"`, false]));
       batchCommand.run();
     }
     this._newFolderDialog.popdown();
@@ -364,9 +364,9 @@ export class ZimbraDriveTreeController extends ZmTreeController {
         if (item.isFolder()) {
           this._treeView["ZIMBRA_DRIVE"].getTreeItemById(item.id).dispose();
         }
-        (<PreviewPaneView> controller.getParentView(controller._currentViewId)).getListView().removeItem(item);
+        controller.getViewMgr().getListView().removeItem(item);
       }
-      (<PreviewPaneView> controller.getParentView(controller._currentViewId)).getPreviewView().enablePreview(false);
+      controller.getViewMgr().getPreviewView().enablePreview(false);
     }
   }
 
