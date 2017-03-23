@@ -64,7 +64,6 @@ export class ZimbraDriveChooseFolderDialog extends ZmChooseFolderDialog {
     this._inputField.setVisible(false);
   }
 
-
   public _loadFolders(): void {
     this._folders = [];
     let treeView: ZmTreeView = this._treeController._treeView[ZimbraDriveApp.TREE_ID];
@@ -78,7 +77,7 @@ export class ZimbraDriveChooseFolderDialog extends ZmChooseFolderDialog {
       let path = folder.getPath();
       this._folders.push({id: folder.id, type: ZimbraDriveApp.TREE_ID, name: name, path: path, accountId: this._accountId});
     }
-  };
+  }
 
   public setActionedItem(actionedItem: DwtTreeItem|ZimbraDriveFolderItem): void {
     this._actionedItem = actionedItem;
@@ -94,6 +93,6 @@ export class ZimbraDriveChooseFolderDialog extends ZmChooseFolderDialog {
     this._folderTreeDivId = this._htmlElId + "_folderTreeDivId";
 
     return AjxTemplate.expand("com_zextras_drive_open.ZimbraDrive#ChooseFolderDialog", {id: this._htmlElId});
-  };
+  }
 
 }

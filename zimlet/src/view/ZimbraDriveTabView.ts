@@ -154,7 +154,7 @@ export class ZimbraDriveTabView extends DwtComposite {
         }
       )
     );
-  };
+  }
 
   public showFolderContent(): void {
     document.getElementById(this._tableID).style.display = "none";

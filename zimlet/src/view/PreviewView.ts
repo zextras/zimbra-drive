@@ -102,7 +102,7 @@ export class PreviewView extends DwtComposite {
     this._iframePreview.getIframe().onload = <(this: HTMLIFrameElement, ev: Event) => any> AjxCallback.simpleClosure(this._updatePreview, this);
     appCtxt.getShell().addControlListener(new AjxListener(this, function() { return this._onResize.apply(this, arguments); }));
     this.addControlListener(new AjxListener(this, function() { return this._onResize.apply(this, arguments); }));
-  };
+  }
 
   public enablePreview(enabled: boolean): void {
     Dwt.setDisplay(this.getElement("filepreview"), enabled ? Dwt.DISPLAY_INLINE : Dwt.DISPLAY_NONE);
@@ -110,7 +110,7 @@ export class PreviewView extends DwtComposite {
     if (!enabled) {
       this._iframePreview.setIframeContent("<div></div>");
     }
-  };
+  }
 
   public set(item: ZimbraDriveItem): void {
     if (!item) {
@@ -144,7 +144,7 @@ export class PreviewView extends DwtComposite {
 
     this._iframePreview.setSrc(url);
     Dwt.setLoadedTime(ZDId.ITEM_ZIMBRADRIVE);
-  };
+  }
 
   public _setupLoading(): void {
     let html = [
@@ -156,14 +156,14 @@ export class PreviewView extends DwtComposite {
       this._iframePreview.setIframeContent(html);
     }
     catch (ignore) {}
-  };
+  }
 
   private _setupPreviewCallback(url: string): string {
     if (!PreviewView._instance) {
       PreviewView._instance = this;
     }
     return PreviewView._addRequestParam(url, "previewcallback", "ZmZimbraDrivePreviewView._previewCallback");
-  };
+  }
 
   private static _addRequestParam(url: string, key: string, value: string): string {
     return url + ( url.match(/\?/) ? "&" : "?" ) + key + "=" + value;
@@ -172,7 +172,7 @@ export class PreviewView extends DwtComposite {
   public static _previewCallback(errorCode?: number, error?: Error): void {
     let previewView = PreviewView._instance;
     previewView._handlePreview(previewView._previewItem, previewView._frameUrl);
-  };
+  }
 
   private _handlePreview(item: ZimbraDriveItem, url: string): void {
     this.enablePreview(true);
@@ -190,12 +190,12 @@ export class PreviewView extends DwtComposite {
         this._iframePreview.setIframeContent(html);
       }
     }
-  };
+  }
 
   public static _errorCallback(errorCode?: number, error?: Error): void {
     let previewView = PreviewView._instance;
     previewView._handleError(previewView._previewItem);
-  };
+  }
 
   private _handleError(item: ZimbraDriveItem): void {
     this.enablePreview(true);
@@ -207,7 +207,7 @@ export class PreviewView extends DwtComposite {
       ].join("");
       this._iframePreview.setIframeContent(html);
     }
-  };
+  }
 
   private _setHeader(item: ZimbraDriveItem): void {
     // Name
@@ -236,7 +236,7 @@ export class PreviewView extends DwtComposite {
     this.setNotes(item);
 
     this._onResize();
-  };
+  }
 
   public setNotes(item: ZimbraDriveItem): void {
     let visible = "";
@@ -245,7 +245,7 @@ export class PreviewView extends DwtComposite {
       this.getElement("notes").innerHTML = AjxStringUtil.nl2br(visible);
     }
     this.expandNotes(false);
-  };
+  }
 
   private expandNotes(expand: boolean): void {
 
@@ -257,11 +257,11 @@ export class PreviewView extends DwtComposite {
     if (this.getElement("expand")) {
       this.getElement("expand").innerHTML = AjxImg.getImageHtml((expand ? "NodeExpanded" : "NodeCollapsed"));
     }
-  };
+  }
 
   private _toggleExpand(): void {
     this.expandNotes(!this._expandState);
-  };
+  }
 
   private _onResize(): void {
     if (this.getElement("container") && this.getElement("body")) {
@@ -270,7 +270,7 @@ export class PreviewView extends DwtComposite {
       let size = Dwt.getSize(this.getElement("container"));
       Dwt.setSize(<HTMLDivElement> this.getElement("body"), size.x, size.y);
     }
-  };
+  }
 
   private _setFolder(item: ZimbraDriveItem): void {
     this._cleanup();
@@ -279,7 +279,7 @@ export class PreviewView extends DwtComposite {
     if (this.getElement("modifier"))
       this.getElement("modifier").innerHTML = item.getAuthor();
     this._setIframeContent(AjxTemplate.expand("briefcase.Briefcase#FolderPreview"));
-  };
+  }
 
   private _setIframeContent(html: string): void {
     this._previewContentHtml = html;
@@ -287,7 +287,7 @@ export class PreviewView extends DwtComposite {
     this._iframePreview.setSrc("");
     this._iframePreview.setSrc("about:blank");
     this._iframePreview._resetEventHandlers();
-  };
+  }
 
   private _updatePreview(): void {
     if (this._previewContent) {
@@ -314,7 +314,7 @@ export class PreviewView extends DwtComposite {
         }
       }
     }
-  };
+  }
 
   private _cleanup(): void {
     this.getElement("name").innerHTML = "";
@@ -325,7 +325,7 @@ export class PreviewView extends DwtComposite {
     if (this.getElement("lock"))     this.getElement("lock").innerHTML = AjxImg.getImageHtml("Blank_16");
     Dwt.setVisible(this.getElement("notes_section"), false);
     this._previewContent = false;
-  };
+  }
 
   private getElement(id: string): HTMLElement {
     if (!this._elementsMap[id]) {

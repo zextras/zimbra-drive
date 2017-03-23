@@ -65,5 +65,6 @@ export class ZimbraDriveIconView extends ZimbraDriveBaseView {
 
     this.associateItemWithElement(item, div);
     return div;
-  };
+  }
+
 }

@@ -47,7 +47,6 @@ import {DwtSelectionEvent} from "./zimbra/ajax/dwt/events/DwtSelectionEvent";
 import {DwtListView} from "./zimbra/ajax/dwt/widgets/DwtListView";
 import {ZimbraDriveApp} from "./ZimbraDriveApp";
 import {ZmBatchCommand} from "./zimbra/zimbra/csfe/ZmBatchCommand";
-import {DwtTreeItem} from "./zimbra/ajax/dwt/widgets/DwtTreeItem";
 import {ZimbraDriveTreeController} from "./ZimbraDriveTreeController";
 import {ZimbraDriveFolder} from "./ZimbraDriveFolder";
 import {ZmTreeView} from "./zimbra/zimbraMail/share/view/ZmTreeView";
@@ -72,7 +71,6 @@ import {AjxEnv} from "./zimbra/ajax/boot/AjxEnv";
 import {AjxPost} from "./zimbra/ajax/net/AjxPost";
 import {DetailListView} from "./view/DetailListView";
 import {DwtToolBarButton} from "./zimbra/ajax/dwt/widgets/DwtToolBar";
-import {DwtIframe} from "./zimbra/ajax/dwt/widgets/DwtIframe";
 import {ZmComposeController} from "./zimbra/zimbraMail/mail/controller/ZmComposeController";
 import {AjxDispatcher} from "./zimbra/ajax/boot/AjxDispatcher";
 import {DwtMessageDialog} from "./zimbra/ajax/dwt/widgets/DwtMessageDialog";
@@ -257,7 +255,7 @@ export class ZimbraDriveController extends ZmListController {
       this._itemCountText[view] = toolbar.getButton(ZmOperation.TEXT);
       appCtxt.notifyZimlets("initializeToolbar", [this._app, toolbar, this, view], { waitUntilLoaded: true });
       // remove any style in upload button element
-      let uploadButton: DwtToolBarButton = toolbar.getButton(ZDId.ZD_NEW_FILE),
+      let uploadButton: DwtToolBarButton = <DwtToolBarButton>toolbar.getButton(ZDId.ZD_NEW_FILE),
         uploadButtonEl: HTMLElement = uploadButton.getHtmlElement();
       uploadButton.setText("");
       uploadButton.setImage("");
@@ -530,11 +528,10 @@ export class ZimbraDriveController extends ZmListController {
 
     if (!(<ZimbraDriveItem> items[0]).isFolder()) {
       (<DetailListView> view).renameFile(items[0]);
-    }
-    else {
+    } else {
       (<ZimbraDriveTreeController> appCtxt.getOverviewController().getTreeController(ZimbraDriveApp.APP_NAME)).renameFolderItemListener(ev, <ZimbraDriveFolderItem>items[0]);
     }
-  };
+  }
 
   private _newListener(ev: DwtSelectionEvent): void {
     let treeController: ZimbraDriveTreeController = <ZimbraDriveTreeController> appCtxt.getOverviewController().getTreeController(ZimbraDriveApp.APP_NAME);
@@ -647,11 +644,10 @@ export class ZimbraDriveController extends ZmListController {
       }
       composeController._initAutoSave();
       composeController.saveDraft(ZmComposeController.DRAFT_TYPE_AUTO, filesArray, null);
-    }
-    else {
+    } else {
       this._errorOnCreatingTempFiles();
     }
-  };
+  }
 
   private _errorOnCreatingTempFiles(): void {
     appCtxt.setStatusMsg({msg: ZimbraDriveApp.getMessage("errorServer"), level: ZmStatusView.LEVEL_CRITICAL});

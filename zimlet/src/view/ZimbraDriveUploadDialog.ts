@@ -32,6 +32,7 @@ import {ZimbraDriveFolder} from "../ZimbraDriveFolder";
 import {SetStatusMsgParams} from "../zimbra/zimbraMail/core/ZmAppCtxt";
 import {AjxMessageFormat} from "../zimbra/ajax/util/AjxText";
 import {ZmStatusView} from "../zimbra/zimbraMail/share/view/ZmStatusView";
+import {DwtToolBarButton} from "../zimbra/ajax/dwt/widgets/DwtToolBar";
 
 export class ZimbraDriveUploadDialog extends ZmUploadDialog {
 
@@ -40,7 +41,7 @@ export class ZimbraDriveUploadDialog extends ZmUploadDialog {
   private static NOT_PERMITTED_EXCEPTION_STATUS_CODE: number = 2;
   private static NO_FILE_IN_THE_REQUEST: number = 3;
 
-  private _uploadButton: DwtButton;
+  private _uploadButton: DwtToolBarButton;
   private _fileMapIds: string[];
   private _fileMapIdName: {[id: string]: string};
 
@@ -247,7 +248,7 @@ export class ZimbraDriveUploadDialog extends ZmUploadDialog {
     }
   }
 
-  public _enableUpload(uploadButton: DwtButton): void {
+  public _enableUpload(uploadButton: DwtToolBarButton): void {
     super._enableUpload(uploadButton);
     uploadButton.setText("");
     // uploadButton.setVisible(false);

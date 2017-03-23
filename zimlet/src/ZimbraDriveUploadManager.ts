@@ -69,8 +69,7 @@ export class ZimbraDriveUploadManager {
         if (params.progressCallback) {
           req.upload.addEventListener("progress", (<EventListener> params.progressCallback), false);
         }
-      }
-      else {
+      } else {
         if (params.curView) {
           let progress = function (obj: any) {
             let viewObj = obj;
@@ -114,11 +113,10 @@ export class ZimbraDriveUploadManager {
     let dialog: DwtMessageDialog = appCtxt.getMsgDialog();
     dialog.setMessage(message, DwtMessageDialog.CRITICAL_STYLE);
     dialog.popup();
-  };
-
+  }
 
   private _getTotalUploadSize(form: HTMLFormElement): number {
-  // Determine the total number of bytes to be upload across all the files
+    // Determine the total number of bytes to be upload across all the files
     let totalSize = 0;
     for (let i = 0; i < form.elements.length; i++) {
       const element: HTMLInputElement = <HTMLInputElement> form.elements[i];
