@@ -8,17 +8,6 @@
       <excludeFolder url="file://$MODULE_DIR$/dist" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module-library">
-      <library name="PHP Runtime">
-        <CLASSES>
-          <root url="jar://$APPLICATION_PLUGINS_DIR$/php/lib/php.jar!/stubs/standard" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$APPLICATION_PLUGINS_DIR$/php/lib/php.jar!/stubs/standard" />
-        </SOURCES>
-      </library>
-    </orderEntry>
     <orderEntry type="library" name="zal-1.12.0-8.7.2" level="project" />
   </component>
 </module>
