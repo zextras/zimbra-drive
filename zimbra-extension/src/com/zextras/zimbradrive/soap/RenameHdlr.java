@@ -28,7 +28,6 @@ public class RenameHdlr implements SoapHandler
   private static final String COMMAND = "Rename";
 
   public static final QName QNAME = new QName(COMMAND + "Request", ZimbraDriveExtension.SOAP_NAMESPACE);
-  private static final QName RESPONSE_QNAME = new QName(COMMAND + "Response", ZimbraDriveExtension.SOAP_NAMESPACE);
 
   private final MoveHdlr mMoveHdlr;
 

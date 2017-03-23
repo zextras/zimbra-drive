@@ -32,7 +32,7 @@ public class ConfigUtils
 
   public static String getNcDomain(String domain) throws IOException
   {
-    JSONObject jsonConf = null;
+    JSONObject jsonConf;
     try
     {
       jsonConf = new JSONObject(readFile(CONFIG_FILE, Charset.defaultCharset()));
@@ -47,7 +47,7 @@ public class ConfigUtils
 
   static String readFile(String path, Charset encoding) throws IOException
   {
-    byte[] encoded = new byte[0];
+    byte[] encoded;
     try
     {
       encoded = Files.readAllBytes(Paths.get(path));

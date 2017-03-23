@@ -36,9 +36,9 @@ dist/zimbradrive.tar.gz:
 	cd build/ && tar cvzf $(app_name).tar.gz $(app_name)
 	mv build/$(app_name).tar.gz dist/
 
-install: guard-NEXTCLOUD_DEV_SERVER dist/zimbradrive.tar.gz
-	scp dist/zimbradrive.tar.gz root@${NEXTCLOUD_DEV_SERVER}:/tmp/
-	ssh root@${NEXTCLOUD_DEV_SERVER} "cd /var/www/nextcloud/apps && rm -rf zimbradrive/ && tar -xvzf /tmp/zimbradrive.tar.gz"
+install: guard-MYCLOUD_DEV_SERVER dist/zimbradrive.tar.gz
+	scp dist/zimbradrive.tar.gz root@${MYCLOUD_DEV_SERVER}:/tmp/
+	ssh root@${MYCLOUD_DEV_SERVER} "cd /var/www/nextcloud/apps && rm -rf zimbradrive/ && tar -xvzf /tmp/zimbradrive.tar.gz"
 
 guard-%:
 	@ if [ "${${*}}" = "" ]; then \

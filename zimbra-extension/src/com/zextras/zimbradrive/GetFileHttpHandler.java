@@ -17,12 +17,12 @@
 
 package com.zextras.zimbradrive;
 
-import org.apache.http.*;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.message.BasicNameValuePair;
-import org.openzal.zal.*;
+import org.apache.http.Header;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpResponse;
+import org.openzal.zal.Account;
+import org.openzal.zal.AuthToken;
+import org.openzal.zal.Provisioning;
 import org.openzal.zal.http.HttpHandler;
 
 import javax.servlet.ServletException;
@@ -36,17 +36,16 @@ import java.util.*;
 
 public class GetFileHttpHandler implements HttpHandler {
   private final static String AUTH_TOKEN = "ZM_AUTH_TOKEN";
-  private final static String NEXT_CLOUD_GET_FILE_URL = "/apps/zimbradrive/api/1.0/GetFile";
   private final static String CONTENT_DISPOSITION_HTTP_HEADER = "Content-Disposition";
   private final static int HTTP_LOWEST_ERROR_STATUS = 300;
 
   private final Provisioning mProvisioning;
-  private final TokenManager mTokenManager;
+  private CloudUtils mCloudUtils;
 
-  public GetFileHttpHandler(Provisioning provisioning, TokenManager tokenManager)
+  public GetFileHttpHandler(Provisioning provisioning, CloudUtils cloudUtils)
   {
     mProvisioning = provisioning;
-    mTokenManager = tokenManager;
+    mCloudUtils = cloudUtils;
   }
 
   @Override
@@ -69,11 +68,8 @@ public class GetFileHttpHandler implements HttpHandler {
 
     String zmAuthToken = null;
     Cookie[] cookies = httpServletRequest.getCookies();
-    for(int i = 0; i < cookies.length; ++i)
-    {
-      Cookie cookie = cookies[i];
-      if(cookie.getName().equals(AUTH_TOKEN) )
-      {
+    for (Cookie cookie : cookies) {
+      if (cookie.getName().equals(AUTH_TOKEN)) {
         zmAuthToken = cookie.getValue();
         break;
       }
@@ -84,20 +80,20 @@ public class GetFileHttpHandler implements HttpHandler {
 
       if (authToken != null)
       {
-        String accountId = authToken.getAccountId(); //todo what if the session is elapsed or the token is not valid?
+        String accountId = authToken.getAccountId(); // TODO: What if the session is elapsed or the token is not valid?
         Account account = mProvisioning.getAccountById(accountId);
 
         String requestedUrl = httpServletRequest.getPathInfo();
         int lengthOfBaseUrl = this.getPath().length()+2; //   "/" + this.getPath() + "/"
         String path = requestedUrl.substring(lengthOfBaseUrl);
 
-        // Don't trigger nextcloud if param preview=1
+        // Don't trigger *cloud if param preview=1
         if (paramsMap.containsKey("previewcallback")) {
           httpServletResponse.getWriter().print(this.triggerCallback(paramsMap.get("previewcallback")));
         }
         else
         {
-          HttpResponse fileRequestResponse = queryDriveOnCloudServerService(account, path);
+          HttpResponse fileRequestResponse = mCloudUtils.queryCloudServerService(account, path);
 
           int responseCode = fileRequestResponse.getStatusLine().getStatusCode();
           if (responseCode < HTTP_LOWEST_ERROR_STATUS)
@@ -123,11 +119,8 @@ public class GetFileHttpHandler implements HttpHandler {
                   break;
               }
             }
-            OutputStream responseOutputStream = httpServletResponse.getOutputStream();
-            try {
+            try (OutputStream responseOutputStream = httpServletResponse.getOutputStream()) {
               fileRequestResponse.getEntity().writeTo(responseOutputStream);
-            } finally {
-              responseOutputStream.close();
             }
           } 
           else {
@@ -140,28 +133,6 @@ public class GetFileHttpHandler implements HttpHandler {
         }
       }
     }
-  }
-
-  private HttpResponse queryDriveOnCloudServerService(final Account account, final String filePath) throws IOException
-  {
-
-    AccountToken token = mTokenManager.getAccountToken(account);
-
-    List<NameValuePair> driveOnCloudParameters = new ArrayList<NameValuePair>();
-    driveOnCloudParameters.add(new BasicNameValuePair("username", token.getAccount().getId()));
-    driveOnCloudParameters.add(new BasicNameValuePair("token", token.getToken()));
-    driveOnCloudParameters.add(new BasicNameValuePair("path", filePath));
-
-    String driveOnCloudDomain = ConfigUtils.getNcDomain(account.getDomainName());
-    String searchRequestUrl = driveOnCloudDomain + NEXT_CLOUD_GET_FILE_URL;
-
-    HttpPost post = new HttpPost(searchRequestUrl);
-    post.setEntity(BackendUtils.getEncodedForm(driveOnCloudParameters));
-
-    HttpClient client = HttpClientBuilder.create().build();
-    HttpResponse response = client.execute(post);
-
-    return response;
   }
 
   @Override
@@ -183,17 +154,18 @@ public class GetFileHttpHandler implements HttpHandler {
   }
 
   public String triggerCallback(String callback) {
-    return "<html>\n" +
-      "<head>\n" +
-      "</head>\n" +
-      "<body onload='onLoad()'>\n" +
-      "<script>\n" +
-      "function onLoad() {\n" +
-      "    window.parent." + callback + "('','');\n" +
-      "}\n" +
-      "</script>\n" +
-      "</body>\n" +
-      "</html>\n";
-  };
+    return
+            "<html>\n" +
+            "\t<head>\n" +
+            "\t</head>\n" +
+            "\t<body onload='onLoad()'>\n" +
+            "\t\t<script>\n" +
+            "\t\t\tfunction onLoad() {\n" +
+            "\t\t\t\twindow.parent." + callback + "('','');\n" +
+            "\t\t\t}\n" +
+            "\t\t</script>\n" +
+            "\t</body>\n" +
+            "</html>\n";
+  }
 
 }

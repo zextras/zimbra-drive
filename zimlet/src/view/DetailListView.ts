@@ -56,12 +56,11 @@ export class DetailListView extends ZimbraDriveBaseView {
   private _dnd: ZmDragAndDrop;
 
   constructor(parent: DwtComposite, controller: ZimbraDriveController, dropTarget: DwtDropTarget) {
-    let isMultiColumn: boolean = controller.isReadingPaneOnRight();
     super({
       view: controller.getCurrentViewId(),
       parent: parent,
       controller: controller,
-      headerList: DetailListView._getHeaderList(isMultiColumn),
+      headerList: DetailListView._getHeaderList(controller.isReadingPaneOnRight()),
       dropTgt: dropTarget,
       type: ZDId.ZIMBRADRIVE_ITEM
     });
@@ -83,7 +82,7 @@ export class DetailListView extends ZimbraDriveBaseView {
 
   public _dragListener(ev: DwtDragEvent): void {
     if (ev.action === DwtDragEvent.SET_DATA) {
-      ev.srcData = {data: ev.srcControl.getDnDSelection(), controller: this};
+      ev.srcData = { data: (<DwtListView>ev.srcControl).getDnDSelection(), controller: this };
     }
   };
 

@@ -66,7 +66,7 @@ export class ZimbraDriveBaseView extends ZmListView {
       fileInput: DwtInputField = this._enableRenameInput(true, fileNameBounds);
     fileInput.setValue(item.getName());
     this._fileItem = item;
-  };
+  }
 
   public _enableRenameInput(enable: boolean, bounds?: DwtRectangle): DwtInputField {
     let fileInput = this._getRenameInput();
@@ -79,7 +79,7 @@ export class ZimbraDriveBaseView extends ZmListView {
       fileInput.setLocation("-10000px", "-10000px");
     }
     return fileInput;
-  };
+  }
 
   public _getRenameInput(): DwtInputField {
     if (!this._renameField) {
@@ -117,7 +117,7 @@ export class ZimbraDriveBaseView extends ZmListView {
       this.resetRenameFile();
     }
     super._mouseDownAction(mouseEv, div);
-  };
+  }
 
   private _doRename(item: ZimbraDriveItem): void {
     let fileName: string = this._renameField.getValue();
@@ -164,7 +164,7 @@ export class ZimbraDriveBaseView extends ZmListView {
       level: number = ZmStatusView.LEVEL_INFO;
     appCtxt.setStatusMsg({msg: msg, level: level});
     return true;
-  };
+  }
 
   private _renameFileErrorCallback(fileName: string, exception: ZmCsfeException): boolean {
     this.resetRenameFile();
@@ -182,12 +182,12 @@ export class ZimbraDriveBaseView extends ZmListView {
     this._enableRenameInput(false);
     this._fileItemNameEl = null;
     this._fileItem = null;
-  };
+  }
 
   private _redrawItem(item: ZimbraDriveItem): void {
     this.resetRenameFile();
     this.redrawItem(item);
-  };
+  }
 
   public _checkDuplicate(name: string): boolean {
     name = name.toLowerCase();
@@ -200,7 +200,7 @@ export class ZimbraDriveBaseView extends ZmListView {
       }
     }
     return false;
-  };
+  }
 }
 
 export interface ZimbraDriveBaseViewParams {

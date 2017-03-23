@@ -210,7 +210,7 @@ export class ZimbraDriveTreeController extends ZmTreeController {
     ZmController.showDialog(renameDialog, this._renameCb, this._pendingActionData);
     renameDialog.registerCallback(DwtDialog.CANCEL_BUTTON, this._clearDialog, this, renameDialog);
     renameDialog._getInputFields()[0].focus();
-  };
+  }
 
   public _sendRenameRequest(renameDialog: ZmRenameFolderDialog, folder: ZimbraDriveFolder, newFolderName: string): void {
     renameDialog.popdown();
@@ -289,7 +289,7 @@ export class ZimbraDriveTreeController extends ZmTreeController {
     moveParams.hideNewButton = true;
     ZmController.showDialog(this._moveToDialog, new AjxCallback(this, this._moveCallback), moveParams);
     this._moveToDialog.registerCallback(DwtDialog.CANCEL_BUTTON, this._clearDialog, this, this._moveToDialog);
-  };
+  }
 
   /** Used by
    *  @see ZmTreeController._moveCallback */
@@ -322,7 +322,7 @@ export class ZimbraDriveTreeController extends ZmTreeController {
       items = (<ZimbraDriveController> appCtxt.getCurrentController()).getSelectedItems();
     }
     if (items.length < 1) { return; }
-    // TODO: These are not really deleted, are moved into the NextCloud trash
+    // TODO: These are not really deleted, are moved into the *Cloud trash
     let message: string;
     if (items.length > 1) {
       message = ZmMsg.confirmPermanentDeleteItemList;

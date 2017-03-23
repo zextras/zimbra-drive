@@ -24,7 +24,6 @@ use OCP\Files\File;
 use OCP\Files\IMimeTypeDetector;
 use OCP\IServerContainer;
 use OC\Files\Filesystem;
-
 use OCP\Files\Node;
 
 class StorageService

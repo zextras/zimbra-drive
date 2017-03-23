@@ -18,7 +18,6 @@
 package com.zextras.zimbradrive;
 
 import com.zextras.zimbradrive.soap.NcSoapService;
-import org.openzal.zal.AuthProvider;
 import org.openzal.zal.extension.ZalExtension;
 import org.openzal.zal.extension.ZalExtensionController;
 import org.openzal.zal.extension.Zimbra;
@@ -46,16 +45,16 @@ public class ZimbraDriveExtension implements ZalExtension
   {
     Zimbra mZimbra = new Zimbra();
     TokenManager tokenManager = new TokenManager();
-    AuthProvider authProvider = new AuthProvider();
+    CloudUtils cloudUtils = new CloudUtils(mZimbra.getProvisioning(), tokenManager);
 
     mSoapServiceManager = new SoapServiceManager();
-    mNcSoapService = new NcSoapService(mZimbra.getProvisioning(), tokenManager);
+    mNcSoapService = new NcSoapService(cloudUtils);
 
     mHttpServiceManager = new HttpServiceManager();
     mNcUserZimbraBackendHttpHandler = new NcUserZimbraBackendHttpHandler(mZimbra.getProvisioning(), tokenManager);
-    mGetFileHttpHdlr = new GetFileHttpHandler(mZimbra.getProvisioning(), tokenManager);
+    mGetFileHttpHdlr = new GetFileHttpHandler(mZimbra.getProvisioning(), cloudUtils);
     mUploadFileHttpHandler = new UploadFileHttpHandler(mZimbra.getProvisioning(), tokenManager);
-    mCreateTempAttachmentFileHttpHdlr = new CreateTempAttachmentFileHttpHandler(mZimbra.getProvisioning(), tokenManager);
+    mCreateTempAttachmentFileHttpHdlr = new CreateTempAttachmentFileHttpHandler(mZimbra.getProvisioning(), cloudUtils);
   }
 
   @Override

@@ -19,8 +19,6 @@ package com.zextras.zimbradrive.soap;
 
 
 import com.zextras.zimbradrive.CloudUtils;
-import com.zextras.zimbradrive.TokenManager;
-import org.openzal.zal.Provisioning;
 import org.openzal.zal.soap.QName;
 import org.openzal.zal.soap.SoapHandler;
 import org.openzal.zal.soap.SoapService;
@@ -32,9 +30,8 @@ public class NcSoapService implements SoapService
 {
   private final Map<QName, SoapHandler> mServiceMap;
 
-  public NcSoapService(final Provisioning provisioning, final TokenManager tokenManager)
+  public NcSoapService(final CloudUtils cloudUtils)
   {
-    CloudUtils cloudUtils = new CloudUtils(provisioning, tokenManager);
     MoveHdlr moveHdlr = new MoveHdlr(cloudUtils);
     mServiceMap = new HashMap<>();
     mServiceMap.put(SearchRequestHdlr.QNAME, new SearchRequestHdlr(cloudUtils));

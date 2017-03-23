@@ -40,7 +40,7 @@ public class NewDirectoryHdlr implements SoapHandler
 
   private final CloudUtils mCloudUtils;
 
-  NewDirectoryHdlr(CloudUtils cloudUtils)
+  public NewDirectoryHdlr(CloudUtils cloudUtils)
   {
     mCloudUtils = cloudUtils;
   }

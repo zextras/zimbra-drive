@@ -21,5 +21,4 @@ namespace OCA\ZimbraDrive\Service;
 use \Exception;
 class BadRequestException extends Exception
 {
-
 }

@@ -21,10 +21,6 @@ import {ZDId} from "./ZDId";
 
 export class ZimbraDriveItem extends ZmItem {
 
-  public getPermissions(): ZimbraDriveItemPermissions {
-    return this.permissions;
-  }
-
   public static F_EMPTY: string = "empty";
   public static F_ICON: string = "icon";
   public static F_NAME: string = "name";
@@ -140,6 +136,10 @@ export class ZimbraDriveItem extends ZmItem {
 
   public containsTargetPath(targetPath: string): boolean {
     return false;
+  }
+
+  public getPermissions(): ZimbraDriveItemPermissions {
+    return this.permissions;
   }
 
 }
