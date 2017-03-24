@@ -21,7 +21,6 @@
         description="${msg.zimletDescription}"
         target="main">
 
-    <include>t4z.js</include>
     <include>com_zextras_drive_open_hdlr.js</include>
     <include>ZimbraDrive.template.js</include>
     <includeCSS>com_zextras_drive_open.css</includeCSS>
