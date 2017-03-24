@@ -64,7 +64,7 @@ export class ZimbraDriveTabView extends DwtComposite {
       additional: {}
     };
     params.searchFor = ZDId.ITEM_ZIMBRADRIVE;
-    params.types = [ZDId.TYPE_FILE];
+    params.types = [ZDId.ITEM_ZIMBRADRIVE];
     params.checkTypes = true;
     let search = new ZmSearch(params);
     search.execute({

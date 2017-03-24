@@ -15,14 +15,14 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {ZmOrganizer} from "./zimbra/zimbraMail/share/model/ZmOrganizer";
 import {ZimbraDriveItemObj} from "./ZimbraDriveItem";
 import {ZmTree} from "./zimbra/zimbraMail/share/model/ZmTree";
 import {appCtxt} from "./zimbra/zimbraMail/appCtxt";
 import {ZimbraDriveApp} from "./ZimbraDriveApp";
 import {ZimbraDriveFolderItem} from "./ZimbraDriveFolderItem";
+import {ZmFolder} from "./zimbra/zimbraMail/share/model/ZmFolder";
 
-export class ZimbraDriveFolder extends ZmOrganizer {
+export class ZimbraDriveFolder extends ZmFolder {
   private folderItem: ZimbraDriveFolderItem;
   public path: string;
   public parentName: string;

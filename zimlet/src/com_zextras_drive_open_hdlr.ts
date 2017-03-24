@@ -41,6 +41,11 @@ import {ZmBatchCommand} from "./zimbra/zimbra/csfe/ZmBatchCommand";
 import {PreviewView} from "./view/PreviewView";
 import {ZmComposeView} from "./zimbra/zimbraMail/mail/view/ZmComposeView";
 import {DwtMenu} from "./zimbra/ajax/dwt/widgets/DwtMenu";
+import {ZmSearchApp} from "./zimbra/zimbraMail/share/ZmSearchApp";
+import {ZmSearchResultsController} from "./zimbra/zimbraMail/share/controller/ZmSearchResultsController";
+import {ZmSearchResultsToolBar} from "./zimbra/zimbraMail/share/view/ZmSearchResultsToolBar";
+import {ZmButtonToolBar} from "./zimbra/zimbraMail/share/view/ZmButtonToolBar";
+import {ZmAppViewMgrCreatedViewDescriptor} from "./zimbra/zimbraMail/core/ZmAppViewMgr";
 
 export class ZimbraDriveZimlet extends ZmZimletBase implements CreateAppZimlet {
 
@@ -102,11 +107,21 @@ export class ZimbraDriveZimlet extends ZmZimletBase implements CreateAppZimlet {
   private onSearchRequested(ev: KeyboardEvent|DwtSelectionEvent): void {
     const searchToolbar: ZmMainSearchToolBar = appCtxt.getSearchController().getSearchToolbar();
     let searchValue: string = searchToolbar.getSearchFieldValue().trim();
-
-    let batchCommand = new ZmBatchCommand();
-    batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadGetAllFolderRequestParams));
-    batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadSearchRequestParams, [searchValue, true]));
-    batchCommand.run();
+    if (searchValue === "") {
+      let searchView: ZmAppViewMgrCreatedViewDescriptor = appCtxt.getAppViewMgr()._getView(
+        appCtxt.getCurrentViewId() &&
+        appCtxt.getCurrentViewId().replace("ZDRIVE_DLV-", "")
+      );
+      if (searchView && searchView.component && searchView.component.searchResultsToolbar) {
+        searchValue = (<ZmSearchResultsToolBar> searchView.component.searchResultsToolbar).getSearchFieldValue();
+      }
+    }
+    if (searchValue !== "") {
+      let batchCommand = new ZmBatchCommand();
+      batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadGetAllFolderRequestParams));
+      batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadSearchRequestParams, [searchValue, true]));
+      batchCommand.run();
+    }
   }
 
   public initializeAttachPopup(attachMenu: DwtMenu, composeView: ZmComposeView): void {

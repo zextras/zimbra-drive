@@ -143,7 +143,6 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
       namespace: ZimbraDriveApp.URN,
       additional: {}
     };
-    params.searchFor = ZDId.ITEM_ZIMBRADRIVE;
     params.types = [ZDId.ZIMBRADRIVE_ITEM];
     params.checkTypes = true;
     if (userInitiated) {
