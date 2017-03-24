@@ -75,6 +75,7 @@ import {ZmComposeController} from "./zimbra/zimbraMail/mail/controller/ZmCompose
 import {AjxDispatcher} from "./zimbra/ajax/boot/AjxDispatcher";
 import {DwtMessageDialog} from "./zimbra/ajax/dwt/widgets/DwtMessageDialog";
 import {ZimbraDriveWaitingDialog} from "./view/ZimbraDriveWaitingDialog";
+import {DwtTreeItem} from "./zimbra/ajax/dwt/widgets/DwtTreeItem";
 
 declare let window: {
   csrfToken: string
@@ -106,6 +107,7 @@ export class ZimbraDriveController extends ZmListController {
   private _itemCountText: {[name: string]: DwtText};
   private _uploadDialog: ZimbraDriveUploadDialog;
   private _waitingDialog: ZimbraDriveWaitingDialog;
+  private query: string;
 
   private static _currentFolderInstance: ZimbraDriveFolder;
   private static _uploadManager: ZimbraDriveUploadManager|AjxPost;
@@ -121,9 +123,9 @@ export class ZimbraDriveController extends ZmListController {
     this._listeners[ZDId.ZD_RENAME] = new AjxListener(this, this._renameFileListener);
     this._listeners[ZmOperation.SEND_FILE_AS_ATT] = new AjxListener(this, this._sendFileListener);
 
-    let dropDownMenu: ZmPopupMenu = (<ZimbraDriveApp>app).getZDNewButtonMenu();
-    dropDownMenu.addSelectionListener(ZDId.ZD_NEW_FILE, this._listeners[ZDId.ZD_NEW_FILE]);
-    dropDownMenu.addSelectionListener(ZDId.ZD_NEW_FOLDER, this._listeners[ZDId.ZD_NEW_FOLDER]);
+    // let dropDownMenu: ZmPopupMenu = (<ZimbraDriveApp>app).getZDNewButtonMenu();
+    // dropDownMenu.addSelectionListener(ZDId.ZD_NEW_FILE, this._listeners[ZDId.ZD_NEW_FILE]);
+    // dropDownMenu.addSelectionListener(ZDId.ZD_NEW_FOLDER, this._listeners[ZDId.ZD_NEW_FOLDER]);
 
     // init on selection
     this.operationsToEnableOnZeroSelection = [
@@ -159,11 +161,11 @@ export class ZimbraDriveController extends ZmListController {
   public show(results: ZmSearchResult): void;
   public show(results: ZmMailMsg, parentController: ZmListController, callback: AjxCallback, markRead: boolean, hidePagination: boolean, forceLoad: boolean, noTruncate: boolean): void;
   public show(results: any, p2?: ZmListController, p3?: AjxCallback, p4?: boolean, p5?: boolean, p6?: boolean, p7?: boolean): void {
-    let query: string = results.getAttribute("query"),
-      itemsResults: ZmList = results.getResults(ZDId.ZIMBRADRIVE_ITEM),
+    this.query = results.getAttribute("query");
+    let itemsResults: ZmList = results.getResults(ZDId.ZIMBRADRIVE_ITEM),
       tree: ZimbraDriveFolderTree = <ZimbraDriveFolderTree> appCtxt.getTree(ZimbraDriveApp.APP_NAME);
     if (!this.isSearchResults) {
-      let currentFolderPath = query.replace("in:\"", "").replace("\"", ""),
+      let currentFolderPath = this.query.replace("in:\"", "").replace("\"", ""),
         treeFolder: ZimbraDriveFolder = <ZimbraDriveFolder> tree.root.getChildByPath("Drive" + currentFolderPath.slice(0, -1));
       this.setCurrentFolder(treeFolder);
       if (treeFolder.children.size() > 0) {
@@ -176,6 +178,7 @@ export class ZimbraDriveController extends ZmListController {
     if (firstItem && firstItem.getName && !firstItem.getName()) {
       itemsResults.getArray().pop();
     }
+    itemsResults.getArray().sort(ZimbraDriveController.sortItems);
     this.setList(itemsResults);
     this._list.setHasMore(false);
 
@@ -204,7 +207,9 @@ export class ZimbraDriveController extends ZmListController {
       // refresh overview tree!
       let treeController: ZimbraDriveTreeController = <ZimbraDriveTreeController> appCtxt.getOverviewController().getTreeController(ZimbraDriveApp.APP_NAME);
       treeController.show({overviewId: "main_ZIMBRA_DRIVE"});
-      treeController._treeView["ZIMBRA_DRIVE"].getTreeItemById(this._currentFolder.id)._setSelected(true);
+      let treeItem: DwtTreeItem = treeController._treeView["ZIMBRA_DRIVE"].getTreeItemById(this._currentFolder.id);
+      treeItem.setExpanded(true, true, true);
+      treeItem._setSelected(true);
     }
     else {
       this.getParentView(this._currentViewId);
@@ -227,8 +232,7 @@ export class ZimbraDriveController extends ZmListController {
       let item = ev.item;
 
       if (item.isFolder()) {
-        ZimbraDriveController.goToFolder((<ZimbraDriveFolderItem>item).getFolder().getPath(true));
-        return;
+        ZimbraDriveController.goToFolder(item.getPath());
       }
     }
   }
@@ -454,7 +458,7 @@ export class ZimbraDriveController extends ZmListController {
       else {
         let itemFolder: ZimbraDriveFolderItem = <ZimbraDriveFolderItem> item;
         let treeController: ZimbraDriveTreeController = <ZimbraDriveTreeController> appCtxt.getOverviewController().getTreeController(ZimbraDriveApp.APP_NAME);
-        treeController.downloadFolderAsZip(itemFolder.getFolder());
+        treeController.downloadFolderAsZip(itemFolder.getPath());
       }
     }
     else {
@@ -465,7 +469,7 @@ export class ZimbraDriveController extends ZmListController {
         }
         else {
           let itemFolder: ZimbraDriveFolderItem = <ZimbraDriveFolderItem> item;
-          urlArray.push(`${ZimbraDriveApp.DOWNLOAD_URL}${itemFolder.getFolder().getPath()}`);
+          urlArray.push(`${ZimbraDriveApp.DOWNLOAD_URL}${itemFolder.getPath()}`);
         }
       }
       ZmZimbraMail.unloadHackCallback();
@@ -492,7 +496,7 @@ export class ZimbraDriveController extends ZmListController {
   }
 
   public _uploadFileListener(ev: DwtSelectionEvent, folder?: ZimbraDriveFolder): void {
-    folder = folder || ZimbraDriveController.getCurrentFolder();
+    folder = folder || ZimbraDriveController.getCurrentFolder() || (<ZimbraDriveFolder> (<ZimbraDriveFolderTree> appCtxt.getTree(ZimbraDriveApp.APP_NAME)).root.getChildByPath("Drive"));
     if (!this._uploadDialog) {
       this._uploadDialog = new ZimbraDriveUploadDialog(appCtxt.getShell());
     }
@@ -529,12 +533,23 @@ export class ZimbraDriveController extends ZmListController {
   }
 
   private _onDeleteDone(items: ZimbraDriveItem[]): void {
-    let treeController: ZimbraDriveTreeController = <ZimbraDriveTreeController> appCtxt.getOverviewController().getTreeController(ZimbraDriveApp.APP_NAME);
+    let treeController: ZimbraDriveTreeController = <ZimbraDriveTreeController> appCtxt.getOverviewController().getTreeController(ZimbraDriveApp.APP_NAME),
+      promiseRefreshSearch: boolean = false;
     for (let item of items) {
       if (item.isFolder()) {
-        treeController._treeView["ZIMBRA_DRIVE"].getTreeItemById(item.id).dispose();
+        if (treeController._treeView["ZIMBRA_DRIVE"] && treeController._treeView["ZIMBRA_DRIVE"].getTreeItemById(item.id)) {
+          treeController._treeView["ZIMBRA_DRIVE"].getTreeItemById(item.id).dispose();
+        }
+        // need refresh because a lot of items can be changed
+        promiseRefreshSearch = this.isSearchResults;
       }
       (<PreviewPaneView> this._parentView[this._currentViewId]).getListView().removeItem(item);
+    }
+    if (promiseRefreshSearch) {
+      let batchCommand = new ZmBatchCommand();
+      batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadGetAllFolderRequestParams));
+      batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadSearchRequestParams, [this.query, true]));
+      batchCommand.run();
     }
     (<PreviewPaneView> this._parentView[this._currentViewId]).getPreviewView().enablePreview(false);
   }
@@ -716,43 +731,29 @@ export class ZimbraDriveController extends ZmListController {
           item.getPath() === ZimbraDriveController.getCurrentFolderPath().substring(0, item.getPath().length);
       }
     }
-    let nextFolderView: string = changeCurrentFolder ? folder.getPath(true) : ZimbraDriveController.getCurrentFolderPath();
-    if (skipGoToFolder) {
-      batchCommand.run();
-    }
-    else {
+    if (!skipGoToFolder) {
+      let nextFolderView: string = changeCurrentFolder ? folder.getPath(true) : ZimbraDriveController.getCurrentFolderPath();
       ZimbraDriveController.goToFolder(nextFolderView, batchCommand);
     }
+    else {
+      batchCommand.run();
+    }
   }
 
-  public static getDroppedItemPath(item: ZimbraDriveItem|ZimbraDriveFolder): string {
-    let itemPath: string = "";
-    if (item.isItem && item.isItem()) {
-      if (item.isFolder()) { // is a ZDFolderItem
-        itemPath = (<ZimbraDriveFolderItem> item).getFolder().getPath(false);
-      }
-      else { // is a file ZDItem
-        itemPath = item.getPath();
-      }
-    }
-    else {// is a ZDFolder
-      itemPath = (<ZimbraDriveFolder> item).getPath(false);
-    }
-    return itemPath;
-  }
-
-  public static _moveCallback(item: ZimbraDriveItem, destinationFolder: ZimbraDriveFolder, moveParams: ZimbraDriveMoveParams): boolean {
+  public static moveCallback(item: ZimbraDriveItem, destinationFolder: ZimbraDriveFolder, moveParams: ZimbraDriveMoveParams): boolean {
     moveParams.countResponses++;
     // show toast only on each move is done
     if (moveParams.countResponses >= moveParams.itemsName.length) {
       ZimbraDriveController.displayMoveDoneMessage(moveParams);
     }
-    item.setPath(destinationFolder.getPath(true) + item.getName());
-    document.getElementById(item.getParentNameElId()).textContent = item.getParentName();
+    if (item.isItem()) {
+      item.setPath(destinationFolder.getPath(true) + item.getName());
+      document.getElementById(item.getParentNameElId()).textContent = item.getParentName();
+    }
     return true;
   }
 
-  public static _moveErrorCallback(item: ZimbraDriveItem|ZimbraDriveFolder, moveParams: ZimbraDriveMoveParams, exception: ZmCsfeException): boolean {
+  public static moveErrorCallback(item: ZimbraDriveItem|ZimbraDriveFolder, moveParams: ZimbraDriveMoveParams, exception: ZmCsfeException): boolean {
     // find index:
     let index: number;
     for (let i = 0; i < moveParams.itemsName.length; i++) {
@@ -849,9 +850,11 @@ export class ZimbraDriveController extends ZmListController {
     return this._waitingDialog;
   }
 
-  private static sortItems(folderA: ZimbraDriveItem, folderB: ZimbraDriveItem): number {
-    if (folderA.getName() > folderB.getName()) { return 1; }
-    if (folderA.getName() < folderB.getName()) { return -1; }
+  private static sortItems(itemA: ZimbraDriveItem, itemB: ZimbraDriveItem): number {
+    if (itemA.isFolder() && !itemB.isFolder()) { return -1; }
+    if (!itemA.isFolder() && itemB.isFolder()) { return 1; }
+    if (itemA.getName() > itemB.getName()) { return 1; }
+    if (itemA.getName() < itemB.getName()) { return -1; }
     return 0; // TODO: Update this function.
   }
 }

@@ -66,7 +66,6 @@ export class ZimbraDriveItem extends ZmItem {
   }
 
   public _loadFromDom(node: ZimbraDriveItemObj): void {
-    this.id = `${node.id}`;
     this.name = node.name;
     this.size = node.size;
     this.modifiedTime = node.modified_time; // in seconds
@@ -117,7 +116,7 @@ export class ZimbraDriveItem extends ZmItem {
   }
 
   public getPath(): string {
-    return this.path;
+    return this.path + (this.isFolder() ? "/" : "");
   }
 
   public setPath(path: string) {

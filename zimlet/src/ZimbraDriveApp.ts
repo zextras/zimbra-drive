@@ -55,6 +55,7 @@ import {ZmSettings} from "./zimbra/zimbraMail/share/model/ZmSettings";
 import {ZmSetting} from "./zimbra/zimbraMail/share/model/ZmSetting";
 import {ZimbraDriveAttachDialog} from "./view/ZimbraDriveAttachDialog";
 import {ZmComposeView} from "./zimbra/zimbraMail/mail/view/ZmComposeView";
+import {ZmPopupMenu} from "./zimbra/zimbraMail/share/view/ZmPopupMenu";
 
 declare let com_zextras_drive_open: {[label: string]: string};
 
@@ -78,6 +79,7 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
   private _defaultNewButtonMenu: DwtMenu;
   private _zimbraDriveNewButtonMenu: ZmActionMenu;
   private _attachDialog: ZimbraDriveAttachDialog;
+  private dropDownMenuItemsLoaded: boolean;
 
   constructor(zimlet: ZimbraDriveZimlet, container: DwtControl) {
     super(ZimbraDriveApp.APP_NAME, zimlet, container);
@@ -166,13 +168,14 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
     batchCommand: ZmBatchCommand,
     moveParams: ZimbraDriveMoveParams
   ): void {
-    let soapDoc = AjxSoapDoc.create("MoveRequest", "urn:zimbraDrive");
-    soapDoc.set(ZDId.F_SOURCE_PATH, ZimbraDriveController.getDroppedItemPath(item));
+    let soapDoc = AjxSoapDoc.create("MoveRequest", "urn:zimbraDrive"),
+      path: string = item.getPath();
+    soapDoc.set(ZDId.F_SOURCE_PATH, (path.charAt(path.length - 1) === "/") ? path.substring(0, path.length - 1) : path);
     soapDoc.set(ZDId.F_TARGET_PATH, destinationFolder.getPath(true));
     batchCommand.addRequestParams(
       soapDoc,
-      new AjxCallback(null, ZimbraDriveController._moveCallback, [item, destinationFolder, moveParams]),
-      new AjxCallback(null, ZimbraDriveController._moveErrorCallback, [item, moveParams])
+      new AjxCallback(null, ZimbraDriveController.moveCallback, [item, destinationFolder, moveParams]),
+      new AjxCallback(null, ZimbraDriveController.moveErrorCallback, [item, moveParams])
     );
   }
 
@@ -309,11 +312,18 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
   // }
 
   public getZimbraDriveController(sessionId: string, searchResultsController?: ZmSearchResultsController): ZimbraDriveController {
-    return <ZimbraDriveController>this.getSessionController({
+    let zimbraDriveController: ZimbraDriveController =  <ZimbraDriveController>this.getSessionController({
       controllerClass: "ZmZimbraDriveController",
       sessionId: sessionId || ZmApp.MAIN_SESSION,
       searchResultsController: searchResultsController
     });
+    if (!this.dropDownMenuItemsLoaded) {
+      let dropDownMenu: ZmPopupMenu = this.getZDNewButtonMenu();
+      dropDownMenu.addSelectionListener(ZDId.ZD_NEW_FILE, zimbraDriveController._listeners[ZDId.ZD_NEW_FILE]);
+      dropDownMenu.addSelectionListener(ZDId.ZD_NEW_FOLDER, zimbraDriveController._listeners[ZDId.ZD_NEW_FOLDER]);
+      this.dropDownMenuItemsLoaded = true;
+    }
+    return zimbraDriveController;
   }
 
   private static onGetAllFolders(result: ZmCsfeResult): boolean {

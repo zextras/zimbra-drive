@@ -30,7 +30,6 @@ import {AjxUtil} from "../zimbra/ajax/util/AjxUtil";
 import {ZmActionMenu} from "../zimbra/zimbraMail/share/view/ZmActionMenu";
 import {ZimbraDriveFolder} from "../ZimbraDriveFolder";
 import {ZmList} from "../zimbra/zimbraMail/share/model/ZmList";
-import {ZimbraDriveFolderItem} from "../ZimbraDriveFolderItem";
 import {ZDId} from "../ZDId";
 import {DwtDragSource} from "../zimbra/ajax/dwt/dnd/DwtDragSource";
 import {AjxListener} from "../zimbra/ajax/events/AjxListener";
@@ -147,7 +146,6 @@ export class DetailListView extends ZimbraDriveBaseView {
       // if (this._revisionView) {
       //   headers.push(new DwtListHeaderItem({field:ZmItem.F_EXPAND, icon: "NodeCollapsed", width:ZmDetailListView.COLWIDTH_ICON, name:ZmMsg.expand}));
       // }
-      // TODO: add
       headers.push(
         new DwtListHeaderItem({ field: ZimbraDriveItem.F_EMPTY, width: DetailListView.COLWIDTH_ICON }),
         new DwtListHeaderItem({ field: ZimbraDriveItem.F_ICON,  icon: "GenericDoc", resizeable: false, name: ZmMsg.icon, width: DetailListView.COLWIDTH_ICON }),
@@ -188,12 +186,8 @@ export class DetailListView extends ZimbraDriveBaseView {
       } else if (field === ZimbraDriveItem.F_FROM) {
         htmlArr[idx++] = zimbraDriveItem.getAuthor();
       } else if (field === ZimbraDriveItem.F_FOLDER) {
-        // let path: string = ZimbraDriveController.getCurrentFolderPath().slice(0, -1);
-        // htmlArr[idx++] = path.substring(path.lastIndexOf("/") + 1);
         zimbraDriveItem.setParentNameElId(this._getFieldId(zimbraDriveItem, ZimbraDriveItem.F_FOLDER));
         htmlArr[idx++] = "<div id='" + zimbraDriveItem.getParentNameElId() + "'>" + zimbraDriveItem.getParentName() + "</div>";
-        // htmlArr[idx++] = zimbraDriveItem.getParentName();
-        // or zimbraDriveFolder.parentName
       } else if (field === ZimbraDriveItem.F_SORTED_BY) {
         htmlArr[idx++] = this._getAbridgedContent(zimbraDriveItem, colIdx);
       }
@@ -215,11 +209,8 @@ export class DetailListView extends ZimbraDriveBaseView {
       } else if (field === ZimbraDriveItem.F_FROM) {
         htmlArr[idx++] = zimbraDriveItem.getAuthor();
       } else if (field === ZimbraDriveItem.F_FOLDER) {
-        // let path: string = ZimbraDriveController.getCurrentFolderPath().slice(0, -1);
-        // htmlArr[idx++] = path.substring(path.lastIndexOf("/") + 1);
         zimbraDriveItem.setParentNameElId(this._getFieldId(zimbraDriveItem, ZimbraDriveItem.F_FOLDER));
         htmlArr[idx++] = "<div id='" + zimbraDriveItem.getParentNameElId() + "'>" + zimbraDriveItem.getParentName() + "</div>";
-        // htmlArr[idx++] = zimbraDriveItem.getParentName();
       } else if (field === ZimbraDriveItem.F_SORTED_BY) {
         htmlArr[idx++] = this._getAbridgedContent(zimbraDriveItem, colIdx);
       }

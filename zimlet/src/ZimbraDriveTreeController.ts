@@ -55,6 +55,7 @@ import {DwtHeaderTreeItem} from "./zimbra/ajax/dwt/widgets/DwtHeaderTreeItem";
 import {AjxImg} from "./zimbra/ajax/core/AjxImg";
 import {ZmStatusView} from "./zimbra/zimbraMail/share/view/ZmStatusView";
 import {ZmCsfeException} from "./zimbra/zimbra/csfe/ZmCsfeException";
+import {ZimbraDriveFolderTree} from "./ZimbraDriveFolderTree";
 
 export class ZimbraDriveTreeController extends ZmTreeController {
 
@@ -138,11 +139,11 @@ export class ZimbraDriveTreeController extends ZmTreeController {
   // Download Folder
   private _downloadListener(ev: DwtSelectionEvent) {
     let folder: ZimbraDriveFolder = <ZimbraDriveFolder> this._getActionMenu(ev, ev.item).getData(Dwt.KEY_OBJECT);
-    this.downloadFolderAsZip(folder);
+    this.downloadFolderAsZip(folder.getPath(true));
   }
 
-  public downloadFolderAsZip(folder: ZimbraDriveFolder) {
-    let url: string = `${ZimbraDriveApp.DOWNLOAD_URL}${folder.getPath()}`;
+  public downloadFolderAsZip(folderPath: string) {
+    let url: string = `${ZimbraDriveApp.DOWNLOAD_URL}${folderPath}`;
     ZmZimbraMail.unloadHackCallback();
     location.href = url;
   }
@@ -196,7 +197,7 @@ export class ZimbraDriveTreeController extends ZmTreeController {
   // Rename folder
   public renameFolderItemListener(ev: DwtUiEvent, item: ZimbraDriveFolderItem): void {
     let backupActionData: ZmFolder = this._actionedOrganizer;
-    this._actionedOrganizer = item.getFolder();
+    this._actionedOrganizer = (<ZimbraDriveFolderTree> appCtxt.getTree(ZimbraDriveApp.APP_NAME)).getFolderById(item.id);
     this._renameListener(ev);
     this._actionedOrganizer = backupActionData;
   }
@@ -226,13 +227,15 @@ export class ZimbraDriveTreeController extends ZmTreeController {
   }
 
   public _renameFolderCallback(renameDialog: ZmRenameFolderDialog, newFolderName: string, folder: ZimbraDriveFolder): boolean {
-    console.log("Callback");
-    this._treeView["ZIMBRA_DRIVE"].getTreeItemById(folder.id).setText(newFolderName);
+    if (this._treeView["ZIMBRA_DRIVE"] && this._treeView["ZIMBRA_DRIVE"].getTreeItemById) {
+      this._treeView["ZIMBRA_DRIVE"].getTreeItemById(folder.id).setText(newFolderName);
+    }
     folder.name = newFolderName;
     folder.resetPath();
     // set folder item name if exists
-    if (folder.getFolderItem().getNameElId()) {
-      document.getElementById(folder.getFolderItem().getNameElId()).textContent = newFolderName;
+    let currentViewFolderItem: ZimbraDriveItem = <ZimbraDriveItem> (<PreviewPaneView> appCtxt.getCurrentView()).getListView().getItemList().getById(folder.id);
+    if (currentViewFolderItem && currentViewFolderItem.getNameElId && currentViewFolderItem.getNameElId()) {
+      document.getElementById(currentViewFolderItem.getNameElId()).textContent = newFolderName;
     }
     this._clearDialog(renameDialog);
     let msg: string = ZimbraDriveApp.getMessage("successfulRename"),
