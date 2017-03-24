@@ -98,7 +98,7 @@ export class ZimbraDriveTabView extends DwtComposite {
     let treeView = overview.getTreeView(ZimbraDriveApp.APP_NAME);
     treeView.addSelectionListener(new AjxListener(this, this._treeListener));
     treeView.getHeaderItem().setVisible(false, true);
-    treeView.setSelection(<DwtTreeItem> treeView.getHeaderItem().getChild(0), true, false, true);
+    treeView.setSelection(<DwtTreeItem> treeView.getHeaderItem().getChildren()[0], true, false, true);
     // Listview
     let app: ZimbraDriveApp = <ZimbraDriveApp> appCtxt.getApp(ZimbraDriveApp.APP_NAME);
     if (!this._controller ) {
