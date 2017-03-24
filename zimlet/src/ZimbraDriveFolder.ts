@@ -141,7 +141,6 @@ export class ZimbraDriveFolder extends ZmFolder {
   }
 
   public createQuery(pathOnly: boolean): string {
-    console.log("Query", this);
     return `in:"${this.getPath(false)}"`;
   }
 
