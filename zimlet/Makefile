@@ -42,10 +42,6 @@ build/LICENSE:
 	mkdir -p build
 	cp ../LICENSE build/LICENSE
 
-build/t4z.js:
-	mkdir -p build
-	./src/zimbra/generateRequiredPackage src/com_zextras_drive_open_hdlr.ts > build/t4z.js
-
 build/ZimbraDrive.template:
 	mkdir -p build
 	cp src/ZimbraDrive.template build/ZimbraDrive.template
@@ -61,13 +57,12 @@ build/com_zextras_drive_open_hdlr.js: node_modules
 	./node_modules/.bin/tslint -c tslint.json --project tsconfig.json
 	./node_modules/.bin/webpack
 
-dist/com_zextras_drive_open.zip: build/com_zextras_drive_open_hdlr.min.js build/t4z.js build/com_zextras_drive_open.css build/com_zextras_drive_open_hdlr.js build/com_zextras_drive_open.xml build/ZimbraDrive.template build/LICENSE
+dist/com_zextras_drive_open.zip: build/com_zextras_drive_open_hdlr.min.js build/com_zextras_drive_open.css build/com_zextras_drive_open_hdlr.js build/com_zextras_drive_open.xml build/ZimbraDrive.template build/LICENSE
 	mkdir -p build
 	mkdir -p dist
 	rm -f dist/com_zextras_drive_open.zip
 	cd build && zip ../dist/com_zextras_drive_open.zip \
 		assets/* \
-		t4z.js \
 		com_zextras_drive_open.css \
 		com_zextras_drive_open_hdlr.js \
 		com_zextras_drive_open_hdlr.js.map \
@@ -78,7 +73,6 @@ dist/com_zextras_drive_open.zip: build/com_zextras_drive_open_hdlr.min.js build/
 		LICENSE
 
 clean:
-	rm -f build/t4z.js
 	rm -f build/com_zextras_drive_open.css
 	rm -f build/com_zextras_drive_open_hdlr.js
 	rm -f build/com_zextras_drive_open_hdlr.js.map
