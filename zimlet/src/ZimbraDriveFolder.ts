@@ -15,14 +15,15 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {ZmOrganizer} from "./zimbra/zimbraMail/share/model/ZmOrganizer";
 import {ZimbraDriveItemObj} from "./ZimbraDriveItem";
 import {ZmTree} from "./zimbra/zimbraMail/share/model/ZmTree";
 import {appCtxt} from "./zimbra/zimbraMail/appCtxt";
 import {ZimbraDriveApp} from "./ZimbraDriveApp";
 import {ZimbraDriveFolderItem} from "./ZimbraDriveFolderItem";
+import {ZmFolder} from "./zimbra/zimbraMail/share/model/ZmFolder";
 
-export class ZimbraDriveFolder extends ZmOrganizer {
+export class ZimbraDriveFolder extends ZmFolder {
+
   private folderItem: ZimbraDriveFolderItem;
   public path: string;
   public parentName: string;
@@ -39,6 +40,9 @@ export class ZimbraDriveFolder extends ZmOrganizer {
     item._loadFromDom(node, args.tree);
     item.name = "Drive";
     root.children.add(item);
+    root.id = `-${ZmFolder.ID_ROOT}_zd`;
+    ZmFolder.HIDE_ID[`-${ZmFolder.ID_ROOT}_zd`] = true;
+    root.nId = `-${ZmFolder.ID_ROOT}`;
     return root;
   }
 
@@ -54,7 +58,14 @@ export class ZimbraDriveFolder extends ZmOrganizer {
     this.path = this.getParent().getPath(true) + node.name + "/";
     this.parentName = (<ZimbraDriveFolder> this.parent).name;
     this.owner = node.author;
-    this.id = `${node.id}_zd`;
+    if (this.path === "/") {
+      this.id = `${ZmFolder.ID_ROOT}_zd`;
+      ZmFolder.HIDE_ID[`${ZmFolder.ID_ROOT}_zd`] = true;
+      this.nId = `${ZmFolder.ID_ROOT}`;
+    } else {
+      this.id = `${node.id}_zd`;
+      this.nId = `${node.id}`;
+    }
     if (node.children) {
       for (let childObj of node.children) {
         let child = new ZimbraDriveFolder();
@@ -127,6 +138,11 @@ export class ZimbraDriveFolder extends ZmOrganizer {
 
   public containsTargetPath(targetPath: string): boolean {
     return this.getPath(true).length <= targetPath.length && this.getPath(true) === targetPath.substring(0, this.getPath(true).length);
+  }
+
+  public createQuery(pathOnly: boolean): string {
+    console.log("Query", this);
+    return `in:"${this.getPath(false)}"`;
   }
 
 }

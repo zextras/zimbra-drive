@@ -15,11 +15,11 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {ZmTree} from "./zimbra/zimbraMail/share/model/ZmTree";
 import {ZDId} from "./ZDId";
 import {ZimbraDriveFolder} from "./ZimbraDriveFolder";
+import {ZmFolderTree} from "./zimbra/zimbraMail/share/model/ZmFolderTree";
 
-export class ZimbraDriveFolderTree extends ZmTree {
+export class ZimbraDriveFolderTree extends ZmFolderTree {
 
   public root: ZimbraDriveFolder;
 

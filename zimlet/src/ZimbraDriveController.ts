@@ -161,7 +161,7 @@ export class ZimbraDriveController extends ZmListController {
   public show(results: ZmSearchResult): void;
   public show(results: ZmMailMsg, parentController: ZmListController, callback: AjxCallback, markRead: boolean, hidePagination: boolean, forceLoad: boolean, noTruncate: boolean): void;
   public show(results: any, p2?: ZmListController, p3?: AjxCallback, p4?: boolean, p5?: boolean, p6?: boolean, p7?: boolean): void {
-    this.query = results.getAttribute("query");
+    this.query = results.search.query;
     let itemsResults: ZmList = results.getResults(ZDId.ZIMBRADRIVE_ITEM),
       tree: ZimbraDriveFolderTree = <ZimbraDriveFolderTree> appCtxt.getTree(ZimbraDriveApp.APP_NAME);
     if (!this.isSearchResults) {
