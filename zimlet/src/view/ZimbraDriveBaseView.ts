@@ -100,7 +100,7 @@ export class ZimbraDriveBaseView extends ZmListView {
     let allowDefault: boolean = true,
       key: number = DwtKeyEvent.getCharCode(ev),
       item: ZimbraDriveItem = this._fileItem;
-    if (DwtKeyEvent.IS_RETURN[key]) {
+    if (key === DwtKeyEvent.KEY_RETURN) {
       this._doRename(item);
       allowDefault = false;
     }

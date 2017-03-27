@@ -164,6 +164,10 @@ export class ZimbraDriveController extends ZmListController {
     this.query = results.getAttribute("query");
     let itemsResults: ZmList = results.getResults(ZDId.ZIMBRADRIVE_ITEM),
       tree: ZimbraDriveFolderTree = <ZimbraDriveFolderTree> appCtxt.getTree(ZimbraDriveApp.APP_NAME);
+    let firstItem: ZimbraDriveItem = itemsResults.getArray().length > 0 && <ZimbraDriveItem> itemsResults.getArray()[0];
+    if (firstItem && firstItem.getName && !firstItem.getName()) {
+      itemsResults.getArray().pop();
+    }
     if (!this.isSearchResults) {
       let currentFolderPath = this.query.replace("in:\"", "").replace("\"", ""),
         treeFolder: ZimbraDriveFolder = <ZimbraDriveFolder> tree.root.getChildByPath("Drive" + currentFolderPath.slice(0, -1));
@@ -173,10 +177,6 @@ export class ZimbraDriveController extends ZmListController {
           itemsResults.add((<ZimbraDriveFolder>treeFolder.children.getArray()[i]).getFolderItem(), 0);
         }
       }
-    }
-    let firstItem: ZimbraDriveItem = itemsResults.getArray().length > 0 && <ZimbraDriveItem> itemsResults.getArray()[0];
-    if (firstItem && firstItem.getName && !firstItem.getName()) {
-      itemsResults.getArray().pop();
     }
     itemsResults.getArray().sort(ZimbraDriveController.sortItems);
     this.setList(itemsResults);
