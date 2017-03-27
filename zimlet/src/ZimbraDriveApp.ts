@@ -61,6 +61,7 @@ import {ZmComposeView} from "./zimbra/zimbraMail/mail/view/ZmComposeView";
 import {ZmPopupMenu} from "./zimbra/zimbraMail/share/view/ZmPopupMenu";
 import {ZmFolderTree} from "./zimbra/zimbraMail/share/model/ZmFolderTree";
 import {ZmOrganizer} from "./zimbra/zimbraMail/share/model/ZmOrganizer";
+import {ZmId} from "./zimbra/zimbraMail/core/ZmId";
 
 declare let com_zextras_drive_open: {[label: string]: string};
 
@@ -151,11 +152,11 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
       namespace: ZimbraDriveApp.URN,
       additional: {}
     };
-    params.searchFor = ZDId.ITEM_ZIMBRADRIVE;
     params.types = [ZDId.ZIMBRADRIVE_ITEM];
     params.checkTypes = true;
     if (userInitiated) {
       params.userInitiated = userInitiated;
+      params.origin = ZmId.SEARCH;
       (<string[]>params.types).push(ZDId.ZIMBRADRIVE_FOLDER);
     }
     let search = new ZmSearch(params);
