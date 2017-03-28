@@ -21,12 +21,10 @@ import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.openzal.zal.Account;
-import org.openzal.zal.AuthToken;
-import org.openzal.zal.Provisioning;
 import org.openzal.zal.http.HttpHandler;
+import org.openzal.zal.log.ZimbraLog;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -35,22 +33,29 @@ import java.util.*;
 
 
 public class GetFileHttpHandler implements HttpHandler {
-  private final static String AUTH_TOKEN = "ZM_AUTH_TOKEN";
   private final static String CONTENT_DISPOSITION_HTTP_HEADER = "Content-Disposition";
   private final static int HTTP_LOWEST_ERROR_STATUS = 300;
 
-  private final Provisioning mProvisioning;
   private CloudUtils mCloudUtils;
+  private BackendUtils mBackendUtils;
 
-  public GetFileHttpHandler(Provisioning provisioning, CloudUtils cloudUtils)
+  public GetFileHttpHandler(CloudUtils cloudUtils, BackendUtils backendUtils)
   {
-    mProvisioning = provisioning;
     mCloudUtils = cloudUtils;
+    mBackendUtils = backendUtils;
   }
 
   @Override
-  public void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException
-  {
+  public void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException {
+    try {
+      doInternalGet(httpServletRequest, httpServletResponse);
+    } catch (Exception ex) {
+      ZimbraLog.extensions.warn("Unable to get file", ex);
+      throw new RuntimeException(ex);
+    }
+  }
+
+  public void doInternalGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException {
     Map<String, String> paramsMap = new HashMap<>();
     String queryString = httpServletRequest.getQueryString();
     if (queryString != null)
@@ -65,71 +70,52 @@ public class GetFileHttpHandler implements HttpHandler {
         }
       }
     }
+    Account account = mBackendUtils.assertAccountFromAuthToken(httpServletRequest);
+    String requestedUrl = httpServletRequest.getPathInfo();
+    int lengthOfBaseUrl = this.getPath().length()+2; //   "/" + this.getPath() + "/"
+    String path = requestedUrl.substring(lengthOfBaseUrl);
 
-    String zmAuthToken = null;
-    Cookie[] cookies = httpServletRequest.getCookies();
-    for (Cookie cookie : cookies) {
-      if (cookie.getName().equals(AUTH_TOKEN)) {
-        zmAuthToken = cookie.getValue();
-        break;
-      }
+    // Don't trigger *cloud if param preview=1
+    if (paramsMap.containsKey("previewcallback")) {
+      httpServletResponse.getWriter().print(this.triggerCallback(paramsMap.get("previewcallback")));
     }
-    if(zmAuthToken != null)
+    else
     {
-      AuthToken authToken = AuthToken.getAuthToken(zmAuthToken);
+      HttpResponse fileRequestResponse = mCloudUtils.queryCloudServerService(account, path);
 
-      if (authToken != null)
+      int responseCode = fileRequestResponse.getStatusLine().getStatusCode();
+      if (responseCode < HTTP_LOWEST_ERROR_STATUS)
       {
-        String accountId = authToken.getAccountId(); // TODO: What if the session is elapsed or the token is not valid?
-        Account account = mProvisioning.getAccountById(accountId);
-
-        String requestedUrl = httpServletRequest.getPathInfo();
-        int lengthOfBaseUrl = this.getPath().length()+2; //   "/" + this.getPath() + "/"
-        String path = requestedUrl.substring(lengthOfBaseUrl);
-
-        // Don't trigger *cloud if param preview=1
-        if (paramsMap.containsKey("previewcallback")) {
-          httpServletResponse.getWriter().print(this.triggerCallback(paramsMap.get("previewcallback")));
-        }
-        else
+        Header[] headers = fileRequestResponse.getAllHeaders();
+        for (Header header : headers)
         {
-          HttpResponse fileRequestResponse = mCloudUtils.queryCloudServerService(account, path);
-
-          int responseCode = fileRequestResponse.getStatusLine().getStatusCode();
-          if (responseCode < HTTP_LOWEST_ERROR_STATUS)
+          String headerName = header.getName();
+          switch (header.getName())
           {
-            Header[] headers = fileRequestResponse.getAllHeaders();
-            for (Header header : headers)
-            {
-              String headerName = header.getName();
-              switch (header.getName())
+            case CONTENT_DISPOSITION_HTTP_HEADER:
+              if (paramsMap.containsKey("viewonly") && (paramsMap.get("viewonly").equals("1")))
               {
-                case CONTENT_DISPOSITION_HTTP_HEADER:
-                  if (paramsMap.containsKey("viewonly") && (paramsMap.get("viewonly").equals("1")))
-                  {
-                    httpServletResponse.setHeader(headerName, header.getValue().replace("attachment", "inline"));
-                  } else
-                  {
-                    httpServletResponse.setHeader(headerName, header.getValue());
-                  }
-                  break;
-                case HttpHeaders.CONTENT_LENGTH:
-                case HttpHeaders.CONTENT_TYPE:
-                  httpServletResponse.setHeader(headerName, header.getValue());
-                  break;
+                httpServletResponse.setHeader(headerName, header.getValue().replace("attachment", "inline"));
+              } else
+              {
+                httpServletResponse.setHeader(headerName, header.getValue());
               }
-            }
-            try (OutputStream responseOutputStream = httpServletResponse.getOutputStream()) {
-              fileRequestResponse.getEntity().writeTo(responseOutputStream);
-            }
-          } 
-          else {
-            httpServletResponse.setStatus(responseCode);
-            if (paramsMap.containsKey("errorcallback"))
-            {
-              httpServletResponse.getWriter().print(this.triggerCallback(paramsMap.get("errorcallback")));
-            }
+              break;
+            case HttpHeaders.CONTENT_LENGTH:
+            case HttpHeaders.CONTENT_TYPE:
+              httpServletResponse.setHeader(headerName, header.getValue());
+              break;
           }
+        }
+        try (OutputStream responseOutputStream = httpServletResponse.getOutputStream()) {
+          fileRequestResponse.getEntity().writeTo(responseOutputStream);
+        }
+      }
+      else {
+        httpServletResponse.setStatus(responseCode);
+        if (paramsMap.containsKey("errorcallback"))
+        {
+          httpServletResponse.getWriter().print(this.triggerCallback(paramsMap.get("errorcallback")));
         }
       }
     }

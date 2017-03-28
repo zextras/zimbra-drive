@@ -27,13 +27,10 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.openzal.zal.Account;
-import org.openzal.zal.AuthToken;
-import org.openzal.zal.Provisioning;
 import org.openzal.zal.http.HttpHandler;
 import org.openzal.zal.log.ZimbraLog;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
@@ -47,21 +44,20 @@ import java.security.cert.X509Certificate;
 
 
 public class CreateTempAttachmentFileHttpHandler implements HttpHandler {
-  private final static String AUTH_TOKEN = "ZM_AUTH_TOKEN";
   private final static String CONTENT_DISPOSITION_HTTP_HEADER = "Content-Disposition";
   private final static int HTTP_LOWEST_ERROR_STATUS = 300;
 
-  private final Provisioning mProvisioning;
   private final CloudUtils mCloudUtils;
+  private final BackendUtils mBackendUtils;
 
-  public CreateTempAttachmentFileHttpHandler(Provisioning provisioning, CloudUtils cloudServerUtils)
+  public CreateTempAttachmentFileHttpHandler(CloudUtils cloudServerUtils, BackendUtils backendUtils)
   {
-    mProvisioning = provisioning;
     mCloudUtils = cloudServerUtils;
+    mBackendUtils = backendUtils;
   }
 
   @Override
-  public void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException
+  public void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException
   {
     try
     {
@@ -73,81 +69,56 @@ public class CreateTempAttachmentFileHttpHandler implements HttpHandler {
       throw new RuntimeException(ex);
     }
   }
-  
-  public void doInternalPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException, KeyStoreException, NoSuchAlgorithmException, KeyManagementException
+
+  public void doInternalPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException, KeyStoreException, NoSuchAlgorithmException, KeyManagementException
   {
-    String zmAuthToken = null;
-    Cookie[] cookies = httpServletRequest.getCookies();
-    for (Cookie cookie : cookies) {
-      if (cookie.getName().equals(AUTH_TOKEN)) {
-        zmAuthToken = cookie.getValue();
-        break;
-      }
-    }
-    if(zmAuthToken != null)
-    {
-      AuthToken authToken = AuthToken.getAuthToken(zmAuthToken);
+    Account account = mBackendUtils.assertAccountFromAuthToken(httpServletRequest);
+    String path;
+    BufferedReader reader = httpServletRequest.getReader();
+    while ((path = reader.readLine()) != null) {
+      HttpResponse fileRequestResponse = mCloudUtils.queryCloudServerService(account, path);
 
-      if (authToken != null)
-      {
-        String accountId = authToken.getAccountId(); //todo what if the session is elapsed or the token is not valid?
-        Account account = mProvisioning.getAccountById(accountId);
-
-        String path;
-        BufferedReader reader = httpServletRequest.getReader();
-        while ((path = reader.readLine()) != null) {
-          HttpResponse fileRequestResponse = mCloudUtils.queryCloudServerService(account, path);
-
-          int responseCode = fileRequestResponse.getStatusLine().getStatusCode();
-          if (responseCode < HTTP_LOWEST_ERROR_STATUS)
-          {
-            HttpPost post = new HttpPost(
-              mProvisioning.getLocalServer().getServiceURL("/service/upload?fmt=extended,raw")
-            );
-            Header[] headers = fileRequestResponse.getAllHeaders();
-            for (Header header : headers)
-            {
-              String headerName = header.getName();
-              switch (headerName)
-              {
-                case CONTENT_DISPOSITION_HTTP_HEADER:
-                  post.setHeader(CONTENT_DISPOSITION_HTTP_HEADER, java.net.URLDecoder.decode(header.getValue(), "UTF-8"));
-                  break;
-                case HttpHeaders.CONTENT_TYPE:
-                case HttpHeaders.CONTENT_LENGTH:
-                  break;
-              }
-            }
-            post.setHeader("Cache-Control", "no-cache");
-            post.setHeader("Cookie", httpServletRequest.getHeader("Cookie"));
-            post.setHeader("X-Zimbra-Csrf-Token", httpServletRequest.getHeader("X-Zimbra-Csrf-Token"));
-            post.setEntity(fileRequestResponse.getEntity());
-
-            SSLContextBuilder builder = new SSLContextBuilder();
-            builder.loadTrustMaterial(null, new TrustStrategy(){
-              @Override
-              public boolean isTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException
-              {
-                return true;
-              }
-            });
-            SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(
-              builder.build());
-            CloseableHttpClient client = HttpClients.custom().setSSLSocketFactory(
-              sslSocketFactory).build();
-            
-            HttpResponse response = client.execute(post);
-
-            response.getEntity().writeTo(httpServletResponse.getOutputStream());
-          } else
-          {
-            httpServletResponse.setStatus(responseCode);
-            PrintWriter respWriter = httpServletResponse.getWriter();
-            respWriter.println("Error");
-            respWriter.close();
-            break;
+      int responseCode = fileRequestResponse.getStatusLine().getStatusCode();
+      if (responseCode < HTTP_LOWEST_ERROR_STATUS) {
+        HttpPost post = new HttpPost(
+            mBackendUtils.getServerServiceUrl("/service/upload?fmt=extended,raw")
+        );
+        Header[] headers = fileRequestResponse.getAllHeaders();
+        for (Header header : headers) {
+          String headerName = header.getName();
+          switch (headerName) {
+            case CONTENT_DISPOSITION_HTTP_HEADER:
+              post.setHeader(CONTENT_DISPOSITION_HTTP_HEADER, java.net.URLDecoder.decode(header.getValue(), "UTF-8"));
+              break;
+            case HttpHeaders.CONTENT_TYPE:
+            case HttpHeaders.CONTENT_LENGTH:
+              break;
           }
         }
+        post.setHeader("Cache-Control", "no-cache");
+        post.setHeader("Cookie", httpServletRequest.getHeader("Cookie"));
+        post.setHeader("X-Zimbra-Csrf-Token", httpServletRequest.getHeader("X-Zimbra-Csrf-Token"));
+        post.setEntity(fileRequestResponse.getEntity());
+
+        SSLContextBuilder builder = new SSLContextBuilder();
+        builder.loadTrustMaterial(null, new TrustStrategy() {
+          @Override
+          public boolean isTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+            return true;
+          }
+        });
+        SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(builder.build());
+        CloseableHttpClient client = HttpClients.custom().setSSLSocketFactory(sslSocketFactory).build();
+
+        HttpResponse response = client.execute(post);
+
+        response.getEntity().writeTo(httpServletResponse.getOutputStream());
+      } else {
+        httpServletResponse.setStatus(responseCode);
+        PrintWriter respWriter = httpServletResponse.getWriter();
+        respWriter.println("Error");
+        respWriter.close();
+        break;
       }
     }
   }
