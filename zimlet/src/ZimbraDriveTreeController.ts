@@ -319,6 +319,13 @@ export class ZimbraDriveTreeController extends ZmTreeController {
     let folder: ZimbraDriveFolder = <ZimbraDriveFolder> this._getActionMenu(ev, ev.item).getData(Dwt.KEY_OBJECT),
       itemActioned: DwtTreeItem|ZimbraDriveFolderItem = this._getActionMenu(ev, ev.item).getData(ZDId.ZIMBRADRIVE_ITEM_ACTIONED);
     if ((<DwtTreeItem>itemActioned).isDwtTreeItem) {
+      if (folder.getPath() === "") {
+        appCtxt.setStatusMsg({
+          msg: ZimbraDriveApp.getMessage("errorDeletingRootFolder"),
+          level: ZmStatusView.LEVEL_WARNING
+        });
+        return;
+      }
       items = [folder];
     }
     else {

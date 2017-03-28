@@ -292,7 +292,9 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
     if (loadCallback) {
       loadCallback.run(controller);
     }
-    // (<ZmSearchApp> appCtxt.getApp(ZmApp.SEARCH)).getSearchResultsController().show(results, controller);
+    // Workaround to not show any conditionals
+    searchResultsController._filterPanel._advancedPanel.setAttribute("style", "display:none");
+    searchResultsController._filterPanel._conditionalsContainer.parentElement.setAttribute("style", "display:none");
 
   }
 
@@ -375,13 +377,19 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
   }
 
   public getNewButtonProps(): SetNewButtonPropsParams {
-    return {
+    let params: SetNewButtonPropsParams = {
       text: ZmMsg.uploadDocs,
       tooltip: ZmMsg.uploadDocs,
       defaultId: ZDId.ZD_NEW_FILE
     };
+    let currentViewId: string = appCtxt.getAppViewMgr().getAppView("ZIMBRA_DRIVE");
+    if (currentViewId && currentViewId !== appCtxt.getCurrentViewId()) {
+      params.disabled = true;
+    }
+    return params;
   }
 
+  // Here change menu of new Button
   public activate(active: boolean, viewId: string): void {
     super.activate(active, viewId);
     let toolbarButton = (<ZmZimbraMail> appCtxt.getAppController()).getNewButton();
