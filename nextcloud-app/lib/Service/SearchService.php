@@ -196,6 +196,12 @@ class SearchService
      */
     private function isInTheDirectoryTree($path, $treeDirectoryRoot)
     {
+        $firstPathChar = substr($treeDirectoryRoot, 0, 1);
+        if($firstPathChar !== "/")
+        {
+            $treeDirectoryRoot = "/" . $treeDirectoryRoot;
+        }
+
         $lastPathChar = substr($treeDirectoryRoot, -1);
         if($lastPathChar !== "/")
         {
