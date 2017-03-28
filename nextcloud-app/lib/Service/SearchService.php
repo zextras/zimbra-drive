@@ -47,7 +47,6 @@ class SearchService
     }
 
 
-    //Assuming the user is already logged in
     /**
      * @param string $query
      * @return array
@@ -59,16 +58,10 @@ class SearchService
             return $this->getContentFolder($query);
         }
 
-        $this->logger->info('SearchRequestDebug');
-        $this->logger->info('query '. $query);
-
         /** @var $tokens array */
         $tokens = $this->getTokens($query);
-        $this->logger->info('token '. print_r($tokens, true));
-
 
         $stringWanted = $this->getStringToFind($tokens);
-        $this->logger->info('plain text ' . print_r($stringWanted, true));
 
         $appProvideSearch = array('files');
 
@@ -76,21 +69,15 @@ class SearchService
         $resultsPerPage = 0; //0 -> all
 
         $allResults = $this->searchService->searchPaged($stringWanted, $appProvideSearch, $pageNumber, $resultsPerPage);
-        $this->logger->info('tutti i risultati (paged)' . print_r($allResults, true));
 
         $rootDirectoryOfTheSearch = $this->getRootDirectoryOfTheSearch($tokens);
-        $this->logger->info('root directory ' . print_r($rootDirectoryOfTheSearch, true));
 
 
         $resultsFilterByFolder = $this->filterByFolder($allResults, $rootDirectoryOfTheSearch);
-        $this->logger->info('filtered result' . print_r($resultsFilterByFolder, true));
 
         $results = $this->fileToArray($resultsFilterByFolder);
 
-
         return $results;
-
-
     }
 
 
@@ -120,8 +107,8 @@ class SearchService
      */
     private function getTokens($query)
     {
-        $delimiter = ' ';
-        return explode($delimiter, $query);
+        preg_match_all('/(([^ :]+:"[^"]*")|([^ :]+))( |$)/', $query, $matches, PREG_PATTERN_ORDER);
+        return $matches[1];
     }
 
     /**
@@ -132,8 +119,7 @@ class SearchService
     {
         foreach ($tokens as $token)
         {
-//            $find = preg_match('/^in:"([\w \/]*)"$/', $token, $matches); //todo
-            $find = preg_match('/^in:([\w \/]*)$/', $token, $matches);
+            $find = preg_match('~^in:"([^"]*)/*"$~', $token, $matches);
             if ($find == true)
             {
                 $path = $matches[1];
@@ -145,7 +131,7 @@ class SearchService
 
     /**
      * @param $tokens array
-     * @return array
+     * @return string
      */
     private function getStringToFind($tokens)
     {
@@ -172,7 +158,7 @@ class SearchService
         foreach($allResults as $resultToFilter)
         {
             $resultPath = $resultToFilter->path;
-            if($this->isInTheDirectoryTree($resultPath, $rootDirectoryOfTheSearch))//substr_compare($resultPath,$rootDirectoryOfTheSearch, 0) == 0)
+            if($this->isInTheDirectoryTree($resultPath, $rootDirectoryOfTheSearch))
             {
                 $filteredResults[] = $resultToFilter;
             }
@@ -195,8 +181,7 @@ class SearchService
      */
     private function isValidSearchOperator($tokens)
     {
-//        $find = preg_match('/^\w*:".*"$/', $tokens, $matches); //todo
-        $find = preg_match('/^\w*:.*$/', $tokens, $matches);
+        $find = preg_match('/^([^ :]+:"[^"]*")$/', $tokens, $matches);
         if ($find == false)
         {
             return false;
@@ -211,7 +196,13 @@ class SearchService
      */
     private function isInTheDirectoryTree($path, $treeDirectoryRoot)
     {
-        if(strlen($path) < strlen($treeDirectoryRoot))
+        $lastPathChar = substr($treeDirectoryRoot, -1);
+        if($lastPathChar !== "/")
+        {
+            $treeDirectoryRoot = $treeDirectoryRoot . "/";
+        }
+
+        if(strlen($path) <= strlen($treeDirectoryRoot))
         {
             return false;
         }
