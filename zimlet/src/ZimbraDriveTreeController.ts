@@ -51,13 +51,16 @@ import {DwtTree} from "./zimbra/ajax/dwt/widgets/DwtTree";
 import {ZimbraDriveChooseFolderDialog} from "./view/ZimbraDriveChooseFolderDialog";
 import {ZmFolderSearchFilterGetMoveParamsValue} from "./zimbra/zimbraMail/share/view/ZmSearchResultsFilterPanel";
 import {ZmOverview} from "./zimbra/zimbraMail/share/view/ZmOverview";
-import {DwtHeaderTreeItem} from "./zimbra/ajax/dwt/widgets/DwtHeaderTreeItem";
-import {AjxImg} from "./zimbra/ajax/core/AjxImg";
 import {ZmStatusView} from "./zimbra/zimbraMail/share/view/ZmStatusView";
 import {ZmCsfeException} from "./zimbra/zimbra/csfe/ZmCsfeException";
 import {ZimbraDriveFolderTree} from "./ZimbraDriveFolderTree";
+import {ZmFolderTreeController} from "./zimbra/zimbraMail/share/controller/ZmFolderTreeController";
+import {ZmTree} from "./zimbra/zimbraMail/share/model/ZmTree";
+import {ZmZimbraAccount} from "./zimbra/zimbraMail/share/model/ZmZimbraAccount";
+import {ZmOrganizer} from "./zimbra/zimbraMail/share/model/ZmOrganizer";
+import {DwtHeaderTreeItem} from "./zimbra/ajax/dwt/widgets/DwtHeaderTreeItem";
 
-export class ZimbraDriveTreeController extends ZmTreeController {
+export class ZimbraDriveTreeController extends ZmFolderTreeController {
 
   private _dnd: ZmDragAndDrop;
   private _pendingActionData: ZimbraDriveFolder;
@@ -67,7 +70,7 @@ export class ZimbraDriveTreeController extends ZmTreeController {
   private _moveToDialog: ZimbraDriveChooseFolderDialog;
 
   constructor(type: string) {
-    super(type || ZimbraDriveApp.APP_NAME);
+    super(type || ZDId.ZIMBRADRIVE_ITEM);
     this._listeners[ZDId.ZD_NEW_FILE]   = new AjxListener(this, this._uploadListener);
     this._listeners[ZDId.ZD_SAVE_FOLDER]   = new AjxListener(this, this._downloadListener);
     this._listeners[ZDId.ZD_NEW_FOLDER] = new AjxListener(this, this._newListener);
@@ -82,20 +85,15 @@ export class ZimbraDriveTreeController extends ZmTreeController {
     params.include = {};
     params.include[ZmFolder.ID_TRASH] = false;
     params.showUnread = false;
-    // params.forceCreate = true;
-    this._dataTree[appCtxt.getActiveAccount().id] = undefined;
+
     let treeView: ZmTreeView = super.show(params),
       headerItem: DwtHeaderTreeItem = treeView.getHeaderItem();
-    headerItem.getChildren()[0].setExpanded(true);
-    headerItem.enableSelection(false);
-    headerItem.enableAction(false);
-    AjxImg.setImage(headerItem._nodeCell);
-    treeView._controller = this;
-    // Finder to BriefcaseTreeView drag and drop
-    this._initDragAndDrop(treeView);
 
-    this._treeView[ZimbraDriveApp.TREE_ID] = treeView;
-    return this._treeView[ZimbraDriveApp.TREE_ID];
+    treeView._controller = this;
+    this._initDragAndDrop(treeView);
+    headerItem.getChildren()[0].setExpanded(true);
+
+    return treeView;
   }
 
   public _initDragAndDrop(treeView: ZmTreeView) {

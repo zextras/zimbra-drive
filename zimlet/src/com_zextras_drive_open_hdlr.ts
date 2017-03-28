@@ -162,16 +162,17 @@ interface ZimletWindow extends Window {
   ZmZimbraDrivePreviewView: Function;
 }
 
-ZmOverviewController.CONTROLLER[ZimbraDriveApp.APP_NAME] = "ZmZimbraDriveTreeController";
+ZmOverviewController.CONTROLLER[ZimbraDriveApp.TREE_ID] = "ZmZimbraDriveTreeController";
 ZmApp.SETTING[ZimbraDriveApp.APP_NAME] = ZimbraDriveApp.ZIMBRADRIVE_ENABLED;
 ZmApp.OVERVIEW_TREES[ZimbraDriveApp.APP_NAME] = [ZimbraDriveApp.TREE_ID];
 ZmApp.APPS.push(ZimbraDriveApp.APP_NAME);
 ZmApp.ORGANIZER[ZimbraDriveApp.APP_NAME] = ZimbraDriveApp.APP_NAME;
 ZmOrganizer.DISPLAY_ORDER[ZimbraDriveApp.APP_NAME] = 100;
-ZmOrganizer.TREE_TYPE[ZimbraDriveApp.APP_NAME] = ZimbraDriveApp.APP_NAME;
-ZmOrganizer.LABEL[ZimbraDriveApp.APP_NAME] = "zimbraDriveFolders";
+ZmOrganizer.TREE_TYPE[ZimbraDriveApp.TREE_ID] = ZmOrganizer.FOLDER;
+ZmOrganizer.LABEL[ZDId.ZIMBRADRIVE_ITEM] = "zimbraDriveFolders";
 ZmOrganizer.APP[ZimbraDriveApp.APP_NAME] = ZimbraDriveApp.APP_NAME;
 ZmTreeView.COMPARE_FUNC[ZimbraDriveApp.APP_NAME] = "ZmZimbraDriveFolder.sortFcn";
+ZmApp.HIDE_ZIMLETS[ZimbraDriveApp.APP_NAME] = true;
 
 (<ZimletWindow>window).ZmZimbraDriveTreeController = ZimbraDriveTreeController;
 (<ZimletWindow>window).ZmZimbraDriveController = ZimbraDriveController;

@@ -68,7 +68,7 @@ declare let com_zextras_drive_open: {[label: string]: string};
 export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, RegisterItemsApp, ShowSearchResultsApp, GetInitialSearchTypeApp {
 
   public static APP_NAME: string = "ZIMBRA_DRIVE";
-  public static TREE_ID: string = "ZIMBRA_DRIVE";
+  public static TREE_ID: string =  ZDId.ZIMBRADRIVE_ITEM;
   public static URN: string = "urn:zimbraDrive";
   public static ZIMBRADRIVE_ENABLED: string = "ZIMBRA_DRIVE_ENABLED";
 
@@ -207,7 +207,6 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
         dropTargets: [], // ZmOrganizer.TAG, ZmOrganizer.BRIEFCASE
         searchType: "file",
         resultsList: AjxCallback.simpleClosure(function(search: ZmSearch) {
-            // AjxDispatcher.require("BriefcaseCore");
             return new ZmList(ZDId.ZIMBRADRIVE_ITEM, search);
           }, this)
       }
@@ -337,32 +336,24 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
   }
 
   private static onGetAllFolders(result: ZmCsfeResult): boolean {
-    const root: ZimbraDriveFolderObj = (<GetAllFoldersResponse>result.getResponse()[ZimbraDriveApp.GET_ALL_FOLDERS_RESP]).root[0];
-    root.name = "";
-    let tree: ZmFolderTree = <ZmFolderTree>appCtxt.getTree(ZimbraDriveApp.APP_NAME);
-    if (!tree) {
-      tree = new ZimbraDriveFolderTree();
-      appCtxt.setTree(ZimbraDriveApp.APP_NAME, tree);
-    }
-    tree.root = ZimbraDriveFolder.createFromDom(root, {tree: tree});
-    ZimbraDriveApp.mixAllFolders(
-      appCtxt.getFolderTree(),
-      tree
-    );
-    // tree.getFolderById("id");
+    const rootObj: ZimbraDriveFolderObj = (<GetAllFoldersResponse>result.getResponse()[ZimbraDriveApp.GET_ALL_FOLDERS_RESP]).root[0];
+    rootObj.name = "";
+    let folderTree: ZmFolderTree = <ZmFolderTree>appCtxt.getTree(ZmOrganizer.FOLDER);
+    let rootToAdd = ZimbraDriveFolder.createFromDom(rootObj, {tree: folderTree});
+    folderTree.root.children.add(rootToAdd);
     // TODO save and apply axpand/collapsed folders
     appCtxt.getOverviewController().getTreeView("main_" + ZimbraDriveApp.APP_NAME, ZimbraDriveApp.APP_NAME);
     return true; // handled
   }
 
-  private static mixAllFolders(mainFT: ZmFolderTree, zdFT: ZmFolderTree): void {
-    let children: ZmOrganizer[] = mainFT.root.children.getArray();
-    for (let child of children) {
-      if (child.type === ZimbraDriveApp.APP_NAME) {
-        mainFT.root.children.remove(child);
+  private static addAsChildren(parent: ZmFolderTree, child: ZmFolderTree): void {
+    let children: ZmOrganizer[] = parent.root.children.getArray();
+    for (let tmpChild of children) {
+      if (tmpChild.type === ZimbraDriveApp.APP_NAME) {
+        parent.root.children.remove(tmpChild);
       }
     }
-    mainFT.root.children.add(zdFT.root);
+    parent.root.children.add(child.root);
   }
 
   private static onGetAllFoldersError(err: ZmCsfeException, req: ZmRequestMgrSendRequestParams): boolean {

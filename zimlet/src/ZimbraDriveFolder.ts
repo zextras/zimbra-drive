@@ -18,9 +18,9 @@
 import {ZimbraDriveItemObj} from "./ZimbraDriveItem";
 import {ZmTree} from "./zimbra/zimbraMail/share/model/ZmTree";
 import {appCtxt} from "./zimbra/zimbraMail/appCtxt";
-import {ZimbraDriveApp} from "./ZimbraDriveApp";
 import {ZimbraDriveFolderItem} from "./ZimbraDriveFolderItem";
 import {ZmFolder} from "./zimbra/zimbraMail/share/model/ZmFolder";
+import {ZDId} from "./ZDId";
 
 export class ZimbraDriveFolder extends ZmFolder {
 
@@ -29,21 +29,13 @@ export class ZimbraDriveFolder extends ZmFolder {
   public parentName: string;
 
   constructor() {
-    super({type: ZimbraDriveApp.TREE_ID});
+    super({ type: ZDId.ZIMBRADRIVE_ITEM });
   }
 
   public static createFromDom(node: ZimbraDriveFolderObj, args: {tree: ZmTree}): ZimbraDriveFolder {
-    let root = new ZimbraDriveFolder();
-    root.path = "";
     let item = new ZimbraDriveFolder();
-    item.parent = root;
     item._loadFromDom(node, args.tree);
-    item.name = "Drive";
-    root.children.add(item);
-    root.id = `-${ZmFolder.ID_ROOT}_zd`;
-    ZmFolder.HIDE_ID[`-${ZmFolder.ID_ROOT}_zd`] = true;
-    root.nId = `-${ZmFolder.ID_ROOT}`;
-    return root;
+    return item;
   }
 
   public static sortFcn(folderA: ZimbraDriveFolder, folderB: ZimbraDriveFolder): number {
@@ -55,16 +47,14 @@ export class ZimbraDriveFolder extends ZmFolder {
   public _loadFromDom(node: ZimbraDriveFolderObj, tree: ZmTree): void {
     this.tree = tree;
     this.name = node.name;
-    this.path = this.getParent().getPath(true) + node.name + "/";
-    this.parentName = (<ZimbraDriveFolder> this.parent).name;
+    this.path = `${(this.parent) ? (<ZimbraDriveFolder>this.parent).getPath(true) : "" }${node.name}/`;
+    this.parentName = (this.parent) ? (<ZimbraDriveFolder> this.parent).name : undefined;
     this.owner = node.author;
     if (this.path === "/") {
       this.id = `${ZmFolder.ID_ROOT}_zd`;
       ZmFolder.HIDE_ID[`${ZmFolder.ID_ROOT}_zd`] = true;
-      this.nId = `${ZmFolder.ID_ROOT}`;
     } else {
       this.id = `${node.id}_zd`;
-      this.nId = `${node.id}`;
     }
     if (node.children) {
       for (let childObj of node.children) {

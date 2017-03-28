@@ -76,6 +76,9 @@ import {AjxDispatcher} from "./zimbra/ajax/boot/AjxDispatcher";
 import {DwtMessageDialog} from "./zimbra/ajax/dwt/widgets/DwtMessageDialog";
 import {ZimbraDriveWaitingDialog} from "./view/ZimbraDriveWaitingDialog";
 import {DwtTreeItem} from "./zimbra/ajax/dwt/widgets/DwtTreeItem";
+import {ZmOrganizer} from "./zimbra/zimbraMail/share/model/ZmOrganizer";
+import {ZmFolderTree} from "./zimbra/zimbraMail/share/model/ZmFolderTree";
+import {ZmFolder} from "./zimbra/zimbraMail/share/model/ZmFolder";
 
 declare let window: {
   csrfToken: string
@@ -161,34 +164,20 @@ export class ZimbraDriveController extends ZmListController {
   public show(results: ZmSearchResult): void;
   public show(results: ZmMailMsg, parentController: ZmListController, callback: AjxCallback, markRead: boolean, hidePagination: boolean, forceLoad: boolean, noTruncate: boolean): void;
   public show(results: any, p2?: ZmListController, p3?: AjxCallback, p4?: boolean, p5?: boolean, p6?: boolean, p7?: boolean): void {
-    this.query = results.search.query;
-    let itemsResults: ZmList = results.getResults(ZDId.ZIMBRADRIVE_ITEM),
-      tree: ZimbraDriveFolderTree = <ZimbraDriveFolderTree> appCtxt.getTree(ZimbraDriveApp.APP_NAME);
-    if (!this.isSearchResults) {
-      let currentFolderPath = this.query.replace("in:\"", "").replace("\"", ""),
-        treeFolder: ZimbraDriveFolder = <ZimbraDriveFolder> tree.root.getChildByPath("Drive" + currentFolderPath.slice(0, -1));
-      this.setCurrentFolder(treeFolder);
-      if (treeFolder.children.size() > 0) {
-        for (let i = treeFolder.children.size() - 1; i >= 0; i--) {
-          itemsResults.add((<ZimbraDriveFolder>treeFolder.children.getArray()[i]).getFolderItem(), 0);
-        }
-      }
-    }
-    let firstItem: ZimbraDriveItem = itemsResults.getArray().length > 0 && <ZimbraDriveItem> itemsResults.getArray()[0];
-    if (firstItem && firstItem.getName && !firstItem.getName()) {
-      itemsResults.getArray().pop();
-    }
-    itemsResults.getArray().sort(ZimbraDriveController.sortItems);
-    this.setList(itemsResults);
+    // this._folderId = results && results.search && results.search.folderId;
+    this.setList(results.getResults(ZDId.ZIMBRADRIVE_ITEM));
     this._list.setHasMore(false);
+    // this._list.setHasMore(results.getAttribute("more"));
 
     super.show(results);
+    // super.show(results, this._currentViewId);
+
     this._setup(this._currentViewId);
 
     // start fresh with search results
-    let lv: ZmListView = this._listView[this._currentViewId];
-    lv.offset = 0;
-    lv._folderId = this._folderId;
+    let lv = this._listView[this._currentViewId];
+    // lv.offset = 0;
+    // lv._folderId = this._folderId;
 
     let elements = this.getViewElements(this._currentViewId, this._parentView[this._currentViewId]);
 
@@ -196,23 +185,12 @@ export class ZimbraDriveController extends ZmListController {
       view: this._currentViewId,
       viewType: this._currentViewType,
       noPush: this.isSearchResults,
-      elements: elements,
+      elements:	elements,
       isAppView: true
     });
-    // if (this.isSearchResults) {
-    //   // if we are switching views, make sure app view mgr is up to date on search view's components
-    //   appCtxt.getAppViewMgr().setViewComponents(this.searchResultsController.getCurrentViewId(), elements, true);
-    // }
-    if (!this.isSearchResults) {
-      // refresh overview tree!
-      let treeController: ZimbraDriveTreeController = <ZimbraDriveTreeController> appCtxt.getOverviewController().getTreeController(ZimbraDriveApp.APP_NAME);
-      treeController.show({overviewId: "main_ZIMBRA_DRIVE"});
-      let treeItem: DwtTreeItem = treeController._treeView["ZIMBRA_DRIVE"].getTreeItemById(this._currentFolder.id);
-      treeItem.setExpanded(true, true, true);
-      treeItem._setSelected(true);
-    }
-    else {
-      this.getParentView(this._currentViewId);
+    if (this.isSearchResults) {
+      // if we are switching views, make sure app view mgr is up to date on search view's components
+      appCtxt.getAppViewMgr().setViewComponents(this.searchResultsController.getCurrentViewId(), elements, true);
     }
     this._resetNavToolBarButtons();
   }
@@ -388,7 +366,7 @@ export class ZimbraDriveController extends ZmListController {
 
   private setCurrentFolder(currentFolder: ZimbraDriveFolder): void {
     this._currentFolder = currentFolder;
-    (<ZimbraDriveTreeController> appCtxt.getOverviewController().getTreeController(ZimbraDriveApp.APP_NAME)).setCurrentFolder(currentFolder);
+    (<ZimbraDriveTreeController> appCtxt.getOverviewController().getTreeController(ZimbraDriveApp.TREE_ID)).setCurrentFolder(currentFolder);
     ZimbraDriveController._currentFolderInstance = currentFolder;
   }
 
@@ -407,7 +385,7 @@ export class ZimbraDriveController extends ZmListController {
     let item: ZimbraDriveItem = <ZimbraDriveItem> ev.item;
     if (item && item.isFolder()) {
       ev.detail = DwtTree.ITEM_ACTIONED;
-      let treeController: ZimbraDriveTreeController = <ZimbraDriveTreeController> appCtxt.getOverviewController().getTreeController(ZimbraDriveApp.APP_NAME),
+      let treeController: ZimbraDriveTreeController = <ZimbraDriveTreeController> appCtxt.getOverviewController().getTreeController(ZimbraDriveApp.TREE_ID),
         itemFolder: ZimbraDriveFolderItem = <ZimbraDriveFolderItem> item;
       if (!itemFolder.setData) {
         return;
@@ -457,7 +435,7 @@ export class ZimbraDriveController extends ZmListController {
       }
       else {
         let itemFolder: ZimbraDriveFolderItem = <ZimbraDriveFolderItem> item;
-        let treeController: ZimbraDriveTreeController = <ZimbraDriveTreeController> appCtxt.getOverviewController().getTreeController(ZimbraDriveApp.APP_NAME);
+        let treeController: ZimbraDriveTreeController = <ZimbraDriveTreeController> appCtxt.getOverviewController().getTreeController(ZimbraDriveApp.TREE_ID);
         treeController.downloadFolderAsZip(itemFolder.getPath());
       }
     }
@@ -533,7 +511,7 @@ export class ZimbraDriveController extends ZmListController {
   }
 
   private _onDeleteDone(items: ZimbraDriveItem[]): void {
-    let treeController: ZimbraDriveTreeController = <ZimbraDriveTreeController> appCtxt.getOverviewController().getTreeController(ZimbraDriveApp.APP_NAME),
+    let treeController: ZimbraDriveTreeController = <ZimbraDriveTreeController> appCtxt.getOverviewController().getTreeController(ZimbraDriveApp.TREE_ID),
       promiseRefreshSearch: boolean = false;
     for (let item of items) {
       if (item.isFolder()) {
@@ -562,17 +540,17 @@ export class ZimbraDriveController extends ZmListController {
     if (!(<ZimbraDriveItem> items[0]).isFolder()) {
       (<DetailListView> view).renameFile(items[0]);
     } else {
-      (<ZimbraDriveTreeController> appCtxt.getOverviewController().getTreeController(ZimbraDriveApp.APP_NAME)).renameFolderItemListener(ev, <ZimbraDriveFolderItem>items[0]);
+      (<ZimbraDriveTreeController> appCtxt.getOverviewController().getTreeController(ZimbraDriveApp.TREE_ID)).renameFolderItemListener(ev, <ZimbraDriveFolderItem>items[0]);
     }
   }
 
   private _newListener(ev: DwtSelectionEvent): void {
-    let treeController: ZimbraDriveTreeController = <ZimbraDriveTreeController> appCtxt.getOverviewController().getTreeController(ZimbraDriveApp.APP_NAME);
+    let treeController: ZimbraDriveTreeController = <ZimbraDriveTreeController> appCtxt.getOverviewController().getTreeController(ZimbraDriveApp.TREE_ID);
     treeController.popupNewFolderDialog(ZimbraDriveController.getCurrentFolder());
   }
 
   private _moveListener(ev: DwtSelectionEvent): void {
-    let treeController: ZimbraDriveTreeController = <ZimbraDriveTreeController> appCtxt.getOverviewController().getTreeController(ZimbraDriveApp.APP_NAME),
+    let treeController: ZimbraDriveTreeController = <ZimbraDriveTreeController> appCtxt.getOverviewController().getTreeController(ZimbraDriveApp.TREE_ID),
       moveDialog: ZimbraDriveChooseFolderDialog = treeController.getChooseFolderDialog();
     let moveParams: ZmFolderSearchFilterGetMoveParamsValue = treeController._getMoveParams(moveDialog);
     let moveDialogOverview: ZmOverview = appCtxt.getOverviewController().getOverview(moveParams.overviewId);
