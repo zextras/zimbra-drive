@@ -52,8 +52,11 @@ build/com_zextras_drive_open.xml:
 	./applyVersion
 
 build/com_zextras_drive_open_hdlr.js: node_modules
-	npm update
 	mkdir -p build
+	npm update
+	# Check T4Z project if there are modifications
+	cd src/zimbra && make check-exports
+	# Lint the files
 	./node_modules/.bin/tslint -c tslint.json --project tsconfig.json
 	./node_modules/.bin/webpack
 
