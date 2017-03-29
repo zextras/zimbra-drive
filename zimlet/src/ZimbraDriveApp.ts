@@ -135,8 +135,8 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
     );
   }
 
-  public static loadSearchRequestParams(query: string, userInitiated: boolean, batchCommand?: ZmBatchCommand): void {
-    let params: ZmSearchControllerSearchParams = {query:  query};
+  public static loadSearchRequestParams(searchParams: ZimbraDriveSearchParams, batchCommand?: ZmBatchCommand): void {
+    let params: ZmSearchControllerSearchParams = {query:  searchParams.query};
     params.soapInfo = {
       method: ZimbraDriveApp.SEARCH_REQ,
       response: ZimbraDriveApp.SEARCH_RESP,
@@ -145,9 +145,9 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
     };
     params.types = [ZDId.ZIMBRADRIVE_ITEM];
     params.checkTypes = true;
-    if (userInitiated) {
-      params.userInitiated = userInitiated;
-      params.origin = ZmId.SEARCH;
+    if (searchParams.userInitiated) {
+      params.userInitiated = searchParams.userInitiated;
+      params.origin = searchParams.origin || ZmId.SEARCHRESULTS;
       params.types.push(ZDId.ZIMBRADRIVE_FOLDER);
     }
     let search = new ZmSearch(params);
@@ -382,8 +382,8 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
       tooltip: ZmMsg.uploadDocs,
       defaultId: ZDId.ZD_NEW_FILE
     };
-    let currentViewId: string = appCtxt.getAppViewMgr().getAppView("ZIMBRA_DRIVE");
-    if (currentViewId && currentViewId !== appCtxt.getCurrentViewId()) {
+    let currentViewId: string = this.getSessionController({controllerClass: "ZmZimbraDriveController", sessionId: "main"}).getCurrentViewId();
+    if (currentViewId !== appCtxt.getCurrentViewId()) {
       params.disabled = true;
     }
     return params;
@@ -428,5 +428,10 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
     this._attachDialog.getDriveView(composeView._controller);
     this._attachDialog.popup();
   }
+}
 
+export interface ZimbraDriveSearchParams {
+  query: string;
+  userInitiated: boolean;
+  origin?: string;
 }

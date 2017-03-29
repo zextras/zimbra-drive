@@ -95,7 +95,7 @@ export class ZimbraDriveZimlet extends ZmZimletBase implements CreateAppZimlet {
     );
 
     let searchToolbarMenu: DwtMenu = appCtxt.getSearchController().getSearchToolbar().getButton(ZmSearchToolBar.TYPES_BUTTON).getMenu();
-    // There is any function to get the menu item!! just a getMenuItemById() where id is a zimbra defined id or "CUSTOM"!!
+    // There is any function to get the menu item!! just a getMenuItemById() where id is a zimbra id or "CUSTOM"!!
     for (let menuItem of searchToolbarMenu.getItems()) {
       if (menuItem.getHTMLElId() === ZmId.getMenuItemId(ZmId.SEARCH, ZDId.ZIMBRADRIVE_ITEM)) {
         menuItem.setText(this.getMessage("searchZimbraDrive"));
@@ -110,20 +110,25 @@ export class ZimbraDriveZimlet extends ZmZimletBase implements CreateAppZimlet {
 
   private onSearchRequested(ev: KeyboardEvent|DwtSelectionEvent): void {
     const searchToolbar: ZmMainSearchToolBar = appCtxt.getSearchController().getSearchToolbar();
-    let searchValue: string = searchToolbar.getSearchFieldValue().trim();
-    if (searchValue === "") {
+    let searchParams = {
+      query: searchToolbar.getSearchFieldValue().trim(),
+      userInitiated: true,
+      origin: ZmId.SEARCH
+    };
+    if (searchParams.query === "") {
+      searchParams.origin = ZmId.SEARCHRESULTS;
       let searchView: ZmAppViewMgrCreatedViewDescriptor = appCtxt.getAppViewMgr()._getView(
         appCtxt.getCurrentViewId() &&
         appCtxt.getCurrentViewId().replace("ZDRIVE_DLV-", "")
       );
       if (searchView && searchView.component && searchView.component.searchResultsToolbar) {
-        searchValue = (<ZmSearchResultsToolBar> searchView.component.searchResultsToolbar).getSearchFieldValue();
+        searchParams.query = (<ZmSearchResultsToolBar> searchView.component.searchResultsToolbar).getSearchFieldValue();
       }
     }
-    if (searchValue !== "") {
+    if (searchParams.query !== "") {
       let batchCommand = new ZmBatchCommand();
       batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadGetAllFolderRequestParams));
-      batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadSearchRequestParams, [searchValue, true]));
+      batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadSearchRequestParams, [searchParams]));
       batchCommand.run();
     }
   }

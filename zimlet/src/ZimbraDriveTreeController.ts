@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {ZimbraDriveApp} from "./ZimbraDriveApp";
+import {ZimbraDriveApp, ZimbraDriveSearchParams} from "./ZimbraDriveApp";
 import {ZmTreeView, ZmTreeViewParams} from "./zimbra/zimbraMail/share/view/ZmTreeView";
 import {ZimbraDriveTreeView} from "./view/ZimbraDriveTreeView";
 import {ZmTreeControllerShowParams, ZmTreeController} from "./zimbra/zimbraMail/share/controller/ZmTreeController";
@@ -187,8 +187,12 @@ export class ZimbraDriveTreeController extends ZmTreeController {
     this._treeView[ZimbraDriveApp.TREE_ID]._addNew(parentNode, newFolder, parentFolder.findIndexForNewChild(newFolderName));
     // send batch command due to refresh view
     if (parentFolder.getPath() === ZimbraDriveController.getCurrentFolder().getPath()) {
-      let batchCommand = new ZmBatchCommand();
-      batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadSearchRequestParams, [`in:"${ZimbraDriveController.getCurrentFolder().getPath(true)}"`, false]));
+      let batchCommand = new ZmBatchCommand(),
+        searchParams: ZimbraDriveSearchParams = {
+          query: `in:"${ZimbraDriveController.getCurrentFolder().getPath(true)}"`,
+          userInitiated: false
+        };
+      batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadSearchRequestParams, [searchParams]));
       batchCommand.run();
     }
     this._newFolderDialog.popdown();

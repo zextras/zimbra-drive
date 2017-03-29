@@ -129,6 +129,21 @@ export class ZimbraDriveFolder extends ZmFolder {
     return this.getPath(true).length <= targetPath.length && this.getPath(true) === targetPath.substring(0, this.getPath(true).length);
   }
 
+  public hasChild(name: string): boolean {
+    return (this.getChild(name) != null);
+  };
+
+  public getChild(name: string): ZimbraDriveFolder {
+    name = name || "";
+    let childrenArray: ZimbraDriveFolder[] = <ZimbraDriveFolder[]> this.children.getArray();
+    for (let i = 0; i < childrenArray.length; i++) {
+      if (childrenArray[i] && childrenArray[i].name === name) {
+        return childrenArray[i];
+      }
+    }
+
+    return null;
+  };
 }
 
 export interface ZimbraDriveFolderObj extends ZimbraDriveItemObj {

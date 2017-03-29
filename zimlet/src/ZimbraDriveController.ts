@@ -45,7 +45,7 @@ import {DwtTree} from "./zimbra/ajax/dwt/widgets/DwtTree";
 import {ZimbraDriveItem} from "./ZimbraDriveItem";
 import {DwtSelectionEvent} from "./zimbra/ajax/dwt/events/DwtSelectionEvent";
 import {DwtListView} from "./zimbra/ajax/dwt/widgets/DwtListView";
-import {ZimbraDriveApp} from "./ZimbraDriveApp";
+import {ZimbraDriveApp, ZimbraDriveSearchParams} from "./ZimbraDriveApp";
 import {ZmBatchCommand} from "./zimbra/zimbra/csfe/ZmBatchCommand";
 import {ZimbraDriveTreeController} from "./ZimbraDriveTreeController";
 import {ZimbraDriveFolder} from "./ZimbraDriveFolder";
@@ -76,6 +76,7 @@ import {AjxDispatcher} from "./zimbra/ajax/boot/AjxDispatcher";
 import {DwtMessageDialog} from "./zimbra/ajax/dwt/widgets/DwtMessageDialog";
 import {ZimbraDriveWaitingDialog} from "./view/ZimbraDriveWaitingDialog";
 import {DwtTreeItem} from "./zimbra/ajax/dwt/widgets/DwtTreeItem";
+import {ZmId} from "./zimbra/zimbraMail/core/ZmId";
 
 declare let window: {
   csrfToken: string
@@ -540,15 +541,20 @@ export class ZimbraDriveController extends ZmListController {
         if (treeController._treeView["ZIMBRA_DRIVE"] && treeController._treeView["ZIMBRA_DRIVE"].getTreeItemById(item.id)) {
           treeController._treeView["ZIMBRA_DRIVE"].getTreeItemById(item.id).dispose();
         }
-        // need refresh because a lot of items can be changed
+        // need refresh because a lot of items can be changed (only in Search view)
         promiseRefreshSearch = this.isSearchResults;
       }
       (<PreviewPaneView> this._parentView[this._currentViewId]).getListView().removeItem(item);
     }
     if (promiseRefreshSearch) {
-      let batchCommand = new ZmBatchCommand();
+      let batchCommand = new ZmBatchCommand(),
+        searchParams: ZimbraDriveSearchParams = {
+          query: this.query,
+          userInitiated: true,
+          origin: ZmId.SEARCHRESULTS
+        };
       batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadGetAllFolderRequestParams));
-      batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadSearchRequestParams, [this.query, true]));
+      batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadSearchRequestParams, [searchParams]));
       batchCommand.run();
     }
     (<PreviewPaneView> this._parentView[this._currentViewId]).getPreviewView().enablePreview(false);
@@ -693,7 +699,11 @@ export class ZimbraDriveController extends ZmListController {
 
   public static goToFolder(folderPath: string, givenBatchCommand?: ZmBatchCommand): void {
     // folder path must have last slash
-    let batchCommand: ZmBatchCommand;
+    let batchCommand: ZmBatchCommand,
+      searchParams: ZimbraDriveSearchParams = {
+        query: `in:"${folderPath}"`,
+        userInitiated: false
+      };
     if (!givenBatchCommand) {
       batchCommand = new ZmBatchCommand();
     }
@@ -701,7 +711,7 @@ export class ZimbraDriveController extends ZmListController {
       batchCommand = givenBatchCommand;
     }
     batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadGetAllFolderRequestParams));
-    batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadSearchRequestParams, [`in:"${folderPath}"`, false]));
+    batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadSearchRequestParams, [searchParams]));
     batchCommand.run();
   }
 
