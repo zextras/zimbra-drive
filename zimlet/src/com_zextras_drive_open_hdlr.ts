@@ -32,7 +32,7 @@ import {ZmId} from "./zimbra/zimbraMail/core/ZmId";
 import {ZDId} from "./ZDId";
 import {AjxListener} from "./zimbra/ajax/events/AjxListener";
 import {DwtSelectionEvent} from "./zimbra/ajax/dwt/events/DwtSelectionEvent";
-import {ZmMainSearchToolBar} from "./zimbra/zimbraMail/share/view/ZmSearchToolBar";
+import {ZmMainSearchToolBar, ZmSearchToolBar} from "./zimbra/zimbraMail/share/view/ZmSearchToolBar";
 import {AjxCallback} from "./zimbra/ajax/boot/AjxCallback";
 import {ZimbraDriveFolder} from "./ZimbraDriveFolder";
 import {ZmMsg} from "./zimbra/zimbraMail/ZmMsg";
@@ -41,10 +41,7 @@ import {ZmBatchCommand} from "./zimbra/zimbra/csfe/ZmBatchCommand";
 import {PreviewView} from "./view/PreviewView";
 import {ZmComposeView} from "./zimbra/zimbraMail/mail/view/ZmComposeView";
 import {DwtMenu} from "./zimbra/ajax/dwt/widgets/DwtMenu";
-import {ZmSearchApp} from "./zimbra/zimbraMail/share/ZmSearchApp";
-import {ZmSearchResultsController} from "./zimbra/zimbraMail/share/controller/ZmSearchResultsController";
 import {ZmSearchResultsToolBar} from "./zimbra/zimbraMail/share/view/ZmSearchResultsToolBar";
-import {ZmButtonToolBar} from "./zimbra/zimbraMail/share/view/ZmButtonToolBar";
 import {ZmAppViewMgrCreatedViewDescriptor} from "./zimbra/zimbraMail/core/ZmAppViewMgr";
 
 export class ZimbraDriveZimlet extends ZmZimletBase implements CreateAppZimlet {
@@ -57,7 +54,7 @@ export class ZimbraDriveZimlet extends ZmZimletBase implements CreateAppZimlet {
     if (appCount < 0) appCount = 0;
 
     this.createApp(
-      this.getMessage("tabName"),
+      `${this.getMessage("tabName")}<sup>beta</sup>`,
       "ZimbraDrive-icon",
       this.getMessage("zimletDescription"),
       appCount
@@ -92,11 +89,18 @@ export class ZimbraDriveZimlet extends ZmZimletBase implements CreateAppZimlet {
 
     this.addSearchDomainItem(
       "ZimbraDrive-icon",
-      this.getMessage("searchZimbraDrive"),
+      "",
       new AjxListener(this, this.onSearchRequested),
       ZmId.getMenuItemId(ZmId.SEARCH, ZDId.ZIMBRADRIVE_ITEM)
     );
 
+    let searchToolbarMenu: DwtMenu = appCtxt.getSearchController().getSearchToolbar().getButton(ZmSearchToolBar.TYPES_BUTTON).getMenu();
+    // There is any function to get the menu item!! just a getMenuItemById() where id is a zimbra defined id or "CUSTOM"!!
+    for (let menuItem of searchToolbarMenu.getItems()) {
+      if (menuItem.getHTMLElId() === ZmId.getMenuItemId(ZmId.SEARCH, ZDId.ZIMBRADRIVE_ITEM)) {
+        menuItem.setText(this.getMessage("searchZimbraDrive"));
+      }
+    }
     return this._app.getName();
   }
 

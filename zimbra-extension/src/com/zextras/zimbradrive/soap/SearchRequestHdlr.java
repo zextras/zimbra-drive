@@ -29,6 +29,8 @@ import org.openzal.zal.soap.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.zextras.zimbradrive.soap.ZimbraDriveItem;
 
@@ -51,14 +53,17 @@ public class SearchRequestHdlr implements SoapHandler
   {
     try
     {
-      String query = zimbraContext.getParameter("query", "");
-      if (query.equals("")) { return; }
       soapResponse.setQName(RESPONSE_QNAME);
+
+      String query = zimbraContext.getParameter("query", "");
       soapResponse.setValue("query", query);
 
       String requestedTypesCsv = zimbraContext.getParameter("types", "");
       soapResponse.setValue("types", requestedTypesCsv);
-  
+
+      if (query.equals("")) { return; }
+      String parsedQuery = getStandardQuery(query);
+
       String[] requestedTypesArray = requestedTypesCsv.split(",");
       if(requestedTypesArray.length == 0)
       {
@@ -68,11 +73,11 @@ public class SearchRequestHdlr implements SoapHandler
       
       JSONArray defaultTypesJsonArray = new JSONArray(requestedTypesArray);
       requestedTypesCsv = defaultTypesJsonArray.toString();
-      
-  
+
+
       HttpResponse response = queryDriveOnCloudServerService(zimbraContext,
-                                                             query,
-                                                             requestedTypesCsv);
+          parsedQuery,
+          requestedTypesCsv);
       BasicResponseHandler basicResponseHandler = new BasicResponseHandler();
       String responseBody = basicResponseHandler.handleResponse(response);  //throw HttpResponseException if status code >= 300
 
@@ -82,6 +87,28 @@ public class SearchRequestHdlr implements SoapHandler
     {
       throw new RuntimeException(e);
     }
+  }
+
+  private String getStandardQuery(String query) {
+    StringBuilder parsedQueryBuilder = new StringBuilder();
+
+    Pattern nonQuotedTokenSValuePattern = Pattern.compile("((^| )[^ :]+:)([^\"]*?)( |$)"); //preTokenDelimiter tokenName : nonQuotedTokenValue postTokenDelimiter
+    Matcher nonQuotedTokenSValueMatcher = nonQuotedTokenSValuePattern.matcher(query);
+    int lastMatchEndIndex = 0;
+    while(nonQuotedTokenSValueMatcher.find())
+    {
+      String preMatchValueQuery = query.substring(lastMatchEndIndex, nonQuotedTokenSValueMatcher.end(1));
+
+      String matchValueQuery = query.substring(nonQuotedTokenSValueMatcher.start(3), nonQuotedTokenSValueMatcher.end(3));
+
+      parsedQueryBuilder.append(preMatchValueQuery).append("\"").append(matchValueQuery).append("\"");
+
+      lastMatchEndIndex  = nonQuotedTokenSValueMatcher.end(3);
+    }
+
+    parsedQueryBuilder.append(query.substring(lastMatchEndIndex));
+
+    return  parsedQueryBuilder.toString();
   }
 
   private HttpResponse queryDriveOnCloudServerService(final ZimbraContext zimbraContext,
