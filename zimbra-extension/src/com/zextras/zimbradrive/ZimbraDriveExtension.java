@@ -45,16 +45,17 @@ public class ZimbraDriveExtension implements ZalExtension
   {
     Zimbra mZimbra = new Zimbra();
     TokenManager tokenManager = new TokenManager();
+    BackendUtils backendUtils = new BackendUtils(mZimbra.getProvisioning(), tokenManager);
     CloudUtils cloudUtils = new CloudUtils(mZimbra.getProvisioning(), tokenManager);
 
     mSoapServiceManager = new SoapServiceManager();
     mNcSoapService = new NcSoapService(cloudUtils);
 
     mHttpServiceManager = new HttpServiceManager();
-    mNcUserZimbraBackendHttpHandler = new NcUserZimbraBackendHttpHandler(mZimbra.getProvisioning(), tokenManager);
-    mGetFileHttpHdlr = new GetFileHttpHandler(mZimbra.getProvisioning(), cloudUtils);
-    mUploadFileHttpHandler = new UploadFileHttpHandler(mZimbra.getProvisioning(), tokenManager);
-    mCreateTempAttachmentFileHttpHdlr = new CreateTempAttachmentFileHttpHandler(mZimbra.getProvisioning(), cloudUtils);
+    mNcUserZimbraBackendHttpHandler = new NcUserZimbraBackendHttpHandler(backendUtils);
+    mUploadFileHttpHandler = new UploadFileHttpHandler(backendUtils);
+    mGetFileHttpHdlr = new GetFileHttpHandler(cloudUtils, backendUtils);
+    mCreateTempAttachmentFileHttpHdlr = new CreateTempAttachmentFileHttpHandler(cloudUtils, backendUtils);
   }
 
   @Override
@@ -78,12 +79,17 @@ public class ZimbraDriveExtension implements ZalExtension
   @Override
   public void startup(ZalExtensionController zalExtensionController, WeakReference<ClassLoader> weakReference)
   {
-    mSoapServiceManager.register(mNcSoapService);
-    mHttpServiceManager.registerHandler(mNcUserZimbraBackendHttpHandler);
-    mHttpServiceManager.registerHandler(mGetFileHttpHdlr);
-    mHttpServiceManager.registerHandler(mUploadFileHttpHandler);
-    mHttpServiceManager.registerHandler(mCreateTempAttachmentFileHttpHdlr);
-    ZimbraLog.mailbox.info("Loaded Zimbra Drive extension.");
+    try
+    {
+      mSoapServiceManager.register(mNcSoapService);
+      mHttpServiceManager.registerHandler(mNcUserZimbraBackendHttpHandler);
+      mHttpServiceManager.registerHandler(mGetFileHttpHdlr);
+      mHttpServiceManager.registerHandler(mUploadFileHttpHandler);
+      mHttpServiceManager.registerHandler(mCreateTempAttachmentFileHttpHdlr);
+      ZimbraLog.extensions.info("Loaded Zimbra Drive extension.");
+    } catch( Throwable ex ) {
+      ZimbraLog.extensions.error( "#######Critical Exception on Startup.#######", ex );
+    }
   }
 
   /**

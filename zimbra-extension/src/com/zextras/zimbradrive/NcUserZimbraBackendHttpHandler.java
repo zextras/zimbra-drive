@@ -33,13 +33,11 @@ public class NcUserZimbraBackendHttpHandler implements HttpHandler
 {
   private final static String KEY_USERNAME = "username";
   private final static String KEY_PASSWORD = "password";
-  private final Provisioning mProvisioning;
-  private final TokenManager mTokenManager;
+  private final BackendUtils mBackendUtils;
 
-  public NcUserZimbraBackendHttpHandler(Provisioning provisioning, TokenManager tokenManager)
+  public NcUserZimbraBackendHttpHandler(BackendUtils backendUtils)
   {
-    mProvisioning = provisioning;
-    mTokenManager = tokenManager;
+    mBackendUtils = backendUtils;
   }
 
   @Override
@@ -54,7 +52,7 @@ public class NcUserZimbraBackendHttpHandler implements HttpHandler
     final Map<String, String> paramsMap = BackendUtils.getJsonRequestParams(httpServletRequest);
     
     final JSONObject returnObj = new JSONObject();
-    Account accountById = mProvisioning.getAccountById(paramsMap.get(KEY_USERNAME));
+    Account accountById = mBackendUtils.getAccountById(paramsMap.get(KEY_USERNAME));
     if (accountById != null) {
       this.handleAsToken(paramsMap, returnObj);
     } else {
@@ -87,7 +85,7 @@ public class NcUserZimbraBackendHttpHandler implements HttpHandler
     String username = paramsMap.get(KEY_USERNAME);
     String tokenStr = paramsMap.get(KEY_PASSWORD);
 
-    AccountToken token = mTokenManager.getAccountToken(username, tokenStr);
+    AccountToken token = mBackendUtils.getAccountToken(username, tokenStr);
     if (token == null || token.isExpired())
     {
       throw new RuntimeException();
@@ -109,11 +107,11 @@ public class NcUserZimbraBackendHttpHandler implements HttpHandler
     { // Must be an email address
       throw new RuntimeException();
     }
-    Account account = mProvisioning.getAccountByName(username);
+    Account account = mBackendUtils.getAccountByName(username);
     try {
       account.authAccount(password, Protocol.zsync);
     } catch (ZimbraException ex) {
-      mTokenManager.getAccountToken(account.getId(), password);
+      mBackendUtils.getAccountToken(account.getId(), password);
     }
     ZimbraLog.mailbox.info("NcUserZimbraBackend: [PASSW] Authenticated " + account.getId());
     returnObj.put("accountId", account.getId());

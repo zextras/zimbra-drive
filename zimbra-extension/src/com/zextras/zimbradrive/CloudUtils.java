@@ -24,9 +24,13 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.openzal.zal.Account;
+import org.openzal.zal.AuthToken;
 import org.openzal.zal.Provisioning;
+import org.openzal.zal.log.ZimbraLog;
 import org.openzal.zal.soap.ZimbraContext;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -86,8 +90,6 @@ public class CloudUtils
     post.setEntity(BackendUtils.getEncodedForm(driveOnCloudParameters));
 
     HttpClient client = HttpClientBuilder.create().build();
-    HttpResponse response = client.execute(post);
-
-    return response;
+    return client.execute(post);
   }
 }
