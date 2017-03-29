@@ -184,4 +184,5 @@ export interface ZimbraDriveItemObj {
   path: string;
   children: ZimbraDriveItemObj[];
   node_type: string;
+  url: string;
 }

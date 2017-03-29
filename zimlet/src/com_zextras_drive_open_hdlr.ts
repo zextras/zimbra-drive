@@ -55,7 +55,7 @@ export class ZimbraDriveZimlet extends ZmZimletBase implements CreateAppZimlet {
     if (appCount < 0) appCount = 0;
 
     this.createApp(
-      this.getMessage("tabName"),
+      `${this.getMessage("tabName")}<sup>beta</sup>`,
       "ZimbraDrive-icon",
       this.getMessage("zimletDescription"),
       appCount
@@ -114,6 +114,13 @@ export class ZimbraDriveZimlet extends ZmZimletBase implements CreateAppZimlet {
       }
     }
 
+    let searchToolbarMenu: DwtMenu = appCtxt.getSearchController().getSearchToolbar().getButton(ZmSearchToolBar.TYPES_BUTTON).getMenu();
+    // There is any function to get the menu item!! just a getMenuItemById() where id is a zimbra defined id or "CUSTOM"!!
+    for (let menuItem of searchToolbarMenu.getItems()) {
+      if (menuItem.getHTMLElId() === ZmId.getMenuItemId(ZmId.SEARCH, ZDId.ZIMBRADRIVE_ITEM)) {
+        menuItem.setText(this.getMessage("searchZimbraDrive"));
+      }
+    }
     return this._app.getName();
   }
 
@@ -170,7 +177,7 @@ ZmApp.ORGANIZER[ZimbraDriveApp.APP_NAME] = ZimbraDriveApp.APP_NAME;
 ZmOrganizer.DISPLAY_ORDER[ZimbraDriveApp.APP_NAME] = 100;
 ZmOrganizer.TREE_TYPE[ZimbraDriveApp.TREE_ID] = ZmOrganizer.FOLDER;
 ZmOrganizer.LABEL[ZDId.ZIMBRADRIVE_ITEM] = "zimbraDriveFolders";
-ZmOrganizer.APP[ZimbraDriveApp.APP_NAME] = ZimbraDriveApp.APP_NAME;
+ZmOrganizer.APP[ZDId.ZIMBRADRIVE_ITEM] = ZimbraDriveApp.APP_NAME;
 ZmTreeView.COMPARE_FUNC[ZimbraDriveApp.APP_NAME] = "ZmZimbraDriveFolder.sortFcn";
 ZmApp.HIDE_ZIMLETS[ZimbraDriveApp.APP_NAME] = true;
 

@@ -37,6 +37,7 @@ import {ZimbraDriveBaseViewParams} from "./ZimbraDriveBaseView";
 import {ZimbraDriveController} from "../ZimbraDriveController";
 import {ZmComposeController} from "../zimbra/zimbraMail/mail/controller/ZmComposeController";
 import {ZmApp} from "../zimbra/zimbraMail/core/ZmApp";
+import {ZimbraDriveItem} from "../ZimbraDriveItem";
 
 export class ZimbraDriveTabView extends DwtComposite {
 
@@ -125,6 +126,10 @@ export class ZimbraDriveTabView extends DwtComposite {
     this._isLoadingFolder = false;
     let results: ZmSearchResult = <ZmSearchResult> (result && result.getResponse()),
       itemsResults: ZmList = results.getResults(ZDId.ZIMBRADRIVE_ITEM);
+    let firstItem: ZimbraDriveItem = itemsResults.getArray().length > 0 && <ZimbraDriveItem> itemsResults.getArray()[0];
+    if (firstItem && firstItem.getName && !firstItem.getName()) {
+      itemsResults.getArray().pop();
+    }
     this._controller._listView[ZimbraDriveTabView.view].set(itemsResults);
     return true;
   }

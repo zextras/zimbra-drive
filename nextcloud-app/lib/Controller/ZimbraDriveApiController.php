@@ -23,7 +23,6 @@ use OCA\ZimbraDrive\Service\SearchService;
 use OCA\ZimbraDrive\Service\StorageService;
 use OCA\ZimbraDrive\Service\LogService;
 use OCA\ZimbraDrive\Service\BadRequestException;
-use OCA\ZimbraDrive\Service\UserService;
 use OCP\AppFramework\ApiController;
 use OCP\IRequest;
 use OCP\AppFramework\Http\JSONResponse;
@@ -32,11 +31,7 @@ use OCA\ZimbraDrive\Service\UnauthorizedException;
 use OCP\AppFramework\Http;
 use OCA\ZimbraDrive\Service\MethodNotAllowedException;
 use \Exception;
-use \OC\Files\Filesystem;
-use \OCP\Response;
-use OCP\AppFramework\Http\StreamResponse;
 use OCP\Files\NotPermittedException;
-use OCA\ZimbraDrive\Controller\EmptyResponse;
 
 class ZimbraDriveApiController extends ApiController
 {
@@ -107,7 +102,8 @@ class ZimbraDriveApiController extends ApiController
         }
 
         $results = $this->filterTypes($wantedFiles, $types);
-        return new JSONResponse($results);
+        $resultsNoShares = $this->filterShareNodes($results);
+        return new JSONResponse($resultsNoShares);
     }
 
     /**
@@ -164,7 +160,8 @@ class ZimbraDriveApiController extends ApiController
             return new EmptyResponse(Http::STATUS_FORBIDDEN);
         }
         $folderAsArray = $this->storageService->getFolderTreeAttributes($searchedFolder);
-        return new JSONResponse($folderAsArray);
+        $folderAsArrayNoShare = $this->filterShareTreeNodes($folderAsArray);
+        return new JSONResponse($folderAsArrayNoShare);
     }
 
     /**
@@ -366,5 +363,48 @@ class ZimbraDriveApiController extends ApiController
     private function createFileStatusResponse($statusCode)
     {
         return array("statusCode" => $statusCode);
+    }
+
+    /**
+     * @param $nodes array
+     * @return array
+     */
+    private function filterShareNodes($nodes)
+    {
+        $results = array();
+        foreach ($nodes as $node)
+        {
+            if($node[ResponseVarName::SHARED_VAR_NAME] === false)
+            {
+                $results[] = $node;
+            }
+        }
+        return $results;
+    }
+
+    /**
+     * @param $nodeTree
+     * @return array
+     */
+    private function filterShareTreeNodes($nodeTree)
+    {
+        $filterTree = $nodeTree;
+        if($nodeTree[ResponseVarName::SHARED_VAR_NAME] === true)
+        {
+            return array();
+        }
+
+        $filterChildren = array();
+        $children = $nodeTree[ResponseVarName::CHILDREN_VAR_NAME];
+        foreach ($children as $child)
+        {
+            $filterChild = self::filterShareTreeNodes($child);
+            if(!empty($filterChild))
+            {
+                $filterChildren[] = $filterChild;
+            }
+        }
+        $filterTree[ResponseVarName::CHILDREN_VAR_NAME] = $filterChildren;
+        return $filterTree;
     }
 }

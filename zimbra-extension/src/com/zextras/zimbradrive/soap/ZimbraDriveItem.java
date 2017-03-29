@@ -36,6 +36,7 @@ public class ZimbraDriveItem
   public static final String F_PERM_SHAREABLE = "shareable";
   public static final String F_AUTHOR = "author";
   public static final String F_PATH = "path";
+  public static final String F_URL = "url";
   public static final String F_SIZE = "size";
   public static final String F_SOURCE_PATH = "source_path";
   public static final String F_TARGET_PATH = "target_path";

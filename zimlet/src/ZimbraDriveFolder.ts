@@ -21,6 +21,7 @@ import {appCtxt} from "./zimbra/zimbraMail/appCtxt";
 import {ZimbraDriveFolderItem} from "./ZimbraDriveFolderItem";
 import {ZmFolder} from "./zimbra/zimbraMail/share/model/ZmFolder";
 import {ZDId} from "./ZDId";
+import {ZimbraDriveApp} from "./ZimbraDriveApp";
 
 export class ZimbraDriveFolder extends ZmFolder {
 
@@ -52,6 +53,7 @@ export class ZimbraDriveFolder extends ZmFolder {
     this.owner = node.author;
     if (this.path === "/") {
       this.id = `${ZmFolder.ID_ROOT}_zd`;
+      this.name = ZimbraDriveApp.getMessage("rootName");
       ZmFolder.HIDE_ID[`${ZmFolder.ID_ROOT}_zd`] = true;
     } else {
       this.id = `${node.id}_zd`;

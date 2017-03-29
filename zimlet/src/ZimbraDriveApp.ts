@@ -38,7 +38,6 @@ import {ZmBatchCommand} from "./zimbra/zimbra/csfe/ZmBatchCommand";
 import {ZmCsfeResult} from "./zimbra/zimbra/csfe/ZmCsfeResult";
 import {ZimbraDriveFolderObj, ZimbraDriveFolder} from "./ZimbraDriveFolder";
 import {GetAllFoldersResponse} from "./GetAllFoldersResponse";
-import {ZimbraDriveFolderTree} from "./ZimbraDriveFolderTree";
 import {ZmCsfeException} from "./zimbra/zimbra/csfe/ZmCsfeException";
 import {ZmRequestMgrSendRequestParams} from "./zimbra/zimbraMail/core/ZmRequestMgr";
 import {AjxSoapDoc} from "./zimbra/ajax/soap/AjxSoapDoc";
@@ -300,7 +299,11 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
     if (loadCallback) {
       loadCallback.run(controller);
     }
-    // (<ZmSearchApp> appCtxt.getApp(ZmApp.SEARCH)).getSearchResultsController().show(results, controller);
+    // Workaround to not show any conditionals
+    if (searchResultsController) {
+      searchResultsController._filterPanel._advancedPanel.setAttribute("style", "display:none");
+      searchResultsController._filterPanel._conditionalsContainer.parentElement.setAttribute("style", "display:none");
+    }
 
   }
 
@@ -340,6 +343,16 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
     rootObj.name = "";
     let folderTree: ZmFolderTree = <ZmFolderTree>appCtxt.getTree(ZmOrganizer.FOLDER);
     let rootToAdd = ZimbraDriveFolder.createFromDom(rootObj, {tree: folderTree});
+    // Clean folderTree root children before to add new children
+    let childrenToRemove: ZmOrganizer[] = [];
+    for (let child of folderTree.root.children.getArray()) {
+      if (child.type === ZDId.ZIMBRADRIVE_ITEM) {
+        childrenToRemove.push(child);
+      }
+    }
+    for (let childtoRemove of childrenToRemove) {
+      folderTree.root.children.remove(childtoRemove);
+    }
     folderTree.root.children.add(rootToAdd);
     // TODO save and apply axpand/collapsed folders
     appCtxt.getOverviewController().getTreeView("main_" + ZimbraDriveApp.APP_NAME, ZimbraDriveApp.APP_NAME);
@@ -389,13 +402,19 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
   }
 
   public getNewButtonProps(): SetNewButtonPropsParams {
-    return {
+    let params: SetNewButtonPropsParams = {
       text: ZmMsg.uploadDocs,
       tooltip: ZmMsg.uploadDocs,
       defaultId: ZDId.ZD_NEW_FILE
     };
+    let currentViewId: string = appCtxt.getAppViewMgr().getAppView("ZIMBRA_DRIVE");
+    if (currentViewId && currentViewId !== appCtxt.getCurrentViewId()) {
+      params.disabled = true;
+    }
+    return params;
   }
 
+  // Here change menu of new Button
   public activate(active: boolean, viewId: string): void {
     super.activate(active, viewId);
     let toolbarButton = (<ZmZimbraMail> appCtxt.getAppController()).getNewButton();

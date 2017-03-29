@@ -51,7 +51,6 @@ import {ZimbraDriveTreeController} from "./ZimbraDriveTreeController";
 import {ZimbraDriveFolder} from "./ZimbraDriveFolder";
 import {ZmTreeView} from "./zimbra/zimbraMail/share/view/ZmTreeView";
 import {ZimbraDriveFolderTree} from "./ZimbraDriveFolderTree";
-import {ZmList} from "./zimbra/zimbraMail/share/model/ZmList";
 import {ZimbraDriveFolderItem} from "./ZimbraDriveFolderItem";
 import {AjxUtil} from "./zimbra/ajax/util/AjxUtil";
 import {ZmZimbraMail} from "./zimbra/zimbraMail/core/ZmZimbraMail";
@@ -75,10 +74,9 @@ import {ZmComposeController} from "./zimbra/zimbraMail/mail/controller/ZmCompose
 import {AjxDispatcher} from "./zimbra/ajax/boot/AjxDispatcher";
 import {DwtMessageDialog} from "./zimbra/ajax/dwt/widgets/DwtMessageDialog";
 import {ZimbraDriveWaitingDialog} from "./view/ZimbraDriveWaitingDialog";
-import {DwtTreeItem} from "./zimbra/ajax/dwt/widgets/DwtTreeItem";
 import {ZmOrganizer} from "./zimbra/zimbraMail/share/model/ZmOrganizer";
-import {ZmFolderTree} from "./zimbra/zimbraMail/share/model/ZmFolderTree";
 import {ZmFolder} from "./zimbra/zimbraMail/share/model/ZmFolder";
+import {ZmList} from "./zimbra/zimbraMail/share/model/ZmList";
 
 declare let window: {
   csrfToken: string
@@ -163,13 +161,44 @@ export class ZimbraDriveController extends ZmListController {
 
   public show(results: ZmSearchResult): void;
   public show(results: ZmMailMsg, parentController: ZmListController, callback: AjxCallback, markRead: boolean, hidePagination: boolean, forceLoad: boolean, noTruncate: boolean): void;
-  public show(results: any, p2?: ZmListController, p3?: AjxCallback, p4?: boolean, p5?: boolean, p6?: boolean, p7?: boolean): void {
+  public show(results: ZmSearchResult|ZmMailMsg, p2?: ZmListController, p3?: AjxCallback, p4?: boolean, p5?: boolean, p6?: boolean, p7?: boolean): void {
+    let rootFolder: ZimbraDriveFolder = null;
+    for (let tmpFldr of appCtxt.getTree(ZmOrganizer.FOLDER).root.children.getArray()) {
+      if (tmpFldr.type === ZDId.ZIMBRADRIVE_ITEM) {
+        rootFolder = <ZimbraDriveFolder>tmpFldr;
+        break;
+      }
+    }
+    let itemsResults: ZmList = (<ZmSearchResult>results).getResults(ZDId.ZIMBRADRIVE_ITEM);
     // this._folderId = results && results.search && results.search.folderId;
-    this.setList(results.getResults(ZDId.ZIMBRADRIVE_ITEM));
+
+    // this.query = results.getAttribute("query");
+    // let itemsResults: ZmList = results.getResults(ZDId.ZIMBRADRIVE_ITEM),
+    //   tree: ZimbraDriveFolderTree = <ZimbraDriveFolderTree> appCtxt.getTree(ZimbraDriveApp.APP_NAME);
+    // let firstItem: ZimbraDriveItem = itemsResults.getArray().length > 0 && <ZimbraDriveItem> itemsResults.getArray()[0];
+    // if (firstItem && firstItem.getName && !firstItem.getName()) {
+    //   itemsResults.getArray().pop();
+    // }
+    if (!this.isSearchResults) {
+      let currentFolderPath = (<ZmSearchResult>results).search.query.replace("in:\"", "").replace("\"", ""),
+        treeFolder: ZimbraDriveFolder = rootFolder;
+      if (currentFolderPath !== "" && currentFolderPath !== "/") {
+        treeFolder = <ZimbraDriveFolder>rootFolder.getChildByPath(currentFolderPath.slice(1, -1));
+      }
+      this.setCurrentFolder(treeFolder);
+      if (treeFolder.children.size() > 0) {
+        for (let i = treeFolder.children.size() - 1; i >= 0; i--) {
+          itemsResults.add((<ZimbraDriveFolder>treeFolder.children.getArray()[i]).getFolderItem(), 0);
+        }
+      }
+    }
+    itemsResults.getArray().sort(ZimbraDriveController.sortItems);
+    this.setList(itemsResults);
+
     this._list.setHasMore(false);
     // this._list.setHasMore(results.getAttribute("more"));
 
-    super.show(results);
+    super.show(<ZmSearchResult> results, this._currentViewId);
     // super.show(results, this._currentViewId);
 
     this._setup(this._currentViewId);
@@ -474,7 +503,7 @@ export class ZimbraDriveController extends ZmListController {
   }
 
   public _uploadFileListener(ev: DwtSelectionEvent, folder?: ZimbraDriveFolder): void {
-    folder = folder || ZimbraDriveController.getCurrentFolder() || (<ZimbraDriveFolder> (<ZimbraDriveFolderTree> appCtxt.getTree(ZimbraDriveApp.APP_NAME)).root.getChildByPath("Drive"));
+    folder = folder || ZimbraDriveController.getCurrentFolder() || (<ZimbraDriveFolder> appCtxt.getTree(ZmOrganizer.FOLDER).root.getChildByPath("/"));
     if (!this._uploadDialog) {
       this._uploadDialog = new ZimbraDriveUploadDialog(appCtxt.getShell());
     }

@@ -36,7 +36,7 @@ build/com_zextras_drive_open_hdlr.min.js: build/yuicompressor.jar build/com_zext
 build/com_zextras_drive_open.css:
 	mkdir -p build
 	cp src/com_zextras_drive_open.css build/
-	cp -r src/assets/ build/ && cp src/*.properties build/
+	cp -r src/assets/ build/ && cp src/i18n/*.properties build/
 
 build/LICENSE:
 	mkdir -p build
@@ -52,8 +52,11 @@ build/com_zextras_drive_open.xml:
 	./applyVersion
 
 build/com_zextras_drive_open_hdlr.js: node_modules
-	npm update
 	mkdir -p build
+	npm update
+	# Check T4Z project if there are modifications
+	cd src/zimbra && make check-exports
+	# Lint the files
 	./node_modules/.bin/tslint -c tslint.json --project tsconfig.json
 	./node_modules/.bin/webpack
 

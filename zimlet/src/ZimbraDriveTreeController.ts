@@ -195,7 +195,7 @@ export class ZimbraDriveTreeController extends ZmFolderTreeController {
   // Rename folder
   public renameFolderItemListener(ev: DwtUiEvent, item: ZimbraDriveFolderItem): void {
     let backupActionData: ZmFolder = this._actionedOrganizer;
-    this._actionedOrganizer = (<ZimbraDriveFolderTree> appCtxt.getTree(ZimbraDriveApp.APP_NAME)).getFolderById(item.id);
+    this._actionedOrganizer = (<ZimbraDriveFolderTree> appCtxt.getTree(ZmOrganizer.FOLDER)).getFolderById(item.id);
     this._renameListener(ev);
     this._actionedOrganizer = backupActionData;
   }
@@ -317,6 +317,13 @@ export class ZimbraDriveTreeController extends ZmFolderTreeController {
     let folder: ZimbraDriveFolder = <ZimbraDriveFolder> this._getActionMenu(ev, ev.item).getData(Dwt.KEY_OBJECT),
       itemActioned: DwtTreeItem|ZimbraDriveFolderItem = this._getActionMenu(ev, ev.item).getData(ZDId.ZIMBRADRIVE_ITEM_ACTIONED);
     if ((<DwtTreeItem>itemActioned).isDwtTreeItem) {
+      if (folder.getPath() === "") {
+        appCtxt.setStatusMsg({
+          msg: ZimbraDriveApp.getMessage("errorDeletingRootFolder"),
+          level: ZmStatusView.LEVEL_WARNING
+        });
+        return;
+      }
       items = [folder];
     }
     else {
