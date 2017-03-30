@@ -22,6 +22,10 @@ all: dist/com_zextras_drive_open.zip
 node_modules:
 	npm install
 
+build/com_zextras_drive_open.properties:
+	mkdir -p build
+	cp i18n/*.properties build/
+
 build/yuicompressor.jar:
 	mkdir -p build
 	# In Zimbra 8.6 is used `yuicompressor-2.4.2-zimbra.jar`, but We will use the latest.
@@ -61,7 +65,12 @@ build/com_zextras_drive_open_hdlr.js: node_modules
 	./node_modules/.bin/tslint -c tslint.json --project tsconfig.json
 	./node_modules/.bin/webpack
 
-dist/com_zextras_drive_open.zip: build/com_zextras_drive_open_hdlr.min.js build/t4z.js build/com_zextras_drive_open.css build/com_zextras_drive_open_hdlr.js build/com_zextras_drive_open.xml build/ZimbraDrive.template build/LICENSE
+dist/com_zextras_drive_open.zip: build/com_zextras_drive_open_hdlr.min.js \
+								build/t4z.js build/com_zextras_drive_open.css \
+								build/com_zextras_drive_open_hdlr.js \
+								build/com_zextras_drive_open.xml \
+								build/ZimbraDrive.template build/LICENSE \
+								build/com_zextras_drive_open.properties
 	mkdir -p build
 	mkdir -p dist
 	rm -f dist/com_zextras_drive_open.zip
@@ -95,6 +104,13 @@ install: guard-ZIMLET_DEV_SERVER dist/com_zextras_drive_open.zip
 	scp dist/com_zextras_drive_open.zip root@${ZIMLET_DEV_SERVER}:/tmp/
 	ssh root@${ZIMLET_DEV_SERVER} "chown zimbra:zimbra /tmp/com_zextras_drive_open.zip"
 	ssh root@${ZIMLET_DEV_SERVER} "su - zimbra -c '/opt/zimbra/bin/zmzimletctl deploy /tmp/com_zextras_drive_open.zip'"
+
+push-translations:
+	zanata-cli push
+
+pull-translations:
+	zanata-cli -B pull
+	mv i18n/com_zextras_drive_open_en_US.properties i18n/com_zextras_drive_open.properties
 
 guard-%:
 	@ if [ "${${*}}" = "" ]; then \
