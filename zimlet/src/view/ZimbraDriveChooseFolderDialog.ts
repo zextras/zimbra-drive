@@ -29,6 +29,9 @@ import {ZimbraDriveFolder} from "../ZimbraDriveFolder";
 import {ZmOverview} from "../zimbra/zimbraMail/share/view/ZmOverview";
 import {appCtxt} from "../zimbra/zimbraMail/appCtxt";
 import {AjxTemplate} from "../zimbra/ajax/boot/AjxTemplate";
+import {DwtEvent} from "../zimbra/ajax/dwt/events/DwtEvent";
+import {AjxListener} from "../zimbra/ajax/events/AjxListener";
+import {ZmMsg} from "../zimbra/zimbraMail/ZmMsg";
 
 export class ZimbraDriveChooseFolderDialog extends ZmChooseFolderDialog {
 
@@ -39,6 +42,13 @@ export class ZimbraDriveChooseFolderDialog extends ZmChooseFolderDialog {
   constructor(parent: DwtControl, className: string, treeController: ZimbraDriveTreeController) {
     super(parent, className);
     this._treeController = treeController;
+    this._getNewButton().removeAllListeners(DwtEvent.SELECTION);
+    this._getNewButton().addSelectionListener(
+      new AjxListener(
+        this,
+        this.newFolderListener
+      )
+    );
   }
 
   public _resetTree(treeIds: string[], overview: ZmOverview): void {
@@ -95,4 +105,13 @@ export class ZimbraDriveChooseFolderDialog extends ZmChooseFolderDialog {
     return AjxTemplate.expand("com_zextras_drive_open.ZimbraDrive#ChooseFolderDialog", {id: this._htmlElId});
   }
 
+  private newFolderListener(): void {
+    let targetFolder: ZimbraDriveFolder = <ZimbraDriveFolder> this._getOverview().getSelected();
+    if (!targetFolder) {
+      this._showError(ZmMsg.noTargetFolder);
+    }
+    else {
+      this._treeController.popupNewFolderDialog(targetFolder);
+    }
+  }
 }

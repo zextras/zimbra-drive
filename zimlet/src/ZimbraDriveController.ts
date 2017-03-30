@@ -546,7 +546,7 @@ export class ZimbraDriveController extends ZmListController {
     if (moveDialogOverview) {
       moveDialogOverview.setTreeView("ZIMBRA_DRIVE");
     }
-    moveParams.hideNewButton = true;
+    // moveParams.hideNewButton = true;
     ZmController.showDialog(moveDialog, new AjxCallback(this, this._moveCallback, [this._listView[this._currentViewId].getSelection(), moveDialog]), moveParams);
     moveDialog.registerCallback(DwtDialog.CANCEL_BUTTON, this._clearDialog, this, moveDialog);
   }
