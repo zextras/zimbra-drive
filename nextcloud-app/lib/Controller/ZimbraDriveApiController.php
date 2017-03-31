@@ -24,6 +24,7 @@ use OCA\ZimbraDrive\Service\StorageService;
 use OCA\ZimbraDrive\Service\LogService;
 use OCA\ZimbraDrive\Service\BadRequestException;
 use OCP\AppFramework\ApiController;
+use OCP\Files\Folder;
 use OCP\IRequest;
 use OCP\AppFramework\Http\JSONResponse;
 use OCA\ZimbraDrive\Service\LoginService;
@@ -159,9 +160,40 @@ class ZimbraDriveApiController extends ApiController
             $this->logger->info($exception->getMessage());
             return new EmptyResponse(Http::STATUS_FORBIDDEN);
         }
-        $folderAsArray = $this->storageService->getFolderTreeAttributes($searchedFolder);
-        $folderAsArrayNoShare = $this->filterShareTreeNodes($folderAsArray);
-        return new JSONResponse($folderAsArrayNoShare);
+        $folderTree = $this->storageService->getFolderTreeAttributes($searchedFolder);
+        $folderTreeNoShare = $this->filterShareTreeNodes($folderTree);
+        return new JSONResponse($folderTreeNoShare);
+    }
+
+    /**
+     * @CORS
+     * @NoCSRFRequired
+     * @PublicPage
+     * @param $username
+     * @param $token
+     * @param $path
+     * @param $types
+     * @return Http\Response
+     */
+    public function getFolderChildren($username, $token, $path, $types)
+    {
+        $this->logger->info($username . ' call getFoldersChild.');
+
+        try {
+            $this->loginService->login($username, $token);
+        } catch (UnauthorizedException $unauthorizedException) {
+            $this->logger->info($unauthorizedException->getMessage());
+            return new EmptyResponse(Http::STATUS_UNAUTHORIZED);
+        }
+
+        $searchedFolder = $this->storageService->getFolder($path);
+        $foldersChildren = $this->storageService->folderChildNodesAttributes($searchedFolder);
+
+        $types = json_decode($types, false);
+        $folderChildrenFiltered = $this->filterTypes($foldersChildren, $types);
+        $foldersFilteredNoShare = $this->filterShareNodes($folderChildrenFiltered);
+        return new JSONResponse($foldersFilteredNoShare);
+
     }
 
     /**
