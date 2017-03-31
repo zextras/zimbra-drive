@@ -175,10 +175,10 @@ export class ZimbraDriveController extends ZmListController {
     // this.query = results.getAttribute("query");
     // let itemsResults: ZmList = results.getResults(ZDId.ZIMBRADRIVE_ITEM),
     //   tree: ZimbraDriveFolderTree = <ZimbraDriveFolderTree> appCtxt.getTree(ZimbraDriveApp.APP_NAME);
-    // let firstItem: ZimbraDriveItem = itemsResults.getArray().length > 0 && <ZimbraDriveItem> itemsResults.getArray()[0];
-    // if (firstItem && firstItem.getName && !firstItem.getName()) {
-    //   itemsResults.getArray().pop();
-    // }
+    let firstItem: ZimbraDriveItem = itemsResults.getArray().length > 0 && <ZimbraDriveItem> itemsResults.getArray()[0];
+    if (firstItem && firstItem.getName && !firstItem.getName()) {
+      itemsResults.getArray().pop();
+    }
     if (!this.isSearchResults) {
       let currentFolderPath = (<ZmSearchResult>results).search.query.replace("in:\"", "").replace("\"", ""),
         treeFolder: ZimbraDriveFolder = rootFolder;
@@ -195,7 +195,7 @@ export class ZimbraDriveController extends ZmListController {
     itemsResults.getArray().sort(ZimbraDriveController.sortItems);
     this.setList(itemsResults);
 
-    this._list.setHasMore(false);
+    this.getList().setHasMore(false);
     // this._list.setHasMore(results.getAttribute("more"));
 
     super.show(<ZmSearchResult> results, this._currentViewId);
@@ -562,12 +562,12 @@ export class ZimbraDriveController extends ZmListController {
   }
 
   private _renameFileListener(ev: DwtUiEvent): void {
-    let view: ZmListView = this._listView[this._currentViewId];
+    let view: DetailListView = <DetailListView> this._listView[this._currentViewId];
     let items: ZimbraDriveItem[] = view.getSelection();
     if (!items) { return; }
 
     if (!(<ZimbraDriveItem> items[0]).isFolder()) {
-      (<DetailListView> view).renameFile(items[0]);
+      view.renameFile(items[0]);
     } else {
       (<ZimbraDriveTreeController> appCtxt.getOverviewController().getTreeController(ZimbraDriveApp.TREE_ID)).renameFolderItemListener(ev, <ZimbraDriveFolderItem>items[0]);
     }
@@ -857,7 +857,7 @@ export class ZimbraDriveController extends ZmListController {
     return this._waitingDialog;
   }
 
-  private static sortItems(itemA: ZimbraDriveItem, itemB: ZimbraDriveItem): number {
+  public static sortItems(itemA: ZimbraDriveItem, itemB: ZimbraDriveItem): number {
     if (itemA.isFolder() && !itemB.isFolder()) { return -1; }
     if (!itemA.isFolder() && itemB.isFolder()) { return 1; }
     if (itemA.getName() > itemB.getName()) { return 1; }

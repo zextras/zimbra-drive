@@ -178,7 +178,7 @@ ZmOrganizer.DISPLAY_ORDER[ZimbraDriveApp.APP_NAME] = 100;
 ZmOrganizer.TREE_TYPE[ZimbraDriveApp.TREE_ID] = ZmOrganizer.FOLDER;
 ZmOrganizer.LABEL[ZDId.ZIMBRADRIVE_ITEM] = "zimbraDriveFolders";
 ZmOrganizer.APP[ZDId.ZIMBRADRIVE_ITEM] = ZimbraDriveApp.APP_NAME;
-ZmTreeView.COMPARE_FUNC[ZimbraDriveApp.APP_NAME] = "ZmZimbraDriveFolder.sortFcn";
+ZmTreeView.COMPARE_FUNC[ZDId.ZIMBRADRIVE_ITEM] = "ZmZimbraDriveFolder.sortFcn";
 ZmApp.HIDE_ZIMLETS[ZimbraDriveApp.APP_NAME] = true;
 
 (<ZimletWindow>window).ZmZimbraDriveTreeController = ZimbraDriveTreeController;
