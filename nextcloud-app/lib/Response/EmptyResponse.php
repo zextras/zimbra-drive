@@ -16,8 +16,9 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace OCA\ZimbraDrive\Controller;
+namespace OCA\ZimbraDrive\Response;
 
+use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Response;
 
 class EmptyResponse extends Response

@@ -64,7 +64,7 @@ class StorageService
         $searchedNode = $this->getNode($path);
         $searchedNodeType = $searchedNode->getType();
         if ($searchedNodeType !== Node::TYPE_FOLDER) {
-            $errorMessage = $path . 'is not a folder.';
+            $errorMessage = $path . ' is not a folder.';
             throw new MethodNotAllowedException($errorMessage);
         }
         return $searchedNode;

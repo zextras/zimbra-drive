@@ -18,13 +18,12 @@
 
 namespace OCA\ZimbraDrive\Controller;
 
+use OCA\ZimbraDrive\Response\EmptyResponse;
 use OCA\ZimbraDrive\Service\StorageService;
 use OCA\ZimbraDrive\Service\LogService;
 use OCA\ZimbraDrive\Service\QueryService;
 use OCA\ZimbraDrive\Service\BadRequestException;
-use OCA\ZimbraDrive\Service\UserService;
 use OCP\AppFramework\ApiController;
-use OCP\Http\Client\IResponse;
 use OCP\IRequest;
 use OCP\AppFramework\Http\JSONResponse;
 use OCA\ZimbraDrive\Service\LoginService;
@@ -32,12 +31,8 @@ use OCA\ZimbraDrive\Service\UnauthorizedException;
 use OCP\AppFramework\Http;
 use OCA\ZimbraDrive\Service\MethodNotAllowedException;
 use \Exception;
-use \OC\Files\Filesystem;
-use \OCP\Response;
-use OCP\AppFramework\Http\StreamResponse;
 use OCP\Files\NotPermittedException;
-use OCA\ZimbraDrive\Controller\EmptyResponse;
-
+use OCA\ZimbraDrive\Response\NodeResponse;
 
 class ZimbraDriveApiController extends ApiController
 {
@@ -79,15 +74,15 @@ class ZimbraDriveApiController extends ApiController
      * @param $username
      * @param $token
      * @param $query
-     * @return \OCA\ZimbraDrive\Controller\EmptyResponse|JSONResponse
+     * @return \OCP\AppFramework\Http\Response
      */
     public function searchRequest($username, $token, $query)
     {
-        $this->logger->info($username . ' call searchRequest.');
+        $this->logger->debug($username . ' call searchRequest.');
         try {
             $this->loginService->login($username, $token);
         } catch (UnauthorizedException $unauthorizedException) {
-            $this->logger->info($unauthorizedException->getMessage());
+            $this->logUnauthorizedLogin($unauthorizedException);
             return new EmptyResponse(Http::STATUS_UNAUTHORIZED);
         }
 
@@ -118,15 +113,15 @@ class ZimbraDriveApiController extends ApiController
      * @PublicPage
      * @param $username
      * @param $token
-     * @return \OCA\ZimbraDrive\Controller\EmptyResponse|JSONResponse
+     * @return \OCP\AppFramework\Http\Response
      */
     public function getAllFolders($username, $token)
     {
-        $this->logger->info($username . ' call getAllFolders.');
+        $this->logger->debug($username . ' call getAllFolders.');
         try {
             $this->loginService->login($username, $token);
         } catch (UnauthorizedException $unauthorizedException) {
-            $this->logger->info($unauthorizedException->getMessage());
+            $this->logUnauthorizedLogin($unauthorizedException);
             return new EmptyResponse(Http::STATUS_UNAUTHORIZED);
         }
 
@@ -147,22 +142,20 @@ class ZimbraDriveApiController extends ApiController
      * @param $username
      * @param $token
      * @param $path
-     * @return \OCA\ZimbraDrive\Controller\EmptyResponse
+     * @return \OCP\AppFramework\Http\Response
      */
     public function getFile($username, $token, $path)
+
     {
-        $this->logger->info($username . ' call getFile.');
+        $this->logger->debug($username . ' call getFile.');
         try {
             $this->loginService->login($username, $token);
         } catch (UnauthorizedException $unauthorizedException) {
-            $this->logger->info($unauthorizedException->getMessage());
+            $this->logUnauthorizedLogin($unauthorizedException);
             return new EmptyResponse(Http::STATUS_UNAUTHORIZED);
         }
 
-        $directory = dirname($path);
-        $fileName = basename($path);
-
-        \OC_Files::get($directory, $fileName);
+        return new NodeResponse($path);
     }
 
     /**
@@ -172,15 +165,15 @@ class ZimbraDriveApiController extends ApiController
      * @param $username
      * @param $token
      * @param $path
-     * @return \OCA\ZimbraDrive\Controller\EmptyResponse|JSONResponse
+     * @return \OCP\AppFramework\Http\Response
      */
     public function delete($username, $token, $path)
     {
-        $this->logger->info($username . ' call delete.');
+        $this->logger->debug($username . ' call delete.');
         try {
             $this->loginService->login($username, $token);
         } catch (UnauthorizedException $unauthorizedException) {
-            $this->logger->info($unauthorizedException->getMessage());
+            $this->logUnauthorizedLogin($unauthorizedException);
             return new EmptyResponse(Http::STATUS_UNAUTHORIZED);
         }
 
@@ -218,14 +211,19 @@ class ZimbraDriveApiController extends ApiController
      * @CORS
      * @NoCSRFRequired
      * @PublicPage
+     * @param $username
+     * @param $token
+     * @param $source_path
+     * @param $target_path
+     * @return \OCP\AppFramework\Http\Response
      */
     public function move($username, $token, $source_path, $target_path)
     {
-        $this->logger->info($username . ' call move.');
+        $this->logger->debug($username . ' call move.');
         try {
             $this->loginService->login($username, $token);
         } catch (UnauthorizedException $unauthorizedException) {
-            $this->logger->info($unauthorizedException->getMessage());
+            $this->logUnauthorizedLogin($unauthorizedException);
             return new EmptyResponse(Http::STATUS_UNAUTHORIZED);
         }
 
@@ -254,14 +252,18 @@ class ZimbraDriveApiController extends ApiController
      * @CORS
      * @NoCSRFRequired
      * @PublicPage
+     * @param $username
+     * @param $token
+     * @param $path
+     * @return \OCP\AppFramework\Http\Response
      */
     public function newDirectory($username, $token, $path)
     {
-        $this->logger->info($username . ' call newDirectory.');
+        $this->logger->debug($username . ' call newDirectory.');
         try {
             $this->loginService->login($username, $token);
         } catch (UnauthorizedException $unauthorizedException) {
-            $this->logger->info($unauthorizedException->getMessage());
+            $this->logUnauthorizedLogin($unauthorizedException);
             return new EmptyResponse(Http::STATUS_UNAUTHORIZED);
         }
 
@@ -287,15 +289,19 @@ class ZimbraDriveApiController extends ApiController
      * @CORS
      * @NoCSRFRequired
      * @PublicPage
+     * @param $username
+     * @param $token
+     * @param $path
+     * @return \OCP\AppFramework\Http\Response
      */
     public function uploadFile($username, $token, $path)
     {
-        $this->logger->info($username . ' call uploadFile.');
+        $this->logger->debug($username . ' call uploadFile.');
 
         try {
             $this->loginService->login($username, $token);
         } catch (UnauthorizedException $unauthorizedException) {
-            $this->logger->info($unauthorizedException->getMessage());
+            $this->logUnauthorizedLogin($unauthorizedException);
             return new EmptyResponse(Http::STATUS_UNAUTHORIZED);
         }
 
@@ -339,5 +345,13 @@ class ZimbraDriveApiController extends ApiController
     private function createFileStatusResponse($statusCode)
     {
         return array("statusCode" => $statusCode);
+    }
+
+    /**
+     * @param $exception Exception
+     */
+    private function logUnauthorizedLogin($exception)
+    {
+        $this->logger->info($exception->getMessage());
     }
 }
