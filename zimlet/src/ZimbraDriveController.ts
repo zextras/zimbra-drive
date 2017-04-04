@@ -181,7 +181,7 @@ export class ZimbraDriveController extends ZmListController {
       itemsResults.getArray().pop();
     }
     if (!this.isSearchResults) {
-      let currentFolderPath = (<ZmSearchResult>results).search.query.replace("in:", "").replace(/"/g, ""),
+      let currentFolderPath: string = (<ZmSearchResult>results).search.query.replace("in:", "").replace(/"/g, ""),
         treeFolder: ZimbraDriveFolder = rootFolder;
       if (currentFolderPath !== "" && currentFolderPath !== "/") {
         treeFolder = <ZimbraDriveFolder>rootFolder.getChildByPath(ZimbraDriveController.removeStartingAndEndingSlash(currentFolderPath));

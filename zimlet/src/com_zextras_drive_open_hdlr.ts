@@ -44,6 +44,7 @@ import {DwtMenu} from "./zimbra/ajax/dwt/widgets/DwtMenu";
 import {ZmOperation} from "./zimbra/zimbraMail/core/ZmOperation";
 import {ZmSearchResultsToolBar} from "./zimbra/zimbraMail/share/view/ZmSearchResultsToolBar";
 import {ZmAppViewMgrCreatedViewDescriptor} from "./zimbra/zimbraMail/core/ZmAppViewMgr";
+import {ZmSearchControllerSearchParams} from "./zimbra/zimbraMail/share/controller/ZmSearchController";
 
 export class ZimbraDriveZimlet extends ZmZimletBase implements CreateAppZimlet {
 
@@ -141,7 +142,14 @@ export class ZimbraDriveZimlet extends ZmZimletBase implements CreateAppZimlet {
       }
     }
     if (searchValue !== "") {
-      ZimbraDriveController.goToFolder(searchValue, true);
+      let searchParams: ZmSearchControllerSearchParams = {
+        query: searchValue,
+        userInitiated: true
+      };
+      let batchCommand = new ZmBatchCommand();
+      batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadGetAllFolderRequestParams));
+      batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadSearchRequestParams, [searchParams]));
+      batchCommand.run();
     }
   }
 
