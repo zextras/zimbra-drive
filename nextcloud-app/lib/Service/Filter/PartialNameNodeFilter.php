@@ -64,8 +64,6 @@ class PartialNameNodeFilter implements NodesFilter
             {
                 $name = strtolower($name);
             }
-            $this->logger->info('is case sensitive ? ' . var_export($this->isCaseSensitive, true));
-            $this->logger->info($name . ' == ' . $this->targetPartialName);
 
             if(strpos($name, $this->targetPartialName) !== false)
             {
