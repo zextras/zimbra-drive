@@ -19,13 +19,32 @@ import {ZmChooseFolderDialog} from "../zimbra/zimbraMail/share/view/dialog/ZmCho
 import {DwtTreeItem} from "../zimbra/ajax/dwt/widgets/DwtTreeItem";
 import {ZimbraDriveFolderItem} from "../ZimbraDriveFolderItem";
 import {AjxTemplate} from "../zimbra/ajax/boot/AjxTemplate";
+import {ZimbraDriveFolder} from "../ZimbraDriveFolder";
+import {ZmMsg} from "../zimbra/zimbraMail/ZmMsg";
+import {ZimbraDriveTreeController} from "../ZimbraDriveTreeController";
+import {AjxListener} from "../zimbra/ajax/events/AjxListener";
+import {DwtEvent} from "../zimbra/ajax/dwt/events/DwtEvent";
+import {DwtControl} from "../zimbra/ajax/dwt/widgets/DwtControl";
 
 export class ZimbraDriveChooseFolderDialog extends ZmChooseFolderDialog {
 
+  private _treeController: ZimbraDriveTreeController;
   private _actionedItem: DwtTreeItem|ZimbraDriveFolderItem;
+
+  constructor(parent: DwtControl, className: string, treeController: ZimbraDriveTreeController) {
+    super(parent, className);
+    this._treeController = treeController;
+  }
 
   public setActionedFolder(actionedItem: DwtTreeItem|ZimbraDriveFolderItem): void {
     this._actionedItem = actionedItem;
+    this._getNewButton().removeAllListeners(DwtEvent.SELECTION);
+    this._getNewButton().addSelectionListener(
+      new AjxListener(
+        this,
+        this.newFolderListener
+      )
+    );
   }
 
   public getActionedFolder(): DwtTreeItem|ZimbraDriveFolderItem {
@@ -38,5 +57,16 @@ export class ZimbraDriveChooseFolderDialog extends ZmChooseFolderDialog {
     this._folderTreeDivId = this._htmlElId + "_folderTreeDivId";
 
     return AjxTemplate.expand("com_zextras_drive_open.ZimbraDrive#ChooseFolderDialog", {id: this._htmlElId});
+  }
+
+
+  private newFolderListener(): void {
+    let targetFolder: ZimbraDriveFolder = <ZimbraDriveFolder> this._getOverview().getSelected();
+    if (!targetFolder) {
+      this._showError(ZmMsg.noTargetFolder);
+    }
+    else {
+      this._treeController.popupNewFolderDialog(targetFolder);
+    }
   }
 }

@@ -57,6 +57,7 @@ import {ZmFolderTreeController} from "./zimbra/zimbraMail/share/controller/ZmFol
 import {ZmOrganizer} from "./zimbra/zimbraMail/share/model/ZmOrganizer";
 import {DwtHeaderTreeItem} from "./zimbra/ajax/dwt/widgets/DwtHeaderTreeItem";
 import {DwtMenu} from "./zimbra/ajax/dwt/widgets/DwtMenu";
+import {AjxImg} from "./zimbra/ajax/core/AjxImg";
 
 export class ZimbraDriveTreeController extends ZmFolderTreeController {
 
@@ -89,6 +90,9 @@ export class ZimbraDriveTreeController extends ZmFolderTreeController {
     treeView._controller = this;
     this._initDragAndDrop(treeView);
     headerItem.getChildren()[0].setExpanded(true);
+    headerItem.enableSelection(false);
+    headerItem.enableAction(false);
+    AjxImg.setImage(headerItem._nodeCell);
 
     return treeView;
   }
@@ -318,7 +322,7 @@ export class ZimbraDriveTreeController extends ZmFolderTreeController {
 
   public getChooseFolderDialog(): ZimbraDriveChooseFolderDialog {
     if (!this._moveToDialog) {
-      this._moveToDialog = new ZimbraDriveChooseFolderDialog(appCtxt.getShell());
+      this._moveToDialog = new ZimbraDriveChooseFolderDialog(appCtxt.getShell(), null, this);
     }
     return this._moveToDialog;
   }
