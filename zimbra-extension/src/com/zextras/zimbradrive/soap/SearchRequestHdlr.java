@@ -97,18 +97,18 @@ public class SearchRequestHdlr implements SoapHandler
   private String getStandardQuery(String query) {
     StringBuilder parsedQueryBuilder = new StringBuilder();
 
-    Pattern nonQuotedTokenSValuePattern = Pattern.compile("((^| )[^ :]+:)([^\"]*?)( |$)"); //preTokenDelimiter tokenName : nonQuotedTokenValue postTokenDelimiter
+    Pattern nonQuotedTokenSValuePattern = Pattern.compile("([^ :]+:)([^\"]*?)( |$)"); //preTokenDelimiter tokenName : nonQuotedTokenValue postTokenDelimiter
     Matcher nonQuotedTokenSValueMatcher = nonQuotedTokenSValuePattern.matcher(query);
     int lastMatchEndIndex = 0;
     while(nonQuotedTokenSValueMatcher.find())
     {
       String preMatchValueQuery = query.substring(lastMatchEndIndex, nonQuotedTokenSValueMatcher.end(1));
 
-      String matchValueQuery = query.substring(nonQuotedTokenSValueMatcher.start(3), nonQuotedTokenSValueMatcher.end(3));
+      String matchValueQuery = query.substring(nonQuotedTokenSValueMatcher.start(2), nonQuotedTokenSValueMatcher.end(2));
 
       parsedQueryBuilder.append(preMatchValueQuery).append("\"").append(matchValueQuery).append("\"");
 
-      lastMatchEndIndex  = nonQuotedTokenSValueMatcher.end(3);
+      lastMatchEndIndex  = nonQuotedTokenSValueMatcher.end(2);
     }
 
     parsedQueryBuilder.append(query.substring(lastMatchEndIndex));
