@@ -36,6 +36,7 @@ import {appCtxt} from "../zimbra/zimbraMail/appCtxt";
 import {ZmSearch} from "../zimbra/zimbraMail/share/model/ZmSearch";
 import {ZmMsg} from "../zimbra/zimbraMail/ZmMsg";
 import {ZmList} from "../zimbra/zimbraMail/share/model/ZmList";
+import {ZimbraDriveApp} from "../ZimbraDriveApp";
 
 export class PreviewPaneView extends DwtComposite {
 
@@ -314,5 +315,10 @@ export class PreviewPaneView extends DwtComposite {
     }else {
       this._previewView.enablePreview(false);
     }
+  }
+
+  // For browser tab name
+  public getTitle(): string {
+    return  [ZmMsg.zimbraTitle, ZimbraDriveApp.getMessage("tabName")].join(": ");
   }
 }
