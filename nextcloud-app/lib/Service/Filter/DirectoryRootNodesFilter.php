@@ -62,7 +62,6 @@ class DirectoryRootNodesFilter implements NodesFilter
         {
             $nodeInternalPath = $node->getInternalPath();
             $nodeUserRootRelativePath = substr($nodeInternalPath, strlen("files"));
-            $this->logger->info($nodeUserRootRelativePath . ' == ' . $this->path);
             if($this->isInTheDirectoryTree($nodeUserRootRelativePath, $this->path))
             {
                 $filteredNodes[] = $node;
