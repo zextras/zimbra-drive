@@ -75,9 +75,9 @@ import {AjxDispatcher} from "./zimbra/ajax/boot/AjxDispatcher";
 import {DwtMessageDialog} from "./zimbra/ajax/dwt/widgets/DwtMessageDialog";
 import {ZimbraDriveWaitingDialog} from "./view/ZimbraDriveWaitingDialog";
 import {ZmOrganizer} from "./zimbra/zimbraMail/share/model/ZmOrganizer";
-import {ZmFolder} from "./zimbra/zimbraMail/share/model/ZmFolder";
 import {ZmList} from "./zimbra/zimbraMail/share/model/ZmList";
 import {DwtTreeItem} from "./zimbra/ajax/dwt/widgets/DwtTreeItem";
+import {ZmSearchControllerSearchParams} from "./zimbra/zimbraMail/share/controller/ZmSearchController";
 
 declare let window: {
   csrfToken: string
@@ -707,7 +707,11 @@ export class ZimbraDriveController extends ZmListController {
 
   public static goToFolder(folderPath: string, userInitiated: boolean, givenBatchCommand?: ZmBatchCommand): void {
     // folder path must have last slash
-    let batchCommand: ZmBatchCommand;
+    let batchCommand: ZmBatchCommand,
+      searchParams: ZmSearchControllerSearchParams = {
+        query: `in:"${folderPath}"`,
+        userInitiated: userInitiated
+      };
     if (!givenBatchCommand) {
       batchCommand = new ZmBatchCommand();
     }
@@ -716,13 +720,17 @@ export class ZimbraDriveController extends ZmListController {
     }
     // TODO: ZD-32
     batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadGetAllFolderRequestParams));
-    batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadSearchRequestParams, [`in:"${folderPath}"`, userInitiated]));
+    batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadSearchRequestParams, [searchParams]));
     batchCommand.run();
   }
 
   public static refreshList(): void {
-    let batchCommand = new ZmBatchCommand();
-    batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadSearchRequestParams, [`in:"${ZimbraDriveController._currentFolderInstance.getPath()}"`, false]));
+    let batchCommand = new ZmBatchCommand(),
+      searchParams: ZmSearchControllerSearchParams = {
+      query: `in:"${ZimbraDriveController._currentFolderInstance.getPath()}"`,
+      userInitiated: false
+    };
+    batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadSearchRequestParams, [searchParams]));
     batchCommand.run();
   }
 

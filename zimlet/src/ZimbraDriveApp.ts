@@ -143,8 +143,7 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
     );
   }
 
-  public static loadSearchRequestParams(query: string, userInitiated: boolean, batchCommand?: ZmBatchCommand): void {
-    let params: ZmSearchControllerSearchParams = {query:  query};
+  public static loadSearchRequestParams(params: ZmSearchControllerSearchParams, batchCommand?: ZmBatchCommand): void {
     params.soapInfo = {
       method: ZimbraDriveApp.SEARCH_REQ,
       response: ZimbraDriveApp.SEARCH_RESP,
@@ -153,10 +152,12 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
     };
     params.types = [ZDId.ZIMBRADRIVE_ITEM];
     params.checkTypes = true;
-    if (userInitiated) {
-      params.userInitiated = userInitiated;
-      params.origin = ZmId.SEARCH;
-      (<string[]>params.types).push(ZDId.ZIMBRADRIVE_FOLDER);
+    if (params.userInitiated) {
+      params.origin = ZmId.SEARCHRESULTS;
+      params.types.push(ZDId.ZIMBRADRIVE_FOLDER);
+    }
+    else {
+      params.soapInfo.additional["casesensitive"] = {};
     }
     let search = new ZmSearch(params);
     search.execute(
