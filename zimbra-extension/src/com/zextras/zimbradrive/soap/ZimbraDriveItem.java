@@ -47,4 +47,5 @@ public class ZimbraDriveItem
   public static final String F_REQ_ID = "requestId";
   public static final String F_NODE_TYPE_FILE = "file";
   public static final String F_NODE_TYPE_FOLDER = "folder";
+  public static final String F_CASESENSITIVE = "casesensitive";
 }

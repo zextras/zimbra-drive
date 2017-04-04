@@ -58,11 +58,18 @@ public class SearchRequestHdlr implements SoapHandler
       String requestedTypesCsv = zimbraContext.getParameter("types", "");
       soapResponse.setValue("types", requestedTypesCsv);
 
+      Boolean isCaseSensitive = false;
+      if(zimbraContext.getParameterMap().containsKey(ZimbraDriveItem.F_CASESENSITIVE))
+      {
+        isCaseSensitive = true;
+        soapResponse.setValue(ZimbraDriveItem.F_CASESENSITIVE, "");
+      }
+
       if (query.equals("")) { return; }
       String parsedQuery = getStandardQuery(query);
 
       String[] requestedTypesArray = requestedTypesCsv.split(",");
-      if(requestedTypesArray.length == 1)
+      if(requestedTypesArray.length == 1 && requestedTypesArray[0].length() == 0)
       {
         requestedTypesArray = new String[]{ZimbraDriveItem.F_NODE_TYPE_FILE,
           ZimbraDriveItem.F_NODE_TYPE_FOLDER};
@@ -74,6 +81,7 @@ public class SearchRequestHdlr implements SoapHandler
 
       HttpResponse response = queryDriveOnCloudServerService(zimbraContext,
           parsedQuery,
+          isCaseSensitive,
           requestedTypesCsv);
       BasicResponseHandler basicResponseHandler = new BasicResponseHandler();
       String responseBody = basicResponseHandler.handleResponse(response);  //throw HttpResponseException if status code >= 300
@@ -110,10 +118,12 @@ public class SearchRequestHdlr implements SoapHandler
 
   private HttpResponse queryDriveOnCloudServerService(final ZimbraContext zimbraContext,
                                                       final String query,
+                                                      Boolean isCaseSensitive,
                                                       final String types) throws IOException {
     List<NameValuePair> driveOnCloudParameters = mCloudUtils.createDriveOnCloudAuthenticationParams(zimbraContext);
     driveOnCloudParameters.add(new BasicNameValuePair("query", query));
     driveOnCloudParameters.add(new BasicNameValuePair("types", types));
+    driveOnCloudParameters.add(new BasicNameValuePair("caseSensitive", isCaseSensitive.toString()));
     return mCloudUtils.sendRequestToCloud(zimbraContext, driveOnCloudParameters, COMMAND + "Request");
   }
 

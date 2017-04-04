@@ -115,7 +115,7 @@ class StorageService
         $folderAsArray = array();
         $nodes = $folder->getDirectoryListing();
         foreach ($nodes as $nodeKey => $nodeValue) {
-            $folderAsArray[] = $this->getNodesAttributes($nodeValue);
+            $folderAsArray[] = $this->getNodeAttributes($nodeValue);
         }
         return $folderAsArray;
     }
@@ -166,7 +166,7 @@ class StorageService
      * @param Node $node
      * @return array
      */
-    public function getNodesAttributes(Node $node)
+    public function getNodeAttributes(Node $node)
     {
         $nodeAttributeMap = $this->getNodesCommonAttributes($node);
         $type = "";
@@ -183,6 +183,21 @@ class StorageService
         }
         $nodeAttributeMap[ResponseVarName::NODE_TYPE_VAR_NAME] = $type;
         return $nodeAttributeMap;
+    }
+
+    /**
+     * @param $nodes array
+     * @return array
+     */
+    public function getNodesAttributes($nodes)
+    {
+        $nodesAttributes = array();
+        /** @var Node $node */
+        foreach($nodes as $node)
+        {
+            $nodesAttributes[] = $this->getNodeAttributes($node);
+        }
+        return $nodesAttributes;
     }
 
 
@@ -360,7 +375,7 @@ class StorageService
      * @param $nodeChild Node
      * @return bool
      */
-    private function isFolder($nodeChild)
+    public function isFolder($nodeChild)
     {
         return $nodeChild->getType() === Folder::TYPE_FOLDER;
     }
@@ -415,5 +430,36 @@ class StorageService
         }
 
         return $pathLevelsWithoutEmptyLevels;
+    }
+
+    /**
+     * @param string $nodePath
+     * @return array
+     */
+    public function getFolderDescendantsFromPath($nodePath = "/")
+    {
+        $folder = $this->getFolder($nodePath);
+        return $this->getFolderDescendants($folder);
+    }
+
+    /**
+     * @param $folder Folder
+     * @return array
+     */
+    public function getFolderDescendants($folder)
+    {
+        $folderChildren = $folder->getDirectoryListing();
+        $nodeDescendants = $folderChildren;
+        /** @var Node $folderChild */
+        foreach($folderChildren as $folderChild)
+        {
+            if($this->isFolder($folderChild))
+            {
+                /** @var Folder $folderChild */
+                $folderChildDescendant = $this->getFolderDescendants($folderChild);
+                $nodeDescendants = array_merge($nodeDescendants, $folderChildDescendant);
+            }
+        }
+        return $nodeDescendants;
     }
 }

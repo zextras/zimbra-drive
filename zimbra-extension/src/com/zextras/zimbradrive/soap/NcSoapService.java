@@ -35,7 +35,6 @@ public class NcSoapService implements SoapService
     MoveHdlr moveHdlr = new MoveHdlr(cloudUtils);
     mServiceMap = new HashMap<>();
     mServiceMap.put(SearchRequestHdlr.QNAME, new SearchRequestHdlr(cloudUtils));
-    mServiceMap.put(GetFolderChildrenHdlr.QNAME, new GetFolderChildrenHdlr(cloudUtils));
     mServiceMap.put(GetAllFoldersHdlr.QNAME, new GetAllFoldersHdlr(cloudUtils));
     mServiceMap.put(DeleteHdlr.QNAME, new DeleteHdlr(cloudUtils));
     mServiceMap.put(MoveHdlr.QNAME, moveHdlr);

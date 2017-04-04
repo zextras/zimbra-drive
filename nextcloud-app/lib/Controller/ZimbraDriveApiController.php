@@ -24,7 +24,6 @@ use OCA\ZimbraDrive\Service\StorageService;
 use OCA\ZimbraDrive\Service\LogService;
 use OCA\ZimbraDrive\Service\BadRequestException;
 use OCP\AppFramework\ApiController;
-use OCP\Files\Folder;
 use OCP\IRequest;
 use OCP\AppFramework\Http\JSONResponse;
 use OCA\ZimbraDrive\Service\LoginService;
@@ -33,6 +32,7 @@ use OCP\AppFramework\Http;
 use OCA\ZimbraDrive\Service\MethodNotAllowedException;
 use \Exception;
 use OCP\Files\NotPermittedException;
+use OCP\AppFramework\Http\Response;
 
 class ZimbraDriveApiController extends ApiController
 {
@@ -74,9 +74,11 @@ class ZimbraDriveApiController extends ApiController
      * @param $username
      * @param $token
      * @param $query
-     * @return \OCA\ZimbraDrive\Controller\EmptyResponse|JSONResponse
+     * @param $types
+     * @param $caseSensitive bool
+     * @return Response
      */
-    public function searchRequest($username, $token, $query, $types)
+    public function searchRequest($username, $token, $query, $types, $caseSensitive)
     {
         $this->logger->info($username . ' call searchRequest.');
         try {
@@ -87,9 +89,10 @@ class ZimbraDriveApiController extends ApiController
         }
 
         $types = json_decode($types, false);
+        $caseSensitive = $caseSensitive === "true";
 
         try {
-            $wantedFiles =  $this->searchService->search($query);
+            $wantedFiles =  $this->searchService->search($query, $caseSensitive);
         } catch (BadRequestException $badRequestException) {
             $this->logger->info($badRequestException->getMessage());
             return new EmptyResponse(Http::STATUS_FORBIDDEN);
@@ -97,10 +100,11 @@ class ZimbraDriveApiController extends ApiController
         catch (MethodNotAllowedException $methodNotAllowedException) {
             $this->logger->info($methodNotAllowedException->getMessage());
             return new EmptyResponse(Http::STATUS_METHOD_NOT_ALLOWED);
-        } catch (Exception $exception) {
-            $this->logger->info($exception->getMessage());
-            return new EmptyResponse(Http::STATUS_FORBIDDEN);
         }
+//        catch (Exception $exception) {
+//            $this->logger->info($exception->getMessage());
+//            return new EmptyResponse(Http::STATUS_FORBIDDEN);
+//        }
 
         $results = $this->filterTypes($wantedFiles, $types);
         $resultsNoShares = $this->filterShareNodes($results);
@@ -163,37 +167,6 @@ class ZimbraDriveApiController extends ApiController
         $folderTree = $this->storageService->getFolderTreeAttributes($searchedFolder);
         $folderTreeNoShare = $this->filterShareTreeNodes($folderTree);
         return new JSONResponse($folderTreeNoShare);
-    }
-
-    /**
-     * @CORS
-     * @NoCSRFRequired
-     * @PublicPage
-     * @param $username
-     * @param $token
-     * @param $path
-     * @param $types
-     * @return Http\Response
-     */
-    public function getFolderChildren($username, $token, $path, $types)
-    {
-        $this->logger->info($username . ' call getFoldersChild.');
-
-        try {
-            $this->loginService->login($username, $token);
-        } catch (UnauthorizedException $unauthorizedException) {
-            $this->logger->info($unauthorizedException->getMessage());
-            return new EmptyResponse(Http::STATUS_UNAUTHORIZED);
-        }
-
-        $searchedFolder = $this->storageService->getFolder($path);
-        $foldersChildren = $this->storageService->folderChildNodesAttributes($searchedFolder);
-
-        $types = json_decode($types, false);
-        $folderChildrenFiltered = $this->filterTypes($foldersChildren, $types);
-        $foldersFilteredNoShare = $this->filterShareNodes($folderChildrenFiltered);
-        return new JSONResponse($foldersFilteredNoShare);
-
     }
 
     /**

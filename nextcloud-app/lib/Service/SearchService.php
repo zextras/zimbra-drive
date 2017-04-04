@@ -18,13 +18,13 @@
 
 namespace OCA\ZimbraDrive\Service;
 
+use OCA\ZimbraDrive\Service\Filter\FilterFactory;
 use OCP\Files\Folder;
-use OCP\ISearch;
+use OCA\ZimbraDrive\Service\Filter\FilterFactoryProvider;
+use OCA\ZimbraDrive\Service\Filter\FilterUtils;
 
 class SearchService
 {
-    const REX_PATH_IN_QUERY = '/^in:"([^"]*)"$/';
-    private $searchService;
     /**
      * @var LogService
      */
@@ -33,73 +33,80 @@ class SearchService
      * @var StorageService
      */
     private $storageService;
+    /**
+     * @var FilterFactoryProvider
+     */
+    private $filterFactoryProvider;
+    /**
+     * @var FilterUtils
+     */
+    private $filterUtils;
 
     /**
      * SearchService constructor.
-     * @param $searchService ISearch
      * @param StorageService $storageService
      * @param LogService $logService
+     * @param FilterFactoryProvider $filterFactoryProvider
+     * @param FilterUtils $filterUtils
+     * @internal param FilterFactory $filterFactory
      */
-    public function __construct(ISearch $searchService, StorageService $storageService, LogService $logService)
+    public function __construct(StorageService $storageService, LogService $logService, FilterFactoryProvider $filterFactoryProvider, FilterUtils $filterUtils)
     {
-        $this->searchService = $searchService;
         $this->logger = $logService;
         $this->storageService = $storageService;
+        $this->filterFactoryProvider = $filterFactoryProvider;
+        $this->filterUtils = $filterUtils;
     }
 
 
     /**
-     * @param string $query
+     * @param $query string
+     * @param $isCaseSensitive
      * @return array
      */
-    public function search($query)
+    public function search($query, $isCaseSensitive)
     {
-        if($this->queryIsFoldersContentsRequest($query))
+        if($this->filterUtils->queryIsFoldersContentsRequest($query)) //actually only 'in:' is supports
         {
-            return $this->getFoldersContent($query);
+            $path = $this->filterUtils->assertPathFromToken($query);
+
+            if($isCaseSensitive)
+            {
+                $results = $this->getFoldersContentCaseSensitive($path);
+            } else
+            {
+                $results = $this->getFoldersContentCaseInsensitive($path);
+            }
+            return $results;
+        }
+
+
+        if($isCaseSensitive)
+        {
+            $filterFactory = $this->filterFactoryProvider->getCaseSensitiveFilterFactory();
+        } else
+        {
+            $filterFactory = $this->filterFactoryProvider->getNonCaseSensitiveFilterFactory();
         }
 
         /** @var $tokens array */
         $tokens = $this->getTokens($query);
 
-        $stringWanted = $this->getStringToFind($tokens);
-
-        $appProvideSearch = array('files');
-
-        $pageNumber = 1;
-        $resultsPerPage = 0; //0 -> all
-
-        $allResults = $this->searchService->searchPaged($stringWanted, $appProvideSearch, $pageNumber, $resultsPerPage);
-
         $rootDirectoryOfTheSearch = $this->getRootDirectoryOfTheSearch($tokens);
 
-        $resultsFilterByFolder = $this->filterByFolder($allResults, $rootDirectoryOfTheSearch);
-
-        $results = $this->resultFileToArray($resultsFilterByFolder);
-
-        return $results;
-    }
-
-
-    /**
-     * @param $query
-     * @return string
-     * @throws BadRequestException
-     */
-    //$query must be 'in:"..."'
-    public function getPath($query)
-    {
-        //is a valid 'in:' query, and extract the path
-        $find = preg_match(self::REX_PATH_IN_QUERY, $query, $matches);
-        if ($find == false)
+        $nodeResults = $this->storageService->getFolderDescendantsFromPath($rootDirectoryOfTheSearch);
+        foreach($tokens as $token)
         {
-            $message = 'Not valid query \'' . $query . '\'';
-            throw new BadRequestException($message);
+            if(sizeof($nodeResults) <= 0)
+            {
+                break;
+            }
+            $nodeResults = $this->filterNodesByToken($nodeResults, $token, $filterFactory);
         }
-        $path = $matches[1];
-        return $path;
-    }
 
+        $nodeArrayResults = $this->storageService->getNodesAttributes($nodeResults);
+        return $nodeArrayResults;
+    }
 
     /**
      * @param $query string
@@ -120,7 +127,7 @@ class SearchService
         foreach ($tokens as $token)
         {
             $find = preg_match('~^in:"([^"]*)/*"$~', $token, $matches);
-            if ($find == true)
+            if ($find === true)
             {
                 $path = $matches[1];
                 return $path;
@@ -130,144 +137,37 @@ class SearchService
     }
 
     /**
-     * @param $tokens array
-     * @return string
-     */
-    private function getStringToFind($tokens)
-    {
-
-        foreach ($tokens as $token)
-        {
-            if($this->isPlainText($token))
-                return $token;
-        }
-        return '';
-    }
-
-    /**
-     * @param $allResults array of \OC\Search\Result\File
-     * @param $rootDirectoryOfTheSearch string
-     * @return array of \OC\Search\Result\File
-     */
-    private function filterByFolder($allResults, $rootDirectoryOfTheSearch)
-    {
-        $filteredResults = array();
-
-        /** @var \OC\Search\Result\File $resultToFilter this is true because it use only the files search provider
-         * and all result objects are descendants of File*/
-        foreach($allResults as $resultToFilter)
-        {
-            $resultPath = $resultToFilter->path;
-            if($this->isInTheDirectoryTree($resultPath, $rootDirectoryOfTheSearch))
-            {
-                $filteredResults[] = $resultToFilter;
-            }
-        }
-        return $filteredResults;
-    }
-
-    /**
-     * @param $tokens string
-     * @return bool
-     */
-    private function isPlainText($tokens)
-    {
-        return ! $this->isValidSearchOperator($tokens);
-    }
-
-    /**
-     * @param $tokens string
-     * @return bool
-     */
-    private function isValidSearchOperator($tokens)
-    {
-        $find = preg_match('/^([^ :]+:"[^"]*")$/', $tokens, $matches);
-        if ($find == false)
-        {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * @param $path string
-     * @param $treeDirectoryRoot string
-     * @return bool
-     */
-    private function isInTheDirectoryTree($path, $treeDirectoryRoot)
-    {
-        $firstPathChar = substr($treeDirectoryRoot, 0, 1);
-        if($firstPathChar !== "/")
-        {
-            $treeDirectoryRoot = "/" . $treeDirectoryRoot;
-        }
-
-        $lastPathChar = substr($treeDirectoryRoot, -1);
-        if($lastPathChar !== "/")
-        {
-            $treeDirectoryRoot = $treeDirectoryRoot . "/";
-        }
-
-        if(strlen($path) <= strlen($treeDirectoryRoot))
-        {
-            return false;
-        }
-        $rootPath = substr($path, 0, strlen($treeDirectoryRoot));
-
-        $rootPath = strtolower($rootPath);
-        $treeDirectoryRoot = strtolower($treeDirectoryRoot);
-
-        if(strcmp($rootPath, $treeDirectoryRoot) === 0)
-        {
-            return true;
-        }
-
-        return false;
-
-
-    }
-
-    /**
-     * @param $wantedFiles array of \OC\Search\Result\File
+     * @param $path
      * @return array
+     * @internal param string $query
      */
-    public function resultFileToArray($wantedFiles)
+    private function getFoldersContentCaseInsensitive($path)
     {
-        $results = array();
-        /** @var \OC\Search\Result\File $wantedFile */
-        foreach ($wantedFiles as $wantedFile)
-        {
-            $file = $this->storageService->getNode($wantedFile->path);
-            $result = $this->storageService->getNodesAttributes($file);
-            $results[] = $result;
-        }
-        return $results;
-    }
-
-    /**
-     * @param $query string
-     * @return bool
-     */
-    private function queryIsFoldersContentsRequest($query)
-    {
-        $find = preg_match(self::REX_PATH_IN_QUERY, $query, $matches);
-        if ($find == false)
-        {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * @param $query string
-     * @return array
-     */
-    private function getFoldersContent($query)
-    {
-        $path = $this->getPath($query);
-
         $folders = $this->storageService->getFoldersNonSensitivePath($path);
 
+        return $this->getFoldersContent($folders);
+    }
+
+    /**
+     * @param $path
+     * @return array
+     * @internal param string $query
+     */
+    private function getFoldersContentCaseSensitive($path)
+    {
+        $folder = $searchedFolder = $this->storageService->getFolder($path);
+
+        $folders =  array($folder);
+
+        return $this->getFoldersContent($folders);
+    }
+
+    /**
+     * @param $folders array of Folder
+     * @return array
+     */
+    private function getFoldersContent($folders)
+    {
         $foldersChildrenArrayResult =  array();
         /** @var Folder $folder */
         foreach($folders as $folder)
@@ -278,4 +178,16 @@ class SearchService
         return $foldersChildrenArrayResult;
     }
 
+    /**
+     * @param $nodesToFilter array
+     * @param $token string
+     * @param $filterFactory FilterFactory
+     * @return mixed
+     * @internal param Node $nodeToFilter
+     */
+    private function filterNodesByToken($nodesToFilter, $token, $filterFactory)
+    {
+        $filter = $filterFactory->createFilter($token);
+        return $filter->filter($nodesToFilter);
+    }
 }
