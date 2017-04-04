@@ -85,7 +85,7 @@ export class DetailListView extends ZimbraDriveBaseView {
     }
   };
 
-  public _dropListener(ev: DwtDropEvent): void {
+  public _dropListener(ev: DwtDropEvent): boolean {
     let data: ZimbraDriveItem| ZimbraDriveItem[]| ZimbraDriveFolder| ZimbraDriveFolder[] = ev.srcData.data;
     let div = this.getTargetItemDiv(ev.uiEvent);
     let dropFolder = this.getItemFromElement(div);
@@ -101,6 +101,7 @@ export class DetailListView extends ZimbraDriveBaseView {
     } else if (ev.action === DwtDropEvent.DRAG_OP_CHANGED) {
       // nothing
     }
+    return true;
   };
 
   public _initDragAndDrop(): void {

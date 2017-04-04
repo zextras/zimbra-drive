@@ -45,6 +45,7 @@ import {ZmZimbraMail} from "../zimbra/zimbraMail/core/ZmZimbraMail";
 import {ZimbraDriveApp} from "../ZimbraDriveApp";
 import {ZmStatusView} from "../zimbra/zimbraMail/share/view/ZmStatusView";
 import {ZmCsfeException} from "../zimbra/zimbra/csfe/ZmCsfeException";
+import {ZimbraDriveController} from "../ZimbraDriveController";
 
 export class ZimbraDriveBaseView extends ZmListView {
 
@@ -163,6 +164,7 @@ export class ZimbraDriveBaseView extends ZmListView {
     let msg: string = ZimbraDriveApp.getMessage("successfulRename"),
       level: number = ZmStatusView.LEVEL_INFO;
     appCtxt.setStatusMsg({msg: msg, level: level});
+    ZimbraDriveController.sortCurrentList();
     return true;
   }
 

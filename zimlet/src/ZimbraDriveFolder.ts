@@ -51,7 +51,8 @@ export class ZimbraDriveFolder extends ZmFolder {
     this.path = `${(this.parent) ? (<ZimbraDriveFolder>this.parent).getPath(true) : "" }${node.name}/`;
     this.parentName = (this.parent) ? (<ZimbraDriveFolder> this.parent).name : undefined;
     this.owner = node.author;
-    if (this.path === "/") {
+    // if (this.path === "/") {
+    if (!this.parent) {
       this.id = `${ZmFolder.ID_ROOT}_zd`;
       this.name = ZimbraDriveApp.getMessage("rootName");
       ZmFolder.HIDE_ID[`${ZmFolder.ID_ROOT}_zd`] = true;
@@ -90,13 +91,20 @@ export class ZimbraDriveFolder extends ZmFolder {
     this.path = this.getParent().getPath(true) + this.name + "/";
   }
 
-  public getPath(keepLastSlash?: boolean): string {
-    // expected last char of this.path be "/"
-    // by default return without it
-    if (keepLastSlash) {
-      return this.path;
+  public getPath(needLastSlash?: boolean): string {
+    // // expected last char of this.path be "/"
+    // // by default return without it
+    // if (needLastSlash) {
+    //   return this.path;
+    // }
+    // return this.path.substring(0, this.path.length - 1);
+
+    // get path and remove root folder name Drive
+    let completePath: string = super.getPath().replace("Drive", "");
+    if (needLastSlash) {
+      completePath += "/";
     }
-    return this.path.substring(0, this.path.length - 1);
+    return completePath;
   }
 
   public getFolderItem(): ZimbraDriveFolderItem {

@@ -141,10 +141,7 @@ export class ZimbraDriveZimlet extends ZmZimletBase implements CreateAppZimlet {
       }
     }
     if (searchValue !== "") {
-      let batchCommand = new ZmBatchCommand();
-      batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadGetAllFolderRequestParams));
-      batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadSearchRequestParams, [searchValue, true]));
-      batchCommand.run();
+      ZimbraDriveController.goToFolder(searchValue, true);
     }
   }
 

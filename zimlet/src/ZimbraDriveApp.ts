@@ -94,7 +94,7 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
     this._setLaunchTime(this.toString(), new Date());
     let newButton: DwtToolBarButton = (<ZmZimbraMail> appCtxt.getAppController()).getNewButton();
     this._defaultNewButtonMenu = newButton.getMenu(true);
-    ZimbraDriveController.goToFolder("/");
+    ZimbraDriveController.goToFolder("/", false);
     if (callback) { callback.run(); }
   }
 
@@ -355,7 +355,7 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
     }
     folderTree.root.children.add(rootToAdd);
     // TODO save and apply axpand/collapsed folders
-    appCtxt.getOverviewController().getTreeView("main_" + ZimbraDriveApp.APP_NAME, ZimbraDriveApp.APP_NAME);
+    // appCtxt.getOverviewController().getTreeView("main_" + ZimbraDriveApp.APP_NAME, ZimbraDriveApp.APP_NAME);
     return true; // handled
   }
 
@@ -442,7 +442,7 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
 
   public runRefresh(): void {
     if (this.isActive() && ZimbraDriveController.getCurrentFolder()) {
-      ZimbraDriveController.goToFolder(ZimbraDriveController.getCurrentFolder().getPath(true));
+      ZimbraDriveController.goToFolder(ZimbraDriveController.getCurrentFolder().getPath(true), false);
     }
   }
 
