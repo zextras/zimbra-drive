@@ -408,8 +408,8 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
       tooltip: ZmMsg.uploadDocs,
       defaultId: ZDId.ZD_NEW_FILE
     };
-    let currentViewId: string = appCtxt.getAppViewMgr().getAppView("ZIMBRA_DRIVE");
-    if (currentViewId && currentViewId !== appCtxt.getCurrentViewId()) {
+    let currentViewId: string = this.getSessionController({controllerClass: "ZmZimbraDriveController", sessionId: "main"}).getCurrentViewId();
+    if (currentViewId !== appCtxt.getCurrentViewId()) {
       params.disabled = true;
     }
     return params;
@@ -454,5 +454,10 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
     this._attachDialog.getDriveView(composeView._controller);
     this._attachDialog.popup();
   }
+}
 
+export interface ZimbraDriveSearchParams {
+  query: string;
+  userInitiated: boolean;
+  origin?: string;
 }

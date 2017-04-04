@@ -298,4 +298,122 @@ class StorageService
 
         Filesystem::fromTmpFile($tempFilePath, $newFileFullPath);
     }
+
+    /**
+     * @param $path
+     * @return array of Folder
+     */
+    public function getFoldersNonSensitivePath($path)
+    {
+        $rootFolder = $this->getFolder(self::ROOT);
+        $folderResults = array($rootFolder);
+
+        $folderLevels = $this->getPathLevels($path);
+
+        foreach($folderLevels as $folderLevel)
+        {
+            $foldersChildren = $this->getFoldersChildOfFolderArray($folderResults);
+
+            $folderResults = $this->filterNodeByNameNonCaseSensitiveName($foldersChildren, $folderLevel);
+        }
+
+        return $folderResults;
+    }
+
+    /**
+     * @param $folders array of Folder
+     * @return array
+     */
+    private function getFoldersChildOfFolderArray($folders)
+    {
+        $foldersResult = array();
+        /** @var Folder $folder */
+        foreach($folders as $folder)
+        {
+            $folderChild = $this->getChildFolders($folder);
+            $foldersResult = array_merge($foldersResult, $folderChild);
+        }
+        return $foldersResult;
+    }
+
+    /**
+     * @param $folder Folder
+     * @return array
+     */
+    private function getChildFolders($folder)
+    {
+        $childFolders = array();
+
+        $nodesChild = $folder->getDirectoryListing();
+        foreach($nodesChild as $nodeChild)
+        {
+            if($this->isFolder($nodeChild))
+            {
+                $childFolders[] = $nodeChild;
+            }
+        }
+
+        return $childFolders;
+    }
+
+    /**
+     * @param $nodeChild Node
+     * @return bool
+     */
+    private function isFolder($nodeChild)
+    {
+        return $nodeChild->getType() === Folder::TYPE_FOLDER;
+    }
+
+    /**
+     * @param $nodes array of Node
+     * @param $targetName string
+     * @return array of Node
+     */
+    private function filterNodeByNameNonCaseSensitiveName($nodes, $targetName)
+    {
+        $filterNodes = array();
+        /** @var Node $node */
+        foreach($nodes as $node)
+        {
+            $nodeName = $node->getName();
+
+            if($this->nonCaseSensitiveCompare($nodeName, $targetName))
+            {
+                $filterNodes[] = $node;
+            }
+        }
+        return $filterNodes;
+    }
+
+    /**
+     * @param $string1
+     * @param $string2
+     * @return bool
+     */
+    private function nonCaseSensitiveCompare($string1, $string2)
+    {
+        return strcasecmp($string1, $string2) === 0;
+    }
+
+    /**
+     * @param $path
+     * @return array
+     */
+    private function getPathLevels($path)
+    {
+        $pathLevels = explode("/", $path);
+
+        $pathLevelsWithoutEmptyLevels = array();
+
+        foreach($pathLevels as $pathLevel)
+        {
+            if($pathLevel !== "")
+            {
+                $pathLevelsWithoutEmptyLevels[] = $pathLevel;
+            }
+        }
+
+        return $pathLevelsWithoutEmptyLevels;
+    }
 }

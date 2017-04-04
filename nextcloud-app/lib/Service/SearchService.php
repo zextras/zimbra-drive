@@ -18,6 +18,7 @@
 
 namespace OCA\ZimbraDrive\Service;
 
+use OCP\Files\Folder;
 use OCP\ISearch;
 
 class SearchService
@@ -55,7 +56,7 @@ class SearchService
     {
         if($this->queryIsFoldersContentsRequest($query))
         {
-            return $this->getContentFolder($query);
+            return $this->getFoldersContent($query);
         }
 
         /** @var $tokens array */
@@ -72,10 +73,9 @@ class SearchService
 
         $rootDirectoryOfTheSearch = $this->getRootDirectoryOfTheSearch($tokens);
 
-
         $resultsFilterByFolder = $this->filterByFolder($allResults, $rootDirectoryOfTheSearch);
 
-        $results = $this->fileToArray($resultsFilterByFolder);
+        $results = $this->resultFileToArray($resultsFilterByFolder);
 
         return $results;
     }
@@ -214,6 +214,9 @@ class SearchService
         }
         $rootPath = substr($path, 0, strlen($treeDirectoryRoot));
 
+        $rootPath = strtolower($rootPath);
+        $treeDirectoryRoot = strtolower($treeDirectoryRoot);
+
         if(strcmp($rootPath, $treeDirectoryRoot) === 0)
         {
             return true;
@@ -228,7 +231,7 @@ class SearchService
      * @param $wantedFiles array of \OC\Search\Result\File
      * @return array
      */
-    public function fileToArray($wantedFiles)
+    public function resultFileToArray($wantedFiles)
     {
         $results = array();
         /** @var \OC\Search\Result\File $wantedFile */
@@ -259,12 +262,20 @@ class SearchService
      * @param $query string
      * @return array
      */
-    private function getContentFolder($query)
+    private function getFoldersContent($query)
     {
         $path = $this->getPath($query);
-        $searchedFolder = $this->storageService->getFolder($path);
-        $folderAsArray = $this->storageService->folderChildNodesAttributes($searchedFolder);
-        return $folderAsArray;
+
+        $folders = $this->storageService->getFoldersNonSensitivePath($path);
+
+        $foldersChildrenArrayResult =  array();
+        /** @var Folder $folder */
+        foreach($folders as $folder)
+        {
+            $folderChildren = $this->storageService->folderChildNodesAttributes($folder);
+            $foldersChildrenArrayResult = array_merge($foldersChildrenArrayResult, $folderChildren) ;
+        }
+        return $foldersChildrenArrayResult;
     }
 
 }

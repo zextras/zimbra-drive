@@ -18,7 +18,8 @@
 package com.zextras.zimbradrive.soap;
 
 
-import com.zextras.zimbradrive.*;
+import com.zextras.zimbradrive.CloudUtils;
+import com.zextras.zimbradrive.ZimbraDriveExtension;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.impl.client.BasicResponseHandler;
@@ -28,19 +29,17 @@ import org.openzal.zal.soap.*;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-public class SearchRequestHdlr implements SoapHandler
+public class GetFolderChildrenHdlr implements SoapHandler
 {
-  private static final String COMMAND = "Search";
+  private static final String COMMAND = "GetFolderChildren";
 
   public static final QName QNAME = new QName(COMMAND +"Request", ZimbraDriveExtension.SOAP_NAMESPACE);
   private static final QName RESPONSE_QNAME = new QName(COMMAND + "Response", ZimbraDriveExtension.SOAP_NAMESPACE);
 
   private final CloudUtils mCloudUtils;
 
-  public SearchRequestHdlr(CloudUtils cloudUtils)
+  public GetFolderChildrenHdlr(CloudUtils cloudUtils)
   {
     mCloudUtils = cloudUtils;
   }
@@ -52,14 +51,11 @@ public class SearchRequestHdlr implements SoapHandler
     {
       soapResponse.setQName(RESPONSE_QNAME);
 
-      String query = zimbraContext.getParameter("query", "");
-      soapResponse.setValue("query", query);
+      String path = zimbraContext.getParameter("path", "");
+      soapResponse.setValue("path", path);
 
       String requestedTypesCsv = zimbraContext.getParameter("types", "");
       soapResponse.setValue("types", requestedTypesCsv);
-
-      if (query.equals("")) { return; }
-      String parsedQuery = getStandardQuery(query);
 
       String[] requestedTypesArray = requestedTypesCsv.split(",");
       if(requestedTypesArray.length == 1)
@@ -71,9 +67,8 @@ public class SearchRequestHdlr implements SoapHandler
       JSONArray defaultTypesJsonArray = new JSONArray(requestedTypesArray);
       requestedTypesCsv = defaultTypesJsonArray.toString();
 
-
       HttpResponse response = queryDriveOnCloudServerService(zimbraContext,
-          parsedQuery,
+          path,
           requestedTypesCsv);
       BasicResponseHandler basicResponseHandler = new BasicResponseHandler();
       String responseBody = basicResponseHandler.handleResponse(response);  //throw HttpResponseException if status code >= 300
@@ -86,35 +81,13 @@ public class SearchRequestHdlr implements SoapHandler
     }
   }
 
-  private String getStandardQuery(String query) {
-    StringBuilder parsedQueryBuilder = new StringBuilder();
-
-    Pattern nonQuotedTokenSValuePattern = Pattern.compile("((^| )[^ :]+:)([^\"]*?)( |$)"); //preTokenDelimiter tokenName : nonQuotedTokenValue postTokenDelimiter
-    Matcher nonQuotedTokenSValueMatcher = nonQuotedTokenSValuePattern.matcher(query);
-    int lastMatchEndIndex = 0;
-    while(nonQuotedTokenSValueMatcher.find())
-    {
-      String preMatchValueQuery = query.substring(lastMatchEndIndex, nonQuotedTokenSValueMatcher.end(1));
-
-      String matchValueQuery = query.substring(nonQuotedTokenSValueMatcher.start(3), nonQuotedTokenSValueMatcher.end(3));
-
-      parsedQueryBuilder.append(preMatchValueQuery).append("\"").append(matchValueQuery).append("\"");
-
-      lastMatchEndIndex  = nonQuotedTokenSValueMatcher.end(3);
-    }
-
-    parsedQueryBuilder.append(query.substring(lastMatchEndIndex));
-
-    return  parsedQueryBuilder.toString();
-  }
-
   private HttpResponse queryDriveOnCloudServerService(final ZimbraContext zimbraContext,
-                                                      final String query,
+                                                      final String path,
                                                       final String types) throws IOException {
     List<NameValuePair> driveOnCloudParameters = mCloudUtils.createDriveOnCloudAuthenticationParams(zimbraContext);
-    driveOnCloudParameters.add(new BasicNameValuePair("query", query));
+    driveOnCloudParameters.add(new BasicNameValuePair("path", path));
     driveOnCloudParameters.add(new BasicNameValuePair("types", types));
-    return mCloudUtils.sendRequestToCloud(zimbraContext, driveOnCloudParameters, COMMAND + "Request");
+    return mCloudUtils.sendRequestToCloud(zimbraContext, driveOnCloudParameters, COMMAND);
   }
 
   @Override
