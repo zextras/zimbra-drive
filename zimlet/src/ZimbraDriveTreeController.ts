@@ -56,6 +56,7 @@ import {ZimbraDriveFolderTree} from "./ZimbraDriveFolderTree";
 import {ZmFolderTreeController} from "./zimbra/zimbraMail/share/controller/ZmFolderTreeController";
 import {ZmOrganizer} from "./zimbra/zimbraMail/share/model/ZmOrganizer";
 import {DwtHeaderTreeItem} from "./zimbra/ajax/dwt/widgets/DwtHeaderTreeItem";
+import {DwtMenu} from "./zimbra/ajax/dwt/widgets/DwtMenu";
 
 export class ZimbraDriveTreeController extends ZmFolderTreeController {
 
@@ -262,10 +263,17 @@ export class ZimbraDriveTreeController extends ZmFolderTreeController {
   public _treeViewListener(ev: DwtUiEvent): void {
     super._treeViewListener(ev);
     if ((<DwtSelectionEvent>ev).detail === DwtTree.ITEM_ACTIONED) {
-      let itemActioned: any = (<DwtSelectionEvent>ev).item;
-      let folder: ZimbraDriveFolder = itemActioned.getData(Dwt.KEY_OBJECT);
-      this._getActionMenu(ev, folder).setData(ZDId.ZIMBRADRIVE_ITEM_ACTIONED, itemActioned);
-      this._getActionMenu(ev, folder).setData(Dwt.KEY_OBJECT, folder);
+      let itemActioned: any = (<DwtSelectionEvent>ev).item,
+        folder: ZimbraDriveFolder = itemActioned.getData(Dwt.KEY_OBJECT),
+        menu: DwtMenu = this._getActionMenu(ev, folder);
+      menu.setData(ZDId.ZIMBRADRIVE_ITEM_ACTIONED, itemActioned);
+      menu.setData(Dwt.KEY_OBJECT, folder);
+      if (!folder.parent) {
+        menu.getItemById("menuItemId", ZDId.ZD_SAVE_FOLDER).setEnabled(false);
+        menu.getItemById("menuItemId", ZmOperation.DELETE_WITHOUT_SHORTCUT).setEnabled(false);
+        menu.getItemById("menuItemId", ZmOperation.MOVE).setEnabled(false);
+        menu.getItemById("menuItemId", ZmOperation.RENAME_FOLDER).setEnabled(false);
+      }
     }
   }
 
