@@ -36,7 +36,7 @@ build/com_zextras_drive_open_hdlr.min.js: build/yuicompressor.jar build/com_zext
 build/com_zextras_drive_open.css:
 	mkdir -p build
 	cp src/com_zextras_drive_open.css build/
-	cp -r src/assets/ build/ && cp src/*.properties build/
+	cp -r src/assets/ build/ && cp src/i18n/*.properties build/
 
 build/LICENSE:
 	mkdir -p build

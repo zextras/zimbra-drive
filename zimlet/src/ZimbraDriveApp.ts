@@ -22,7 +22,10 @@ import {ZimbraDriveController, ZimbraDriveMoveParams} from "./ZimbraDriveControl
 import {ZmSearchResult} from "./zimbra/zimbraMail/share/model/ZmSearchResult";
 import {ZmSearchResultsController} from "./zimbra/zimbraMail/share/controller/ZmSearchResultsController";
 import {AjxDispatcher} from "./zimbra/ajax/boot/AjxDispatcher";
-import {ZmApp, ShowSearchResultsApp, DefineApiApp, RegisterItemsApp} from "./zimbra/zimbraMail/core/ZmApp";
+import {
+  ZmApp, ShowSearchResultsApp, DefineApiApp, RegisterItemsApp,
+  GetInitialSearchTypeApp
+} from "./zimbra/zimbraMail/core/ZmApp";
 import {AjxCallback} from "./zimbra/ajax/boot/AjxCallback";
 import {ZmZimbraMail, SetNewButtonPropsParams} from "./zimbra/zimbraMail/core/ZmZimbraMail";
 import {appCtxt} from "./zimbra/zimbraMail/appCtxt";
@@ -35,7 +38,6 @@ import {ZmBatchCommand} from "./zimbra/zimbra/csfe/ZmBatchCommand";
 import {ZmCsfeResult} from "./zimbra/zimbra/csfe/ZmCsfeResult";
 import {ZimbraDriveFolderObj, ZimbraDriveFolder} from "./ZimbraDriveFolder";
 import {GetAllFoldersResponse} from "./GetAllFoldersResponse";
-import {ZimbraDriveFolderTree} from "./ZimbraDriveFolderTree";
 import {ZmCsfeException} from "./zimbra/zimbra/csfe/ZmCsfeException";
 import {ZmRequestMgrSendRequestParams} from "./zimbra/zimbraMail/core/ZmRequestMgr";
 import {AjxSoapDoc} from "./zimbra/ajax/soap/AjxSoapDoc";
@@ -56,14 +58,16 @@ import {ZmSetting} from "./zimbra/zimbraMail/share/model/ZmSetting";
 import {ZimbraDriveAttachDialog} from "./view/ZimbraDriveAttachDialog";
 import {ZmComposeView} from "./zimbra/zimbraMail/mail/view/ZmComposeView";
 import {ZmPopupMenu} from "./zimbra/zimbraMail/share/view/ZmPopupMenu";
+import {ZmFolderTree} from "./zimbra/zimbraMail/share/model/ZmFolderTree";
+import {ZmOrganizer} from "./zimbra/zimbraMail/share/model/ZmOrganizer";
 import {ZmId} from "./zimbra/zimbraMail/core/ZmId";
 
 declare let com_zextras_drive_open: {[label: string]: string};
 
-export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, RegisterItemsApp, ShowSearchResultsApp {
+export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, RegisterItemsApp, ShowSearchResultsApp, GetInitialSearchTypeApp {
 
   public static APP_NAME: string = "ZIMBRA_DRIVE";
-  public static TREE_ID: string = "ZIMBRA_DRIVE";
+  public static TREE_ID: string =  ZDId.ZIMBRADRIVE_ITEM;
   public static URN: string = "urn:zimbraDrive";
   public static ZIMBRADRIVE_ENABLED: string = "ZIMBRA_DRIVE_ENABLED";
 
@@ -90,8 +94,12 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
     this._setLaunchTime(this.toString(), new Date());
     let newButton: DwtToolBarButton = (<ZmZimbraMail> appCtxt.getAppController()).getNewButton();
     this._defaultNewButtonMenu = newButton.getMenu(true);
-    ZimbraDriveController.goToFolder("/");
+    ZimbraDriveController.goToFolder("/", false);
     if (callback) { callback.run(); }
+  }
+
+  public getInitialSearchType(): string {
+    return ZDId.ZIMBRADRIVE_ITEM;
   }
 
   public _registerApp(): void {
@@ -135,8 +143,7 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
     );
   }
 
-  public static loadSearchRequestParams(searchParams: ZimbraDriveSearchParams, batchCommand?: ZmBatchCommand): void {
-    let params: ZmSearchControllerSearchParams = {query:  searchParams.query};
+  public static loadSearchRequestParams(params: ZmSearchControllerSearchParams, batchCommand?: ZmBatchCommand): void {
     params.soapInfo = {
       method: ZimbraDriveApp.SEARCH_REQ,
       response: ZimbraDriveApp.SEARCH_RESP,
@@ -145,10 +152,12 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
     };
     params.types = [ZDId.ZIMBRADRIVE_ITEM];
     params.checkTypes = true;
-    if (searchParams.userInitiated) {
-      params.userInitiated = searchParams.userInitiated;
-      params.origin = searchParams.origin || ZmId.SEARCHRESULTS;
+    if (params.userInitiated) {
+      params.origin = ZmId.SEARCHRESULTS;
       params.types.push(ZDId.ZIMBRADRIVE_FOLDER);
+    }
+    else {
+      params.soapInfo.additional["casesensitive"] = {};
     }
     let search = new ZmSearch(params);
     search.execute(
@@ -198,7 +207,6 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
         dropTargets: [], // ZmOrganizer.TAG, ZmOrganizer.BRIEFCASE
         searchType: "file",
         resultsList: AjxCallback.simpleClosure(function(search: ZmSearch) {
-            // AjxDispatcher.require("BriefcaseCore");
             return new ZmList(ZDId.ZIMBRADRIVE_ITEM, search);
           }, this)
       }
@@ -293,8 +301,10 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
       loadCallback.run(controller);
     }
     // Workaround to not show any conditionals
-    searchResultsController._filterPanel._advancedPanel.setAttribute("style", "display:none");
-    searchResultsController._filterPanel._conditionalsContainer.parentElement.setAttribute("style", "display:none");
+    if (searchResultsController) {
+      searchResultsController._filterPanel._advancedPanel.setAttribute("style", "display:none");
+      searchResultsController._filterPanel._conditionalsContainer.parentElement.setAttribute("style", "display:none");
+    }
 
   }
 
@@ -330,18 +340,34 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
   }
 
   private static onGetAllFolders(result: ZmCsfeResult): boolean {
-    const root: ZimbraDriveFolderObj = (<GetAllFoldersResponse>result.getResponse()[ZimbraDriveApp.GET_ALL_FOLDERS_RESP]).root[0];
-    root.name = "";
-    let tree: ZimbraDriveFolderTree = <ZimbraDriveFolderTree> appCtxt.getTree(ZimbraDriveApp.APP_NAME);
-    if (!tree) {
-      tree = new ZimbraDriveFolderTree();
-      appCtxt.setTree(ZimbraDriveApp.APP_NAME, tree);
+    const rootObj: ZimbraDriveFolderObj = (<GetAllFoldersResponse>result.getResponse()[ZimbraDriveApp.GET_ALL_FOLDERS_RESP]).root[0];
+    rootObj.name = "";
+    let folderTree: ZmFolderTree = <ZmFolderTree>appCtxt.getTree(ZmOrganizer.FOLDER);
+    let rootToAdd = ZimbraDriveFolder.createFromDom(rootObj, {tree: folderTree});
+    // Clean folderTree root children before to add new children
+    let childrenToRemove: ZmOrganizer[] = [];
+    for (let child of folderTree.root.children.getArray()) {
+      if (child.type === ZDId.ZIMBRADRIVE_ITEM) {
+        childrenToRemove.push(child);
+      }
     }
-    tree.root = ZimbraDriveFolder.createFromDom(root, {tree: tree});
-    // tree.getFolderById("id");
+    for (let childtoRemove of childrenToRemove) {
+      folderTree.root.children.remove(childtoRemove);
+    }
+    folderTree.root.children.add(rootToAdd);
     // TODO save and apply axpand/collapsed folders
-    appCtxt.getOverviewController().getTreeView("main_" + ZimbraDriveApp.APP_NAME, ZimbraDriveApp.APP_NAME);
+    // appCtxt.getOverviewController().getTreeView("main_" + ZimbraDriveApp.APP_NAME, ZimbraDriveApp.APP_NAME);
     return true; // handled
+  }
+
+  private static addAsChildren(parent: ZmFolderTree, child: ZmFolderTree): void {
+    let children: ZmOrganizer[] = parent.root.children.getArray();
+    for (let tmpChild of children) {
+      if (tmpChild.type === ZimbraDriveApp.APP_NAME) {
+        parent.root.children.remove(tmpChild);
+      }
+    }
+    parent.root.children.add(child.root);
   }
 
   private static onGetAllFoldersError(err: ZmCsfeException, req: ZmRequestMgrSendRequestParams): boolean {
@@ -417,7 +443,7 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
 
   public runRefresh(): void {
     if (this.isActive() && ZimbraDriveController.getCurrentFolder()) {
-      ZimbraDriveController.goToFolder(ZimbraDriveController.getCurrentFolder().getPath(true));
+      ZimbraDriveController.goToFolder(ZimbraDriveController.getCurrentFolder().getPath(true), false);
     }
   }
 

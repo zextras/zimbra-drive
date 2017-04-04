@@ -18,28 +18,25 @@
 import {ZimbraDriveItemObj} from "./ZimbraDriveItem";
 import {ZmTree} from "./zimbra/zimbraMail/share/model/ZmTree";
 import {appCtxt} from "./zimbra/zimbraMail/appCtxt";
-import {ZimbraDriveApp} from "./ZimbraDriveApp";
 import {ZimbraDriveFolderItem} from "./ZimbraDriveFolderItem";
 import {ZmFolder} from "./zimbra/zimbraMail/share/model/ZmFolder";
+import {ZDId} from "./ZDId";
+import {ZimbraDriveApp} from "./ZimbraDriveApp";
 
 export class ZimbraDriveFolder extends ZmFolder {
+
   private folderItem: ZimbraDriveFolderItem;
   public path: string;
   public parentName: string;
 
   constructor() {
-    super({type: ZimbraDriveApp.TREE_ID});
+    super({ type: ZDId.ZIMBRADRIVE_ITEM });
   }
 
   public static createFromDom(node: ZimbraDriveFolderObj, args: {tree: ZmTree}): ZimbraDriveFolder {
-    let root = new ZimbraDriveFolder();
-    root.path = "";
     let item = new ZimbraDriveFolder();
-    item.parent = root;
     item._loadFromDom(node, args.tree);
-    item.name = "Drive";
-    root.children.add(item);
-    return root;
+    return item;
   }
 
   public static sortFcn(folderA: ZimbraDriveFolder, folderB: ZimbraDriveFolder): number {
@@ -51,10 +48,17 @@ export class ZimbraDriveFolder extends ZmFolder {
   public _loadFromDom(node: ZimbraDriveFolderObj, tree: ZmTree): void {
     this.tree = tree;
     this.name = node.name;
-    this.path = this.getParent().getPath(true) + node.name + "/";
-    this.parentName = (<ZimbraDriveFolder> this.parent).name;
+    this.path = `${(this.parent) ? (<ZimbraDriveFolder>this.parent).getPath(true) : "" }${node.name}/`;
+    this.parentName = (this.parent) ? (<ZimbraDriveFolder> this.parent).name : undefined;
     this.owner = node.author;
-    this.id = `${node.id}_zd`;
+    // if (this.path === "/") {
+    if (!this.parent) {
+      this.id = `${ZmFolder.ID_ROOT}_zd`;
+      this.name = ZimbraDriveApp.getMessage("rootName");
+      ZmFolder.HIDE_ID[`${ZmFolder.ID_ROOT}_zd`] = true;
+    } else {
+      this.id = `${node.id}_zd`;
+    }
     if (node.children) {
       for (let childObj of node.children) {
         let child = new ZimbraDriveFolder();
@@ -87,13 +91,20 @@ export class ZimbraDriveFolder extends ZmFolder {
     this.path = this.getParent().getPath(true) + this.name + "/";
   }
 
-  public getPath(keepLastSlash?: boolean): string {
-    // expected last char of this.path be "/"
-    // by default return without it
-    if (keepLastSlash) {
-      return this.path;
+  public getPath(needLastSlash?: boolean): string {
+    // // expected last char of this.path be "/"
+    // // by default return without it
+    // if (needLastSlash) {
+    //   return this.path;
+    // }
+    // return this.path.substring(0, this.path.length - 1);
+
+    // get path and remove root folder name Drive
+    let completePath: string = super.getPath().replace("Drive", "");
+    if (needLastSlash) {
+      completePath += "/";
     }
-    return this.path.substring(0, this.path.length - 1);
+    return completePath;
   }
 
   public getFolderItem(): ZimbraDriveFolderItem {
@@ -129,21 +140,10 @@ export class ZimbraDriveFolder extends ZmFolder {
     return this.getPath(true).length <= targetPath.length && this.getPath(true) === targetPath.substring(0, this.getPath(true).length);
   }
 
-  public hasChild(name: string): boolean {
-    return (this.getChild(name) != null);
-  };
+  public createQuery(pathOnly: boolean): string {
+    return `in:"${this.getPath(false)}"`;
+  }
 
-  public getChild(name: string): ZimbraDriveFolder {
-    name = name || "";
-    let childrenArray: ZimbraDriveFolder[] = <ZimbraDriveFolder[]> this.children.getArray();
-    for (let i = 0; i < childrenArray.length; i++) {
-      if (childrenArray[i] && childrenArray[i].name === name) {
-        return childrenArray[i];
-      }
-    }
-
-    return null;
-  };
 }
 
 export interface ZimbraDriveFolderObj extends ZimbraDriveItemObj {

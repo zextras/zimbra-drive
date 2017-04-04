@@ -84,19 +84,19 @@ export class ZimbraDriveTabView extends DwtComposite {
         overviewClass: "ZimbraDriveTabBox ZimbraDriveOverviewBox",
         headerClass: "DwtTreeItem",
         noTooltips: true,
-        treeIds: [ZimbraDriveApp.APP_NAME],
+        treeIds: [ZimbraDriveApp.TREE_ID],
         account: appCtxt.getActiveAccount(),
         isAppOverview: true,
         appName: ZimbraDriveApp.APP_NAME
       };
       overview = opc.createOverview(ovParams);
-      overview.set([ZimbraDriveApp.APP_NAME]);
+      overview.set([ZimbraDriveApp.TREE_ID]);
       document.getElementById(this._folderTreeCellId).appendChild(overview.getHtmlElement());
     }
     else {
-      overview.set([ZimbraDriveApp.APP_NAME]);
+      overview.set([ZimbraDriveApp.TREE_ID]);
     }
-    let treeView = overview.getTreeView(ZimbraDriveApp.APP_NAME);
+    let treeView = overview.getTreeView(ZimbraDriveApp.TREE_ID);
     treeView.addSelectionListener(new AjxListener(this, this._treeListener));
     treeView.getHeaderItem().setVisible(false, true);
     treeView.setSelection(<DwtTreeItem> treeView.getHeaderItem().getChildren()[0], true, false, true);
@@ -166,6 +166,7 @@ export class ZimbraDriveTabView extends DwtComposite {
     this._folderDisplayed = "/";
     this._isLoadingFolder = true;
     let batchCommand: ZmBatchCommand = new ZmBatchCommand();
+    // TODO: ZD-32
     batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadGetAllFolderRequestParams));
     batchCommand.add(new AjxCallback(this, this.loadSearchRequestParams, [`in:"${this._folderDisplayed}"`, new AjxCallback(this, this._handleResponseDoSearch)]));
     batchCommand.run();
