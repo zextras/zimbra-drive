@@ -67,7 +67,7 @@ public class MoveHdlr implements SoapHandler
   }
 
   private HttpResponse sendMoveToDriveOnCloudServerService(final ZimbraContext zimbraContext, final String sourcePath, final String targetPath) throws IOException {
-    List<NameValuePair> driveOnCloudParameters = mCloudUtils.createDriveOnCloudParams(zimbraContext);
+    List<NameValuePair> driveOnCloudParameters = mCloudUtils.createDriveOnCloudAuthenticationParams(zimbraContext);
     driveOnCloudParameters.add(new BasicNameValuePair(ZimbraDriveItem.F_SOURCE_PATH, sourcePath));
     driveOnCloudParameters.add(new BasicNameValuePair(ZimbraDriveItem.F_TARGET_PATH, targetPath));
     return mCloudUtils.sendRequestToCloud(zimbraContext, driveOnCloudParameters, COMMAND);

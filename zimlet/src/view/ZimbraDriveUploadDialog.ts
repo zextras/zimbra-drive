@@ -243,8 +243,8 @@ export class ZimbraDriveUploadDialog extends ZmUploadDialog {
   public _refreshSearch(statusMsgParams: SetStatusMsgParams): void {
     appCtxt.setStatusMsg(statusMsgParams);
     this._enableUpload(this._uploadButton);
-    if ((<ZimbraDriveFolder> this._uploadFolder).getPath(true) === ZimbraDriveController.getCurrentFolderPath()) {
-      ZimbraDriveController.goToFolder(ZimbraDriveController.getCurrentFolderPath());
+    if (!this._controller.isSearchResults && (<ZimbraDriveFolder> this._uploadFolder).getPath(true) === ZimbraDriveController.getCurrentFolderPath()) {
+      ZimbraDriveController.goToFolder(ZimbraDriveController.getCurrentFolderPath(), false);
     }
   }
 

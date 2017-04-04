@@ -20,7 +20,6 @@ OC::$CLASSPATH['OC_User_Zimbra'] = 'zimbradrive/lib/Auth/OC_User_Zimbra.php';
 
 use OCA\ZimbraDrive\Service\StorageService;
 use OCA\ZimbraDrive\Service\LogService;
-use OCA\ZimbraDrive\Service\QueryService;
 use OCP\AppFramework\App;
 
 class Application extends App {
@@ -48,18 +47,6 @@ class Application extends App {
         $container->registerService('IServerContainer', function($c) {
             return $c->query('ServerContainer');
         });
-
-        $container->registerService('StorageService', function($c) {
-            $logger = $c->query('ILogger');
-            $serverContainer = $c->query('IServerContainer');
-            return new StorageService($serverContainer, $logger);
-        });
-
-        $container->registerService('QueryService', function($c) {
-            $logger = $c->query('ILogger');
-            return new QueryService($logger);
-        });
-
     }
 }
 

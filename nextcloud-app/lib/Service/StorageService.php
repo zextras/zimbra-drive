@@ -67,6 +67,7 @@ class StorageService
             $errorMessage = $path . ' is not a folder.';
             throw new MethodNotAllowedException($errorMessage);
         }
+        /** @var Folder $searchedNode */
         return $searchedNode;
     }
 
@@ -83,6 +84,7 @@ class StorageService
             $errorMessage = $path . 'is not a file.';
             throw new MethodNotAllowedException($errorMessage);
         }
+        /** @var File $searchedNode */
         return $searchedNode;
     }
 
@@ -108,38 +110,12 @@ class StorageService
      * @param Folder $folder
      * @return array
      */
-    public function folderChildAttributes(Folder $folder)
+    public function folderChildNodesAttributes(Folder $folder)
     {
         $folderAsArray = array();
         $nodes = $folder->getDirectoryListing();
         foreach ($nodes as $nodeKey => $nodeValue) {
-            $nodeType = $nodeValue->getType();
-            if ($nodeType === Folder::TYPE_FOLDER) {
-                $nodeResponseMap = $this->childFolderToArray($nodeValue);
-            } else {
-                $nodeResponseMap = folderContentsToArray($nodeValue);
-            }
-            $folderAsArray[] = $nodeResponseMap;
-        }
-        return $folderAsArray;
-    }
-
-    /**
-     * @param Folder $folder
-     * @return array
-     */
-    public function folderChildNodeNoFolderAttributes(Folder $folder)
-    {
-        $folderAsArray = array();
-        $nodes = $folder->getDirectoryListing();
-        foreach ($nodes as $nodeKey => $nodeValue) {
-            $nodeType = $nodeValue->getType();
-            if ($nodeType === Folder::TYPE_FILE) {
-                $nodeResponseMap = $this->getNodesAttributes($nodeValue);
-                //$nodeResponseMap[ResponseVarName::NODE_TYPE_VAR_NAME] = $nodeType;
-                $nodeResponseMap[ResponseVarName::MIME_TYPE_VAR_NAME] = $nodeValue->getMimetype();
-                $folderAsArray[] = $nodeResponseMap;
-            }
+            $folderAsArray[] = $this->getNodeAttributes($nodeValue);
         }
         return $folderAsArray;
     }
@@ -149,16 +125,17 @@ class StorageService
      * @param Folder $folder
      * @return array
      */
-    public function getFolderAttributeTree(Folder $folder)
+    public function getFolderTreeAttributes(Folder $folder)
     {
-        $folderAttributes = $this->getNodesAttributes($folder);
+        $folderAttributes = $this->getNodesCommonAttributes($folder);
 
         $folderChildrenAttributeForest = array();
         $folderChildren = $folder->getDirectoryListing();
         foreach ($folderChildren as $childKey => $childNode) {
             $childNodeType = $childNode->getType();
             if ($childNodeType === Folder::TYPE_FOLDER) {
-                $folderChildrenAttributeForest[] = $this->getFolderAttributeTree($childNode);
+                /** @var Folder $childNode */
+                $folderChildrenAttributeForest[] = $this->getFolderTreeAttributes($childNode);
             }
         }
         $folderAttributes[ResponseVarName::CHILDREN_VAR_NAME] = $folderChildrenAttributeForest;
@@ -169,7 +146,7 @@ class StorageService
      * @param Node $node
      * @return array
      */
-    public function getNodesAttributes(Node $node)
+    public function getNodesCommonAttributes(Node $node)
     {
         $nodeOwner = $node->getOwner();
         $nodeAttributeMap = [
@@ -184,6 +161,46 @@ class StorageService
         ];
         return $nodeAttributeMap;
     }
+
+    /**
+     * @param Node $node
+     * @return array
+     */
+    public function getNodeAttributes(Node $node)
+    {
+        $nodeAttributeMap = $this->getNodesCommonAttributes($node);
+        $type = "";
+        switch ($node->getType()){
+            case Folder::TYPE_FOLDER:
+                /** @var  Folder $node */
+                $type = ResponseVarName::NODE_FOLDER;
+                break;
+            case Folder::TYPE_FILE:
+                /** @var  File $node */
+                $type = ResponseVarName::NODE_FILE;
+                $nodeAttributeMap[ResponseVarName::MIME_TYPE_VAR_NAME] = $node->getMimetype();
+                break;
+        }
+        $nodeAttributeMap[ResponseVarName::NODE_TYPE_VAR_NAME] = $type;
+        return $nodeAttributeMap;
+    }
+
+    /**
+     * @param $nodes array
+     * @return array
+     */
+    public function getNodesAttributes($nodes)
+    {
+        $nodesAttributes = array();
+        /** @var Node $node */
+        foreach($nodes as $node)
+        {
+            $nodesAttributes[] = $this->getNodeAttributes($node);
+        }
+        return $nodesAttributes;
+    }
+
+
 
     /**
      * @param FileInfo $fileInfo
@@ -295,5 +312,154 @@ class StorageService
         }
 
         Filesystem::fromTmpFile($tempFilePath, $newFileFullPath);
+    }
+
+    /**
+     * @param $path
+     * @return array of Folder
+     */
+    public function getFoldersNonSensitivePath($path)
+    {
+        $rootFolder = $this->getFolder(self::ROOT);
+        $folderResults = array($rootFolder);
+
+        $folderLevels = $this->getPathLevels($path);
+
+        foreach($folderLevels as $folderLevel)
+        {
+            $foldersChildren = $this->getFoldersChildOfFolderArray($folderResults);
+
+            $folderResults = $this->filterNodeByNameNonCaseSensitiveName($foldersChildren, $folderLevel);
+        }
+
+        return $folderResults;
+    }
+
+    /**
+     * @param $folders array of Folder
+     * @return array
+     */
+    private function getFoldersChildOfFolderArray($folders)
+    {
+        $foldersResult = array();
+        /** @var Folder $folder */
+        foreach($folders as $folder)
+        {
+            $folderChild = $this->getChildFolders($folder);
+            $foldersResult = array_merge($foldersResult, $folderChild);
+        }
+        return $foldersResult;
+    }
+
+    /**
+     * @param $folder Folder
+     * @return array
+     */
+    private function getChildFolders($folder)
+    {
+        $childFolders = array();
+
+        $nodesChild = $folder->getDirectoryListing();
+        foreach($nodesChild as $nodeChild)
+        {
+            if($this->isFolder($nodeChild))
+            {
+                $childFolders[] = $nodeChild;
+            }
+        }
+
+        return $childFolders;
+    }
+
+    /**
+     * @param $nodeChild Node
+     * @return bool
+     */
+    public function isFolder($nodeChild)
+    {
+        return $nodeChild->getType() === Folder::TYPE_FOLDER;
+    }
+
+    /**
+     * @param $nodes array of Node
+     * @param $targetName string
+     * @return array of Node
+     */
+    private function filterNodeByNameNonCaseSensitiveName($nodes, $targetName)
+    {
+        $filterNodes = array();
+        /** @var Node $node */
+        foreach($nodes as $node)
+        {
+            $nodeName = $node->getName();
+
+            if($this->nonCaseSensitiveCompare($nodeName, $targetName))
+            {
+                $filterNodes[] = $node;
+            }
+        }
+        return $filterNodes;
+    }
+
+    /**
+     * @param $string1
+     * @param $string2
+     * @return bool
+     */
+    private function nonCaseSensitiveCompare($string1, $string2)
+    {
+        return strcasecmp($string1, $string2) === 0;
+    }
+
+    /**
+     * @param $path
+     * @return array
+     */
+    private function getPathLevels($path)
+    {
+        $pathLevels = explode("/", $path);
+
+        $pathLevelsWithoutEmptyLevels = array();
+
+        foreach($pathLevels as $pathLevel)
+        {
+            if($pathLevel !== "")
+            {
+                $pathLevelsWithoutEmptyLevels[] = $pathLevel;
+            }
+        }
+
+        return $pathLevelsWithoutEmptyLevels;
+    }
+
+    /**
+     * @param string $nodePath
+     * @return array
+     */
+    public function getFolderDescendantsFromPath($nodePath = "/")
+    {
+        $folder = $this->getFolder($nodePath);
+        return $this->getFolderDescendants($folder);
+    }
+
+    /**
+     * @param $folder Folder
+     * @return array
+     */
+    public function getFolderDescendants($folder)
+    {
+        $folderChildren = $folder->getDirectoryListing();
+        $nodeDescendants = $folderChildren;
+        /** @var Node $folderChild */
+        foreach($folderChildren as $folderChild)
+        {
+            if($this->isFolder($folderChild))
+            {
+                /** @var Folder $folderChild */
+                $folderChildDescendant = $this->getFolderDescendants($folderChild);
+                $nodeDescendants = array_merge($nodeDescendants, $folderChildDescendant);
+            }
+        }
+        return $nodeDescendants;
     }
 }

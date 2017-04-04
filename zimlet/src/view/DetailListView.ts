@@ -30,7 +30,6 @@ import {AjxUtil} from "../zimbra/ajax/util/AjxUtil";
 import {ZmActionMenu} from "../zimbra/zimbraMail/share/view/ZmActionMenu";
 import {ZimbraDriveFolder} from "../ZimbraDriveFolder";
 import {ZmList} from "../zimbra/zimbraMail/share/model/ZmList";
-import {ZimbraDriveFolderItem} from "../ZimbraDriveFolderItem";
 import {ZDId} from "../ZDId";
 import {DwtDragSource} from "../zimbra/ajax/dwt/dnd/DwtDragSource";
 import {AjxListener} from "../zimbra/ajax/events/AjxListener";
@@ -86,7 +85,7 @@ export class DetailListView extends ZimbraDriveBaseView {
     }
   };
 
-  public _dropListener(ev: DwtDropEvent): void {
+  public _dropListener(ev: DwtDropEvent): boolean {
     let data: ZimbraDriveItem| ZimbraDriveItem[]| ZimbraDriveFolder| ZimbraDriveFolder[] = ev.srcData.data;
     let div = this.getTargetItemDiv(ev.uiEvent);
     let dropFolder = this.getItemFromElement(div);
@@ -102,6 +101,7 @@ export class DetailListView extends ZimbraDriveBaseView {
     } else if (ev.action === DwtDropEvent.DRAG_OP_CHANGED) {
       // nothing
     }
+    return true;
   };
 
   public _initDragAndDrop(): void {
@@ -147,7 +147,6 @@ export class DetailListView extends ZimbraDriveBaseView {
       // if (this._revisionView) {
       //   headers.push(new DwtListHeaderItem({field:ZmItem.F_EXPAND, icon: "NodeCollapsed", width:ZmDetailListView.COLWIDTH_ICON, name:ZmMsg.expand}));
       // }
-      // TODO: add
       headers.push(
         new DwtListHeaderItem({ field: ZimbraDriveItem.F_EMPTY, width: DetailListView.COLWIDTH_ICON }),
         new DwtListHeaderItem({ field: ZimbraDriveItem.F_ICON,  icon: "GenericDoc", resizeable: false, name: ZmMsg.icon, width: DetailListView.COLWIDTH_ICON }),
@@ -172,13 +171,13 @@ export class DetailListView extends ZimbraDriveBaseView {
   }
 
   public _getCellContents(htmlArr: string[], idx: number, item: any, field: string, colIdx: number, params?: {now?: Date}, classes?: string[]): number {
-    if (item.isFolder()) {
-      let zimbraDriveFolder: ZimbraDriveFolderItem = <ZimbraDriveFolderItem> item;
+    let zimbraDriveItem: ZimbraDriveItem = <ZimbraDriveItem> item;
+    if (zimbraDriveItem.isFolder()) {
       if (field === ZimbraDriveItem.F_ICON) {
-        idx = this._getImageHtml(htmlArr, idx, "Folder", this._getFieldId(zimbraDriveFolder, field), classes);
+        idx = this._getImageHtml(htmlArr, idx, "Folder", this._getFieldId(zimbraDriveItem, field), classes);
       } else if (field === ZimbraDriveItem.F_NAME) {
-        zimbraDriveFolder.setNameElId(this._getFieldId(item, ZimbraDriveItem.F_NAME));
-        htmlArr[idx++] = "<div id='" + zimbraDriveFolder.getNameElId() + "'>" + zimbraDriveFolder.getName() + "</div>";
+        zimbraDriveItem.setNameElId(this._getFieldId(zimbraDriveItem, ZimbraDriveItem.F_NAME));
+        htmlArr[idx++] = "<div id='" + zimbraDriveItem.getNameElId() + "'>" + zimbraDriveItem.getName() + "</div>";
       } else if (field === ZimbraDriveItem.F_FILE_TYPE) {
         htmlArr[idx++] = ZmMsg.folder;
       } else if (field === ZimbraDriveItem.F_SIZE) {
@@ -186,17 +185,15 @@ export class DetailListView extends ZimbraDriveBaseView {
       } else if (field === ZimbraDriveItem.F_DATE) {
         htmlArr[idx++] = "";
       } else if (field === ZimbraDriveItem.F_FROM) {
-        htmlArr[idx++] = zimbraDriveFolder.getAuthor();
+        htmlArr[idx++] = zimbraDriveItem.getAuthor();
       } else if (field === ZimbraDriveItem.F_FOLDER) {
-        let path: string = ZimbraDriveController.getCurrentFolderPath().slice(0, -1);
-        htmlArr[idx++] = path.substring(path.lastIndexOf("/") + 1);
-        // or zimbraDriveFolder.parentName
+        zimbraDriveItem.setParentNameElId(this._getFieldId(zimbraDriveItem, ZimbraDriveItem.F_FOLDER));
+        htmlArr[idx++] = "<div id='" + zimbraDriveItem.getParentNameElId() + "'>" + zimbraDriveItem.getParentName() + "</div>";
       } else if (field === ZimbraDriveItem.F_SORTED_BY) {
-        htmlArr[idx++] = this._getAbridgedContent(item, colIdx);
+        htmlArr[idx++] = this._getAbridgedContent(zimbraDriveItem, colIdx);
       }
     }
     else {
-      let zimbraDriveItem: ZimbraDriveItem = <ZimbraDriveItem> item;
       if (field === ZimbraDriveItem.F_ICON) {
         let mimeInfo: ZmMimeInfoData = ZmMimeTable.getInfo(zimbraDriveItem.getMimetype());
         idx = this._getImageHtml(htmlArr, idx, mimeInfo.image, this._getFieldId(zimbraDriveItem, field), classes);
@@ -213,10 +210,10 @@ export class DetailListView extends ZimbraDriveBaseView {
       } else if (field === ZimbraDriveItem.F_FROM) {
         htmlArr[idx++] = zimbraDriveItem.getAuthor();
       } else if (field === ZimbraDriveItem.F_FOLDER) {
-        let path: string = ZimbraDriveController.getCurrentFolderPath().slice(0, -1);
-        htmlArr[idx++] = path.substring(path.lastIndexOf("/") + 1);
+        zimbraDriveItem.setParentNameElId(this._getFieldId(zimbraDriveItem, ZimbraDriveItem.F_FOLDER));
+        htmlArr[idx++] = "<div id='" + zimbraDriveItem.getParentNameElId() + "'>" + zimbraDriveItem.getParentName() + "</div>";
       } else if (field === ZimbraDriveItem.F_SORTED_BY) {
-        htmlArr[idx++] = this._getAbridgedContent(item, colIdx);
+        htmlArr[idx++] = this._getAbridgedContent(zimbraDriveItem, colIdx);
       }
     }
     return idx;

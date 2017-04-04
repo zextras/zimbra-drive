@@ -32,7 +32,7 @@ import {ZmId} from "./zimbra/zimbraMail/core/ZmId";
 import {ZDId} from "./ZDId";
 import {AjxListener} from "./zimbra/ajax/events/AjxListener";
 import {DwtSelectionEvent} from "./zimbra/ajax/dwt/events/DwtSelectionEvent";
-import {ZmMainSearchToolBar} from "./zimbra/zimbraMail/share/view/ZmSearchToolBar";
+import {ZmMainSearchToolBar, ZmSearchToolBar} from "./zimbra/zimbraMail/share/view/ZmSearchToolBar";
 import {AjxCallback} from "./zimbra/ajax/boot/AjxCallback";
 import {ZimbraDriveFolder} from "./ZimbraDriveFolder";
 import {ZmMsg} from "./zimbra/zimbraMail/ZmMsg";
@@ -41,6 +41,10 @@ import {ZmBatchCommand} from "./zimbra/zimbra/csfe/ZmBatchCommand";
 import {PreviewView} from "./view/PreviewView";
 import {ZmComposeView} from "./zimbra/zimbraMail/mail/view/ZmComposeView";
 import {DwtMenu} from "./zimbra/ajax/dwt/widgets/DwtMenu";
+import {ZmOperation} from "./zimbra/zimbraMail/core/ZmOperation";
+import {ZmSearchResultsToolBar} from "./zimbra/zimbraMail/share/view/ZmSearchResultsToolBar";
+import {ZmAppViewMgrCreatedViewDescriptor} from "./zimbra/zimbraMail/core/ZmAppViewMgr";
+import {ZmSearchControllerSearchParams} from "./zimbra/zimbraMail/share/controller/ZmSearchController";
 
 export class ZimbraDriveZimlet extends ZmZimletBase implements CreateAppZimlet {
 
@@ -52,12 +56,13 @@ export class ZimbraDriveZimlet extends ZmZimletBase implements CreateAppZimlet {
     if (appCount < 0) appCount = 0;
 
     this.createApp(
-      this.getMessage("tabName"),
+      `${this.getMessage("tabName")}<sup>beta</sup>`,
       "ZimbraDrive-icon",
       this.getMessage("zimletDescription"),
       appCount
     );
     ZmMsg.zimbraDriveFolders = ZmMsg.folders;
+    ZmMsg.zimbradrive_item = ZimbraDriveApp.getMessage("zimbraDriveFolder");
     ZmMsg.downloadFolder = ZimbraDriveApp.getMessage("downloadFolder");
   }
 
@@ -85,13 +90,39 @@ export class ZimbraDriveZimlet extends ZmZimletBase implements CreateAppZimlet {
     this._app = new ZimbraDriveApp(this, DwtShell.getShell(window));
     controller.addApp(this._app);
 
+    let searchDomainData: SearchDomainData = {
+      icon: "ZimbraDrive-icon",
+      text: this.getMessage("searchZimbraDrive"),
+      listener: new AjxListener(this, this.onSearchRequested)
+    };
     this.addSearchDomainItem(
-      "ZimbraDrive-icon",
-      this.getMessage("searchZimbraDrive"),
-      new AjxListener(this, this.onSearchRequested),
+      searchDomainData.icon,
+      searchDomainData.text,
+      searchDomainData.listener,
       ZmId.getMenuItemId(ZmId.SEARCH, ZDId.ZIMBRADRIVE_ITEM)
     );
+    // Dirty hack to set the correct default search item also for this non-app
+    let searchToolbar: ZmMainSearchToolBar = appCtxt.getSearchController().getSearchToolbar();
+    if (searchToolbar) {
+      let menu = searchToolbar.getButton(ZmSearchToolBar.TYPES_BUTTON).getMenu();
+      let menuChildren = menu.getChildren();
+      for (let mi of menuChildren) {
+        if ((mi.getData(ZmOperation.MENUITEM_ID) === ZmId.SEARCH_CUSTOM)) {
+          let tmpSDD: SearchDomainData = mi.getData(ZmMainSearchToolBar.CUSTOM_ITEM_ID);
+          if (tmpSDD.icon === searchDomainData.icon && tmpSDD.text === searchDomainData.text) {
+            mi.setData(ZmOperation.MENUITEM_ID, ZDId.ZIMBRADRIVE_ITEM);
+          }
+        }
+      }
+    }
 
+    let searchToolbarMenu: DwtMenu = appCtxt.getSearchController().getSearchToolbar().getButton(ZmSearchToolBar.TYPES_BUTTON).getMenu();
+    // There is any function to get the menu item!! just a getMenuItemById() where id is a zimbra id or "CUSTOM"!!
+    for (let menuItem of searchToolbarMenu.getItems()) {
+      if (menuItem.getHTMLElId() === ZmId.getMenuItemId(ZmId.SEARCH, ZDId.ZIMBRADRIVE_ITEM)) {
+        menuItem.setText(this.getMessage("searchZimbraDrive"));
+      }
+    }
     return this._app.getName();
   }
 
@@ -102,17 +133,40 @@ export class ZimbraDriveZimlet extends ZmZimletBase implements CreateAppZimlet {
   private onSearchRequested(ev: KeyboardEvent|DwtSelectionEvent): void {
     const searchToolbar: ZmMainSearchToolBar = appCtxt.getSearchController().getSearchToolbar();
     let searchValue: string = searchToolbar.getSearchFieldValue().trim();
-
-    let batchCommand = new ZmBatchCommand();
-    batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadGetAllFolderRequestParams));
-    batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadSearchRequestParams, [searchValue]));
-    batchCommand.run();
+    let searchParams: ZmSearchControllerSearchParams = {
+      query: searchValue,
+      userInitiated: true,
+      origin: ZmId.SEARCH
+    };
+    if (searchValue === "") {
+      searchParams.origin = ZmId.SEARCHRESULTS;
+      let searchView: ZmAppViewMgrCreatedViewDescriptor = appCtxt.getAppViewMgr()._getView(
+        appCtxt.getCurrentViewId() &&
+        appCtxt.getCurrentViewId().replace("ZDRIVE_DLV-", "")
+      );
+      if (searchView && searchView.component && searchView.component["searchResultsToolbar"]) {
+        searchValue = (<ZmSearchResultsToolBar> searchView.component["searchResultsToolbar"]).getSearchFieldValue();
+      }
+    }
+    if (searchValue !== "") {
+      searchParams.query = searchValue;
+      let batchCommand = new ZmBatchCommand();
+      batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadGetAllFolderRequestParams));
+      batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadSearchRequestParams, [searchParams]));
+      batchCommand.run();
+    }
   }
 
   public initializeAttachPopup(attachMenu: DwtMenu, composeView: ZmComposeView): void {
     composeView._createAttachMenuItem(attachMenu, ZimbraDriveApp.getMessage("zimletLabel"), new AjxListener(this._app, this._app.popupAttachDialog, composeView));
   }
 
+}
+
+interface SearchDomainData {
+  icon: string;
+  text: string;
+  listener: AjxListener;
 }
 
 interface ZimletWindow extends Window {
@@ -124,14 +178,17 @@ interface ZimletWindow extends Window {
   ZmZimbraDrivePreviewView: Function;
 }
 
-ZmOverviewController.CONTROLLER[ZimbraDriveApp.APP_NAME] = "ZmZimbraDriveTreeController";
+ZmOverviewController.CONTROLLER[ZimbraDriveApp.TREE_ID] = "ZmZimbraDriveTreeController";
 ZmApp.SETTING[ZimbraDriveApp.APP_NAME] = ZimbraDriveApp.ZIMBRADRIVE_ENABLED;
 ZmApp.OVERVIEW_TREES[ZimbraDriveApp.APP_NAME] = [ZimbraDriveApp.TREE_ID];
 ZmApp.APPS.push(ZimbraDriveApp.APP_NAME);
+ZmApp.ORGANIZER[ZimbraDriveApp.APP_NAME] = ZimbraDriveApp.APP_NAME;
 ZmOrganizer.DISPLAY_ORDER[ZimbraDriveApp.APP_NAME] = 100;
-ZmOrganizer.TREE_TYPE[ZimbraDriveApp.APP_NAME] = ZimbraDriveApp.APP_NAME;
-ZmOrganizer.LABEL[ZimbraDriveApp.APP_NAME] = "zimbraDriveFolders";
-ZmTreeView.COMPARE_FUNC[ZimbraDriveApp.APP_NAME] = "ZmZimbraDriveFolder.sortFcn";
+ZmOrganizer.TREE_TYPE[ZimbraDriveApp.TREE_ID] = ZmOrganizer.FOLDER;
+ZmOrganizer.LABEL[ZDId.ZIMBRADRIVE_ITEM] = "zimbraDriveFolders";
+ZmOrganizer.APP[ZDId.ZIMBRADRIVE_ITEM] = ZimbraDriveApp.APP_NAME;
+ZmTreeView.COMPARE_FUNC[ZDId.ZIMBRADRIVE_ITEM] = "ZmZimbraDriveFolder.sortFcn";
+ZmApp.HIDE_ZIMLETS[ZimbraDriveApp.APP_NAME] = true;
 
 (<ZimletWindow>window).ZmZimbraDriveTreeController = ZimbraDriveTreeController;
 (<ZimletWindow>window).ZmZimbraDriveController = ZimbraDriveController;

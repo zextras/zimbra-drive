@@ -17,20 +17,20 @@
 
 package com.zextras.zimbradrive;
 
+import com.zextras.zimbradrive.soap.ZimbraDriveItem;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.openzal.zal.Account;
-import org.openzal.zal.AuthToken;
 import org.openzal.zal.Provisioning;
-import org.openzal.zal.log.ZimbraLog;
+import org.openzal.zal.soap.SoapResponse;
 import org.openzal.zal.soap.ZimbraContext;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +50,7 @@ public class CloudUtils
     mTokenManager = tokenManager;
   }
 
-  public List<NameValuePair> createDriveOnCloudParams(final ZimbraContext zimbraContext) {
+  public List<NameValuePair> createDriveOnCloudAuthenticationParams(final ZimbraContext zimbraContext) {
     Account account = mProvisioning.getAccountById(zimbraContext.getAuthenticatedAccontId());
 
     AccountToken token = mTokenManager.getAccountToken(account);
@@ -91,5 +91,42 @@ public class CloudUtils
 
     HttpClient client = HttpClientBuilder.create().build();
     return client.execute(post);
+  }
+
+  public void appendArrayNodesAttributeToSoapResponse(SoapResponse soapResponse, String jsonNodeArray) {
+    JSONArray driveOnCloudResponseJsons = new JSONArray(jsonNodeArray);
+
+    for (int i = 0; i < driveOnCloudResponseJsons.length(); i++)
+    {
+      JSONObject nodeJson = driveOnCloudResponseJsons.getJSONObject(i);
+
+      SoapResponse nodeSoap = soapResponse.createNode(ZimbraDriveItem.NODE_NAME);
+
+      nodeSoap.setValue(ZimbraDriveItem.F_NAME, nodeJson.getString(ZimbraDriveItem.F_NAME));
+      nodeSoap.setValue(ZimbraDriveItem.F_SHARED, nodeJson.getBoolean(ZimbraDriveItem.F_SHARED));
+      nodeSoap.setValue(ZimbraDriveItem.F_DATE, nodeJson.getInt(ZimbraDriveItem.F_DATE));
+
+      nodeSoap.setValue(ZimbraDriveItem.F_ID, nodeJson.getInt(ZimbraDriveItem.F_ID));
+      nodeSoap.setValue(ZimbraDriveItem.F_AUTHOR, nodeJson.getString(ZimbraDriveItem.F_AUTHOR));
+      nodeSoap.setValue(ZimbraDriveItem.F_SIZE, nodeJson.getInt(ZimbraDriveItem.F_SIZE));
+      nodeSoap.setValue(ZimbraDriveItem.F_PATH, nodeJson.getString(ZimbraDriveItem.F_PATH));
+
+      JSONObject driveOnCloudNodePermissions = nodeJson.getJSONObject(ZimbraDriveItem.F_PERMISSIONS);
+      SoapResponse nodeSoapPermission = nodeSoap.createNode(ZimbraDriveItem.F_PERMISSIONS);
+      nodeSoapPermission.setValue(ZimbraDriveItem.F_PERM_READABLE, driveOnCloudNodePermissions.getBoolean(ZimbraDriveItem.F_PERM_READABLE));
+      nodeSoapPermission.setValue(ZimbraDriveItem.F_PERM_WRITABLE, driveOnCloudNodePermissions.getBoolean(ZimbraDriveItem.F_PERM_WRITABLE));
+      nodeSoapPermission.setValue(ZimbraDriveItem.F_PERM_SHAREABLE, driveOnCloudNodePermissions.getBoolean(ZimbraDriveItem.F_PERM_SHAREABLE));
+
+      String nodeType = nodeJson.getString(ZimbraDriveItem.F_NODE_TYPE);
+      nodeSoap.setValue(ZimbraDriveItem.F_NODE_TYPE, nodeType);
+      if(nodeType.equals(ZimbraDriveItem.F_NODE_TYPE_FILE))
+      {
+        nodeSoap.setValue(ZimbraDriveItem.F_MIMETYPE, nodeJson.getString(ZimbraDriveItem.F_MIMETYPE));
+      }
+
+    }
+    if (driveOnCloudResponseJsons.length() == 0) {
+      soapResponse.createNode(ZimbraDriveItem.NODE_NAME);
+    }
   }
 }

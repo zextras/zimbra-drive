@@ -20,6 +20,7 @@ export class ZDId {
   public static VIEW_ZIMBRADRIVE_DETAIL: string = "ZDRIVE_DLV";
   public static ITEM_ZIMBRADRIVE: string = "ZIMBRADRIVE_ITEM";
   public static ZIMBRADRIVE_ITEM: string = "ZIMBRADRIVE_ITEM";
+  public static ZIMBRADRIVE_FOLDER: string = "ZIMBRADRIVE_FOLDER";
   public static ZIMBRADRIVE_ITEM_ACTIONED: string = "ZIMBRADRIVE_ITEM_ACTIONED";
   public static ORG_ZIMBRADRIVE: string = "zimbradrive";
   public static ZD_NEW_FILE: string = "ZIMBRA_DRIVE_NEW_FILE";
@@ -35,4 +36,7 @@ export class ZDId {
   public static F_TARGET_PATH: string = "target_path";
   public static F_NEW_NAME: string = "new_name";
   public static F_NEW_FOLDER: string = "new_folder";
+
+  public static TYPE_FILE: string = "file";
+  public static TYPE_FOLDER: string = "folder";
 }

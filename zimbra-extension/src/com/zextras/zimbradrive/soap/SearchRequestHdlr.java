@@ -24,11 +24,12 @@ import org.apache.http.NameValuePair;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
-import org.json.JSONObject;
 import org.openzal.zal.soap.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SearchRequestHdlr implements SoapHandler
 {
@@ -49,18 +50,43 @@ public class SearchRequestHdlr implements SoapHandler
   {
     try
     {
+      soapResponse.setQName(RESPONSE_QNAME);
+
       String query = zimbraContext.getParameter("query", "");
+      soapResponse.setValue("query", query);
+
+      String requestedTypesCsv = zimbraContext.getParameter("types", "");
+      soapResponse.setValue("types", requestedTypesCsv);
+
+      Boolean isCaseSensitive = false;
+      if(zimbraContext.getParameterMap().containsKey(ZimbraDriveItem.F_CASESENSITIVE))
+      {
+        isCaseSensitive = true;
+        soapResponse.setValue(ZimbraDriveItem.F_CASESENSITIVE, "");
+      }
+
       if (query.equals("")) { return; }
+      String parsedQuery = getStandardQuery(query);
+
+      String[] requestedTypesArray = requestedTypesCsv.split(",");
+      if(requestedTypesArray.length == 1 && requestedTypesArray[0].length() == 0)
+      {
+        requestedTypesArray = new String[]{ZimbraDriveItem.F_NODE_TYPE_FILE,
+          ZimbraDriveItem.F_NODE_TYPE_FOLDER};
+      }
+      
+      JSONArray defaultTypesJsonArray = new JSONArray(requestedTypesArray);
+      requestedTypesCsv = defaultTypesJsonArray.toString();
 
 
-      HttpResponse response = queryDriveOnCloudServerService(zimbraContext, query);
+      HttpResponse response = queryDriveOnCloudServerService(zimbraContext,
+          parsedQuery,
+          isCaseSensitive,
+          requestedTypesCsv);
       BasicResponseHandler basicResponseHandler = new BasicResponseHandler();
       String responseBody = basicResponseHandler.handleResponse(response);  //throw HttpResponseException if status code >= 300
 
-      soapResponse.setQName(RESPONSE_QNAME);
-      soapResponse.setValue("query", query);
-
-      appendSoapResponseFromDriveResponse(soapResponse, responseBody);
+      mCloudUtils.appendArrayNodesAttributeToSoapResponse(soapResponse, responseBody);
 
     } catch (Exception e)
     {
@@ -68,41 +94,37 @@ public class SearchRequestHdlr implements SoapHandler
     }
   }
 
-  private HttpResponse queryDriveOnCloudServerService(final ZimbraContext zimbraContext, final String query) throws IOException {
-    List<NameValuePair> driveOnCloudParameters = mCloudUtils.createDriveOnCloudParams(zimbraContext);
-    driveOnCloudParameters.add(new BasicNameValuePair("query", query));
-    return mCloudUtils.sendRequestToCloud(zimbraContext, driveOnCloudParameters, COMMAND + "Request");
+  private String getStandardQuery(String query) {
+    StringBuilder parsedQueryBuilder = new StringBuilder();
+
+    Pattern nonQuotedTokenSValuePattern = Pattern.compile("((^| )[^ :]+:)([^\"]*?)( |$)"); //preTokenDelimiter tokenName : nonQuotedTokenValue postTokenDelimiter
+    Matcher nonQuotedTokenSValueMatcher = nonQuotedTokenSValuePattern.matcher(query);
+    int lastMatchEndIndex = 0;
+    while(nonQuotedTokenSValueMatcher.find())
+    {
+      String preMatchValueQuery = query.substring(lastMatchEndIndex, nonQuotedTokenSValueMatcher.end(1));
+
+      String matchValueQuery = query.substring(nonQuotedTokenSValueMatcher.start(3), nonQuotedTokenSValueMatcher.end(3));
+
+      parsedQueryBuilder.append(preMatchValueQuery).append("\"").append(matchValueQuery).append("\"");
+
+      lastMatchEndIndex  = nonQuotedTokenSValueMatcher.end(3);
+    }
+
+    parsedQueryBuilder.append(query.substring(lastMatchEndIndex));
+
+    return  parsedQueryBuilder.toString();
   }
 
-  private void appendSoapResponseFromDriveResponse(final SoapResponse soapResponse, final String responseBody)
-  {
-    JSONArray driveOnCloudResponseJsons = new JSONArray(responseBody);
-
-    for (int i = 0; i < driveOnCloudResponseJsons.length(); i++)
-    {
-      JSONObject nodeJson = driveOnCloudResponseJsons.getJSONObject(i);
-
-      SoapResponse nodeSoap = soapResponse.createNode(ZimbraDriveItem.NODE_NAME);
-
-      nodeSoap.setValue(ZimbraDriveItem.F_NAME, nodeJson.getString(ZimbraDriveItem.F_NAME));
-      nodeSoap.setValue(ZimbraDriveItem.F_SHARED, nodeJson.getBoolean(ZimbraDriveItem.F_SHARED));
-      nodeSoap.setValue(ZimbraDriveItem.F_DATE, nodeJson.getInt(ZimbraDriveItem.F_DATE));
-
-      nodeSoap.setValue(ZimbraDriveItem.F_ID, nodeJson.getInt(ZimbraDriveItem.F_ID));
-      nodeSoap.setValue(ZimbraDriveItem.F_AUTHOR, nodeJson.getString(ZimbraDriveItem.F_AUTHOR));
-      nodeSoap.setValue(ZimbraDriveItem.F_SIZE, nodeJson.getInt(ZimbraDriveItem.F_SIZE));
-      nodeSoap.setValue(ZimbraDriveItem.F_MIMETYPE, nodeJson.getString(ZimbraDriveItem.F_MIMETYPE));
-      nodeSoap.setValue(ZimbraDriveItem.F_PATH, nodeJson.getString(ZimbraDriveItem.F_PATH));
-
-      JSONObject driveOnCloudNodePermissions = nodeJson.getJSONObject(ZimbraDriveItem.F_PERMISSIONS);
-      SoapResponse nodeSoapPermission = nodeSoap.createNode(ZimbraDriveItem.F_PERMISSIONS);
-      nodeSoapPermission.setValue(ZimbraDriveItem.F_PERM_READABLE, driveOnCloudNodePermissions.getBoolean(ZimbraDriveItem.F_PERM_READABLE));
-      nodeSoapPermission.setValue(ZimbraDriveItem.F_PERM_WRITABLE, driveOnCloudNodePermissions.getBoolean(ZimbraDriveItem.F_PERM_WRITABLE));
-      nodeSoapPermission.setValue(ZimbraDriveItem.F_PERM_SHAREABLE, driveOnCloudNodePermissions.getBoolean(ZimbraDriveItem.F_PERM_SHAREABLE));
-    }
-    if (driveOnCloudResponseJsons.length() == 0) {
-      soapResponse.createNode(ZimbraDriveItem.NODE_NAME);
-    }
+  private HttpResponse queryDriveOnCloudServerService(final ZimbraContext zimbraContext,
+                                                      final String query,
+                                                      Boolean isCaseSensitive,
+                                                      final String types) throws IOException {
+    List<NameValuePair> driveOnCloudParameters = mCloudUtils.createDriveOnCloudAuthenticationParams(zimbraContext);
+    driveOnCloudParameters.add(new BasicNameValuePair("query", query));
+    driveOnCloudParameters.add(new BasicNameValuePair("types", types));
+    driveOnCloudParameters.add(new BasicNameValuePair("caseSensitive", isCaseSensitive.toString()));
+    return mCloudUtils.sendRequestToCloud(zimbraContext, driveOnCloudParameters, COMMAND + "Request");
   }
 
   @Override

@@ -37,6 +37,7 @@ import {ZimbraDriveBaseViewParams} from "./ZimbraDriveBaseView";
 import {ZimbraDriveController} from "../ZimbraDriveController";
 import {ZmComposeController} from "../zimbra/zimbraMail/mail/controller/ZmComposeController";
 import {ZmApp} from "../zimbra/zimbraMail/core/ZmApp";
+import {ZimbraDriveItem} from "../ZimbraDriveItem";
 
 export class ZimbraDriveTabView extends DwtComposite {
 
@@ -64,7 +65,7 @@ export class ZimbraDriveTabView extends DwtComposite {
       additional: {}
     };
     params.searchFor = ZDId.ITEM_ZIMBRADRIVE;
-    params.types = [ZDId.ZIMBRADRIVE_ITEM];
+    params.types = [ZDId.ITEM_ZIMBRADRIVE];
     params.checkTypes = true;
     let search = new ZmSearch(params);
     search.execute({
@@ -83,22 +84,22 @@ export class ZimbraDriveTabView extends DwtComposite {
         overviewClass: "ZimbraDriveTabBox ZimbraDriveOverviewBox",
         headerClass: "DwtTreeItem",
         noTooltips: true,
-        treeIds: [ZimbraDriveApp.APP_NAME],
+        treeIds: [ZimbraDriveApp.TREE_ID],
         account: appCtxt.getActiveAccount(),
         isAppOverview: true,
         appName: ZimbraDriveApp.APP_NAME
       };
       overview = opc.createOverview(ovParams);
-      overview.set([ZimbraDriveApp.APP_NAME]);
+      overview.set([ZimbraDriveApp.TREE_ID]);
       document.getElementById(this._folderTreeCellId).appendChild(overview.getHtmlElement());
     }
     else {
-      overview.set([ZimbraDriveApp.APP_NAME]);
+      overview.set([ZimbraDriveApp.TREE_ID]);
     }
-    let treeView = overview.getTreeView(ZimbraDriveApp.APP_NAME);
+    let treeView = overview.getTreeView(ZimbraDriveApp.TREE_ID);
     treeView.addSelectionListener(new AjxListener(this, this._treeListener));
     treeView.getHeaderItem().setVisible(false, true);
-    treeView.setSelection(<DwtTreeItem> treeView.getHeaderItem().getChild(0), true, false, true);
+    treeView.setSelection(<DwtTreeItem> treeView.getHeaderItem().getChildren()[0], true, false, true);
     // Listview
     let app: ZimbraDriveApp = <ZimbraDriveApp> appCtxt.getApp(ZimbraDriveApp.APP_NAME);
     if (!this._controller ) {
@@ -125,6 +126,10 @@ export class ZimbraDriveTabView extends DwtComposite {
     this._isLoadingFolder = false;
     let results: ZmSearchResult = <ZmSearchResult> (result && result.getResponse()),
       itemsResults: ZmList = results.getResults(ZDId.ZIMBRADRIVE_ITEM);
+    let firstItem: ZimbraDriveItem = itemsResults.getArray().length > 0 && <ZimbraDriveItem> itemsResults.getArray()[0];
+    if (firstItem && firstItem.getName && !firstItem.getName()) {
+      itemsResults.getArray().pop();
+    }
     this._controller._listView[ZimbraDriveTabView.view].set(itemsResults);
     return true;
   }
@@ -161,6 +166,7 @@ export class ZimbraDriveTabView extends DwtComposite {
     this._folderDisplayed = "/";
     this._isLoadingFolder = true;
     let batchCommand: ZmBatchCommand = new ZmBatchCommand();
+    // TODO: ZD-32
     batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadGetAllFolderRequestParams));
     batchCommand.add(new AjxCallback(this, this.loadSearchRequestParams, [`in:"${this._folderDisplayed}"`, new AjxCallback(this, this._handleResponseDoSearch)]));
     batchCommand.run();

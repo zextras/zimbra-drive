@@ -16,22 +16,20 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace OCA\ZimbraDrive\Service;
+namespace OCA\ZimbraDrive\Service\Filter;
 
+use \Exception;
 
-class ResponseVarName
+class NoSuchFilterException extends Exception
 {
-    const NAME_VAR_NAME = 'name';
-    const PERMISSIONS_VAR_NAME = 'permissions';
-    const NODE_TYPE_VAR_NAME = 'node_type';
-    const SHARED_VAR_NAME = 'shared';
-    const MIME_TYPE_VAR_NAME = 'mimetype';
-    const CHILDREN_VAR_NAME = 'children';
-    const AUTHOR_VAR_NAME = 'author';
-    const MODIFIED_TIME_VAR_NAME = 'modified_time';
-    const SIZE_VAR_NAME = 'size';
-    const ID_VAR_NAME = 'id';
-    const PATH_VAR_NAME = 'path';
-    const NODE_FILE = 'file';
-    const NODE_FOLDER = 'folder';
+    const MESSAGE = "The filter is not support.";
+
+    /**
+     * NoSuchFilterException constructor.
+     * @param string $message
+     */
+    public function __construct($message = self::MESSAGE)
+    {
+        parent::__construct($message);
+    }
 }

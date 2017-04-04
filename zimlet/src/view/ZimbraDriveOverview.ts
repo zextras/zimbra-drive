@@ -22,7 +22,7 @@ import {ZimbraDriveTreeView} from "./ZimbraDriveTreeView";
 
 export class ZimbraDriveOverview extends ZmOverview {
   public focus(): DwtTreeItem {
-    let zimbraDriveTreeView: ZimbraDriveTreeView = <ZimbraDriveTreeView> this.getTreeView(ZimbraDriveApp.APP_NAME),
+    let zimbraDriveTreeView: ZimbraDriveTreeView = <ZimbraDriveTreeView> this.getTreeView(ZimbraDriveApp.TREE_ID),
       currentFolderTreeItem: DwtTreeItem = zimbraDriveTreeView.getCurrentFolderTreeItem();
     this.clearSelection();
     this.itemSelected(currentFolderTreeItem);

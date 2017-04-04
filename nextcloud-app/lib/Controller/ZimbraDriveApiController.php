@@ -18,10 +18,12 @@
 
 namespace OCA\ZimbraDrive\Controller;
 
+
 use OCA\ZimbraDrive\Response\EmptyResponse;
+use OCA\ZimbraDrive\Service\ResponseVarName;
+use OCA\ZimbraDrive\Service\SearchService;
 use OCA\ZimbraDrive\Service\StorageService;
 use OCA\ZimbraDrive\Service\LogService;
-use OCA\ZimbraDrive\Service\QueryService;
 use OCA\ZimbraDrive\Service\BadRequestException;
 use OCP\AppFramework\ApiController;
 use OCP\IRequest;
@@ -33,6 +35,7 @@ use OCA\ZimbraDrive\Service\MethodNotAllowedException;
 use \Exception;
 use OCP\Files\NotPermittedException;
 use OCA\ZimbraDrive\Response\NodeResponse;
+use OCP\AppFramework\Http\Response;
 
 class ZimbraDriveApiController extends ApiController
 {
@@ -44,14 +47,14 @@ class ZimbraDriveApiController extends ApiController
     private $logger;
     private $loginService;
     private $storageService;
-    private $queryService;
+    private $searchService;
 
     public function __construct(
         $appName,
         IRequest $request,
         LoginService $loginService,
         StorageService $storageService,
-        QueryService $queryService,
+        SearchService $searchService,
         LogService $logger
     )
     {
@@ -64,7 +67,7 @@ class ZimbraDriveApiController extends ApiController
         $this->logger = $logger;
         $this->loginService = $loginService;
         $this->storageService = $storageService;
-        $this->queryService = $queryService;
+        $this->searchService = $searchService;
     }
 
     /**
@@ -74,9 +77,11 @@ class ZimbraDriveApiController extends ApiController
      * @param $username
      * @param $token
      * @param $query
-     * @return \OCP\AppFramework\Http\Response
+     * @param $types
+     * @param $caseSensitive bool
+     * @return Response
      */
-    public function searchRequest($username, $token, $query)
+    public function searchRequest($username, $token, $query, $types, $caseSensitive)
     {
         $this->logger->debug($username . ' call searchRequest.');
         try {
@@ -86,25 +91,56 @@ class ZimbraDriveApiController extends ApiController
             return new EmptyResponse(Http::STATUS_UNAUTHORIZED);
         }
 
-        try {
-            $path = $this->queryService->getPath($query);
-        } catch (BadRequestException $badRequestException) {
-            $this->logger->info($badRequestException->getMessage());
-            return new EmptyResponse(Http::STATUS_BAD_REQUEST);
-        }
+        $types = json_decode($types, false);
+        $caseSensitive = $caseSensitive === "true";
 
         try {
-            $searchedFolder = $this->storageService->getFolder($path);
-        }
-         catch (MethodNotAllowedException $methodNotAllowedException) {
-            $this->logger->info($methodNotAllowedException->getMessage());
-             return new EmptyResponse(Http::STATUS_METHOD_NOT_ALLOWED);
-        } catch (Exception $exception) {
-            $this->logger->info($exception->getMessage());
+            $wantedFiles =  $this->searchService->search($query, $caseSensitive);
+        } catch (BadRequestException $badRequestException) {
+            $this->logger->info($badRequestException->getMessage());
             return new EmptyResponse(Http::STATUS_FORBIDDEN);
         }
-        $folderAsArray = $this->storageService->folderChildNodeNoFolderAttributes($searchedFolder);
-        return new JSONResponse($folderAsArray);
+        catch (MethodNotAllowedException $methodNotAllowedException) {
+            $this->logger->info($methodNotAllowedException->getMessage());
+            return new EmptyResponse(Http::STATUS_METHOD_NOT_ALLOWED);
+        }
+//        catch (Exception $exception) {
+//            $this->logger->info($exception->getMessage());
+//            return new EmptyResponse(Http::STATUS_FORBIDDEN);
+//        }
+
+        $results = $this->filterTypes($wantedFiles, $types);
+        $resultsNoShares = $this->filterShareNodes($results);
+        return new JSONResponse($resultsNoShares);
+    }
+
+    /**
+     * @param $mapsToBeFilter array
+     * @param $types array of string
+     * @return array
+     */
+    private function filterTypes($mapsToBeFilter, $types)
+    {
+        $results = array();
+        foreach($mapsToBeFilter as $mapToBeFilter)
+        {
+            if($this->isAValidType($mapToBeFilter, $types))
+            {
+                $results[] = $mapToBeFilter;
+            }
+        }
+        return $results;
+
+    }
+
+    /**
+     * @param $mapToBeFilter string
+     * @param $types array
+     * @return bool
+     */
+    private function isAValidType($mapToBeFilter, $types)
+    {
+        return in_array($mapToBeFilter[ResponseVarName::NODE_TYPE_VAR_NAME], $types, true);
     }
 
     /**
@@ -131,8 +167,9 @@ class ZimbraDriveApiController extends ApiController
             $this->logger->info($exception->getMessage());
             return new EmptyResponse(Http::STATUS_FORBIDDEN);
         }
-        $folderAsArray = $this->storageService->getFolderAttributeTree($searchedFolder);
-        return new JSONResponse($folderAsArray);
+        $folderTree = $this->storageService->getFolderTreeAttributes($searchedFolder);
+        $folderTreeNoShare = $this->filterShareTreeNodes($folderTree);
+        return new JSONResponse($folderTreeNoShare);
     }
 
     /**
@@ -281,7 +318,7 @@ class ZimbraDriveApiController extends ApiController
             $this->logger->info($methodNotAllowedException->getMessage());
             return new EmptyResponse(Http::STATUS_METHOD_NOT_ALLOWED);
         }
-        $newFolderAttributes = $this->storageService->getFolderAttributeTree($newFolder);
+        $newFolderAttributes = $this->storageService->getFolderTreeAttributes($newFolder);
         return new JSONResponse($newFolderAttributes);
     }
 
@@ -345,6 +382,50 @@ class ZimbraDriveApiController extends ApiController
     private function createFileStatusResponse($statusCode)
     {
         return array("statusCode" => $statusCode);
+    }
+
+    /**
+     * @param $nodes array
+     * @return array
+     */
+    private function filterShareNodes($nodes)
+    {
+        $results = array();
+        foreach ($nodes as $node)
+        {
+            if($node[ResponseVarName::SHARED_VAR_NAME] === false)
+            {
+                $results[] = $node;
+            }
+        }
+        return $results;
+    }
+
+    /**
+     * @param $nodeTree
+     * @return array
+     */
+    private function filterShareTreeNodes($nodeTree)
+    {
+        $filterTree = $nodeTree;
+        if($nodeTree[ResponseVarName::SHARED_VAR_NAME] === true)
+        {
+            return array();
+        }
+
+        $filterChildren = array();
+        $children = $nodeTree[ResponseVarName::CHILDREN_VAR_NAME];
+        foreach ($children as $child)
+        {
+            $filterChild = self::filterShareTreeNodes($child);
+            if(!empty($filterChild))
+            {
+                $filterChildren[] = $filterChild;
+            }
+        }
+        $filterTree[ResponseVarName::CHILDREN_VAR_NAME] = $filterChildren;
+        return $filterTree;
+
     }
 
     /**

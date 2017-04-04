@@ -83,7 +83,7 @@ public class DeleteHdlr implements SoapHandler
   }
 
   private HttpResponse sendDeleteDriveOnCloudServerService(final ZimbraContext zimbraContext, final String targetPath) throws IOException {
-    List<NameValuePair> driveOnCloudParameters = mCloudUtils.createDriveOnCloudParams(zimbraContext);
+    List<NameValuePair> driveOnCloudParameters = mCloudUtils.createDriveOnCloudAuthenticationParams(zimbraContext);
     driveOnCloudParameters.add(new BasicNameValuePair(ZimbraDriveItem.F_PATH, targetPath));
     return mCloudUtils.sendRequestToCloud(zimbraContext, driveOnCloudParameters, COMMAND);
   }

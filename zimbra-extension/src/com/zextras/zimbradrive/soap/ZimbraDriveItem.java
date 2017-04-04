@@ -36,6 +36,7 @@ public class ZimbraDriveItem
   public static final String F_PERM_SHAREABLE = "shareable";
   public static final String F_AUTHOR = "author";
   public static final String F_PATH = "path";
+  public static final String F_URL = "url";
   public static final String F_SIZE = "size";
   public static final String F_SOURCE_PATH = "source_path";
   public static final String F_TARGET_PATH = "target_path";
@@ -44,5 +45,7 @@ public class ZimbraDriveItem
   public static final String F_NEW_FOLDER = "new_folder";
   public static final String F_SEND_FILES_AS_ATTACHMENT = "send_files_as_attachment";
   public static final String F_REQ_ID = "requestId";
-
+  public static final String F_NODE_TYPE_FILE = "file";
+  public static final String F_NODE_TYPE_FOLDER = "folder";
+  public static final String F_CASESENSITIVE = "casesensitive";
 }
