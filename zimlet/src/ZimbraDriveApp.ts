@@ -153,7 +153,6 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
     params.types = [ZDId.ZIMBRADRIVE_ITEM];
     params.checkTypes = true;
     if (params.userInitiated) {
-      params.origin = ZmId.SEARCHRESULTS;
       params.types.push(ZDId.ZIMBRADRIVE_FOLDER);
     }
     else {

@@ -62,6 +62,7 @@ export class ZimbraDriveZimlet extends ZmZimletBase implements CreateAppZimlet {
       appCount
     );
     ZmMsg.zimbraDriveFolders = ZmMsg.folders;
+    ZmMsg.zimbradrive_item = ZimbraDriveApp.getMessage("zimbraDriveFolder");
     ZmMsg.downloadFolder = ZimbraDriveApp.getMessage("downloadFolder");
   }
 
@@ -132,7 +133,13 @@ export class ZimbraDriveZimlet extends ZmZimletBase implements CreateAppZimlet {
   private onSearchRequested(ev: KeyboardEvent|DwtSelectionEvent): void {
     const searchToolbar: ZmMainSearchToolBar = appCtxt.getSearchController().getSearchToolbar();
     let searchValue: string = searchToolbar.getSearchFieldValue().trim();
+    let searchParams: ZmSearchControllerSearchParams = {
+      query: searchValue,
+      userInitiated: true,
+      origin: ZmId.SEARCH
+    };
     if (searchValue === "") {
+      searchParams.origin = ZmId.SEARCHRESULTS;
       let searchView: ZmAppViewMgrCreatedViewDescriptor = appCtxt.getAppViewMgr()._getView(
         appCtxt.getCurrentViewId() &&
         appCtxt.getCurrentViewId().replace("ZDRIVE_DLV-", "")
@@ -142,10 +149,7 @@ export class ZimbraDriveZimlet extends ZmZimletBase implements CreateAppZimlet {
       }
     }
     if (searchValue !== "") {
-      let searchParams: ZmSearchControllerSearchParams = {
-        query: searchValue,
-        userInitiated: true
-      };
+      searchParams.query = searchValue;
       let batchCommand = new ZmBatchCommand();
       batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadGetAllFolderRequestParams));
       batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadSearchRequestParams, [searchParams]));
