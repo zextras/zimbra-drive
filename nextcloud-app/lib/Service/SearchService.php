@@ -19,6 +19,7 @@
 namespace OCA\ZimbraDrive\Service;
 
 use OCA\ZimbraDrive\Service\Filter\FilterFactory;
+use OCA\ZimbraDrive\Service\Filter\NoSuchFilterException;
 use OCP\Files\Folder;
 use OCA\ZimbraDrive\Service\Filter\FilterFactoryProvider;
 use OCA\ZimbraDrive\Service\Filter\FilterUtils;
@@ -48,7 +49,6 @@ class SearchService
      * @param LogService $logService
      * @param FilterFactoryProvider $filterFactoryProvider
      * @param FilterUtils $filterUtils
-     * @internal param FilterFactory $filterFactory
      */
     public function __construct(StorageService $storageService, LogService $logService, FilterFactoryProvider $filterFactoryProvider, FilterUtils $filterUtils)
     {
@@ -139,7 +139,6 @@ class SearchService
     /**
      * @param $path
      * @return array
-     * @internal param string $query
      */
     private function getFoldersContentCaseInsensitive($path)
     {
@@ -151,7 +150,6 @@ class SearchService
     /**
      * @param $path
      * @return array
-     * @internal param string $query
      */
     private function getFoldersContentCaseSensitive($path)
     {
@@ -183,11 +181,17 @@ class SearchService
      * @param $token string
      * @param $filterFactory FilterFactory
      * @return mixed
-     * @internal param Node $nodeToFilter
+     * @throws BadRequestException
      */
     private function filterNodesByToken($nodesToFilter, $token, $filterFactory)
     {
-        $filter = $filterFactory->createFilter($token);
+        try
+        {
+            $filter = $filterFactory->createFilter($token);
+        } catch (NoSuchFilterException $noSuchFilterException)
+        {
+            throw new BadRequestException($noSuchFilterException->getMessage());
+        }
         return $filter->filter($nodesToFilter);
     }
 }

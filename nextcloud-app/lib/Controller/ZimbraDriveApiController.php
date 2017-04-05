@@ -98,16 +98,12 @@ class ZimbraDriveApiController extends ApiController
             $wantedFiles =  $this->searchService->search($query, $caseSensitive);
         } catch (BadRequestException $badRequestException) {
             $this->logger->info($badRequestException->getMessage());
-            return new EmptyResponse(Http::STATUS_FORBIDDEN);
+            return new EmptyResponse(Http::STATUS_BAD_REQUEST);
         }
         catch (MethodNotAllowedException $methodNotAllowedException) {
             $this->logger->info($methodNotAllowedException->getMessage());
             return new EmptyResponse(Http::STATUS_METHOD_NOT_ALLOWED);
         }
-//        catch (Exception $exception) {
-//            $this->logger->info($exception->getMessage());
-//            return new EmptyResponse(Http::STATUS_FORBIDDEN);
-//        }
 
         $results = $this->filterTypes($wantedFiles, $types);
         $resultsNoShares = $this->filterShareNodes($results);
