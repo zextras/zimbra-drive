@@ -40,10 +40,12 @@ public class UploadFileHttpHandler extends HttpServlet implements HttpHandler {
   private final static String NEXT_CLOUD_UPLOAD_FILE_URL = "/apps/zimbradrive/api/1.0/UploadFile";
 
   private final BackendUtils mBackendUtils;
+  private final DriveProxy   mDriveProxy;
 
-  public UploadFileHttpHandler(BackendUtils backendUtils)
+  public UploadFileHttpHandler(BackendUtils backendUtils, DriveProxy driveProxy)
   {
     mBackendUtils = backendUtils;
+    mDriveProxy = driveProxy;
   }
 
   @Override
@@ -163,7 +165,8 @@ public class UploadFileHttpHandler extends HttpServlet implements HttpHandler {
     String formBoundary = getFormPartsBoundary(httpServletRequest);
     Account userAccount = mBackendUtils.assertAccountFromAuthToken(httpServletRequest);
     HttpEntity requestToSendToDrive = createUploadFileRequest(httpServletRequest, formBoundary, userAccount);
-    String driveOnCloudDomain = ConfigUtils.getNcDomain(userAccount.getDomainName());
+//    String driveOnCloudDomain = ConfigUtils.getNcDomain(userAccount.getDomainName());
+    String driveOnCloudDomain = mDriveProxy.getDriveDomainAssociatedToDomain(userAccount.getDomainName());
     String fileUploadRequestUrl = driveOnCloudDomain + NEXT_CLOUD_UPLOAD_FILE_URL;
     HttpPost post = new HttpPost(fileUploadRequestUrl);
     post.setEntity(requestToSendToDrive);
