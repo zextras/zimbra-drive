@@ -89,7 +89,9 @@ export class ZimbraDriveTreeController extends ZmFolderTreeController {
 
     treeView._controller = this;
     this._initDragAndDrop(treeView);
-    headerItem.getChildren()[0].setExpanded(true);
+    if (headerItem.getChildren().length > 0) {
+      headerItem.getChildren()[0].setExpanded(true);
+    }
     headerItem.enableSelection(false);
     headerItem.enableAction(false);
     AjxImg.setImage(headerItem._nodeCell);

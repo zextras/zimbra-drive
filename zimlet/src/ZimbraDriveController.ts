@@ -78,6 +78,8 @@ import {ZmOrganizer} from "./zimbra/zimbraMail/share/model/ZmOrganizer";
 import {ZmList} from "./zimbra/zimbraMail/share/model/ZmList";
 import {DwtTreeItem} from "./zimbra/ajax/dwt/widgets/DwtTreeItem";
 import {ZmSearchControllerSearchParams} from "./zimbra/zimbraMail/share/controller/ZmSearchController";
+import {ZmBaseController} from "./zimbra/zimbraMail/share/controller/ZmBaseController";
+import {ZmAppViewMgr} from "./zimbra/zimbraMail/core/ZmAppViewMgr";
 
 declare let window: {
   csrfToken: string
@@ -920,6 +922,40 @@ export class ZimbraDriveController extends ZmListController {
       parsedString = parsedString.slice(0, -1);
     }
     return parsedString;
+  }
+}
+
+export class ZimbraDriveErrorController extends ZmBaseController {
+  public show(results: ZmCsfeException): void {
+    this._setup(this._currentViewId);
+    let elements = this.getViewElements(this._currentViewId, <DwtComposite> this._view[this._currentViewId]);
+    this._setView({
+      view: this._currentViewId,
+      viewType: this._currentViewType,
+      elements:	elements,
+      hide: ZmAppViewMgr.LEFT_NAV,
+      isAppView: true
+    });
+    this._view[this._currentViewId].setContent(
+      "<div> Test Text </div>"
+    );
+  }
+
+  public _initializeView(view: string): void {
+    if (this._view[view]) { return; }
+    this._view[view] = new DwtComposite({
+      parent: appCtxt.getShell(),
+      posStyle: Dwt.ABSOLUTE_STYLE,
+      id: view
+    });
+  }
+  // Skip init toolbar (strange check )
+  public _getToolBarOps(): string[] {
+    return [];
+  }
+
+  public static getDefaultViewType(): string {
+    return ZDId.VIEW_ZIMBRADRIVE_ERROR;
   }
 }
 

@@ -26,7 +26,7 @@ import {ZmAppButtonParams} from "./zimbra/zimbraMail/share/view/ZmAppButton";
 import {ZmOverviewController} from "./zimbra/zimbraMail/share/controller/ZmOverviewController";
 import {ZmOrganizer} from "./zimbra/zimbraMail/share/model/ZmOrganizer";
 import {ZimbraDriveTreeController} from "./ZimbraDriveTreeController";
-import {ZimbraDriveController} from "./ZimbraDriveController";
+import {ZimbraDriveController, ZimbraDriveErrorController} from "./ZimbraDriveController";
 import {ZimbraDriveItem} from "./ZimbraDriveItem";
 import {ZmId} from "./zimbra/zimbraMail/core/ZmId";
 import {ZDId} from "./ZDId";
@@ -172,6 +172,7 @@ interface SearchDomainData {
 interface ZimletWindow extends Window {
   com_zextras_drive_open_hdlr: Function;
   ZmZimbraDriveController: Function;
+  ZmZimbraDriveErrorController: Function;
   ZmZimbraDriveTreeController: Function;
   ZmZimbraDriveItem: Function;
   ZmZimbraDriveFolder: Function;
@@ -192,6 +193,7 @@ ZmApp.HIDE_ZIMLETS[ZimbraDriveApp.APP_NAME] = true;
 
 (<ZimletWindow>window).ZmZimbraDriveTreeController = ZimbraDriveTreeController;
 (<ZimletWindow>window).ZmZimbraDriveController = ZimbraDriveController;
+(<ZimletWindow>window).ZmZimbraDriveErrorController = ZimbraDriveErrorController;
 (<ZimletWindow>window).ZmZimbraDriveItem = ZimbraDriveItem;
 (<ZimletWindow>window).ZmZimbraDriveFolder = ZimbraDriveFolder;
 (<ZimletWindow>window).ZmZimbraDrivePreviewView = PreviewView;
