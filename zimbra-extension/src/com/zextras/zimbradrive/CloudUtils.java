@@ -43,11 +43,13 @@ public class CloudUtils
 
   private final Provisioning mProvisioning;
   private final TokenManager mTokenManager;
+  private final DriveProxy   mDriveProxy;
 
-  public CloudUtils(Provisioning provisioning, TokenManager tokenManager)
+  public CloudUtils(Provisioning provisioning, TokenManager tokenManager, DriveProxy driveProxy)
   {
     mProvisioning = provisioning;
     mTokenManager = tokenManager;
+    mDriveProxy = driveProxy;
   }
 
   public List<NameValuePair> createDriveOnCloudAuthenticationParams(final ZimbraContext zimbraContext) {
@@ -55,7 +57,7 @@ public class CloudUtils
 
     AccountToken token = mTokenManager.getAccountToken(account);
 
-    List<NameValuePair> driveOnCloudParameters = new ArrayList<NameValuePair>();
+    List<NameValuePair> driveOnCloudParameters = new ArrayList<>();
     driveOnCloudParameters.add(new BasicNameValuePair("username", token.getAccount().getId()));
     driveOnCloudParameters.add(new BasicNameValuePair("token", token.getToken()));
     return driveOnCloudParameters;
@@ -64,7 +66,10 @@ public class CloudUtils
   public HttpResponse sendRequestToCloud(final ZimbraContext zimbraContext, List<NameValuePair> driveOnCloudParameters, String driveCommand)  
     throws IOException
   {
-    String driveOnCloudDomain = ConfigUtils.getNcDomain(mProvisioning.getAccountById(zimbraContext.getAuthenticatedAccontId()).getDomainName());
+    String authenticatedAccountId = zimbraContext.getAuthenticatedAccontId();
+    Account authenticatedUser = mProvisioning.assertAccountById(authenticatedAccountId);
+    String userDomain = authenticatedUser.getDomainName();
+    String driveOnCloudDomain = mDriveProxy.getDriveDomainAssociatedToDomain(userDomain);
     String searchRequestUrl = driveOnCloudDomain + DRIVE_ON_CLOUD_URL + driveCommand;
 
     HttpPost post = new HttpPost(searchRequestUrl);
@@ -78,12 +83,12 @@ public class CloudUtils
   {
     AccountToken token = mTokenManager.getAccountToken(account);
 
-    List<NameValuePair> driveOnCloudParameters = new ArrayList<NameValuePair>();
+    List<NameValuePair> driveOnCloudParameters = new ArrayList<>();
     driveOnCloudParameters.add(new BasicNameValuePair("username", token.getAccount().getId()));
     driveOnCloudParameters.add(new BasicNameValuePair("token", token.getToken()));
     driveOnCloudParameters.add(new BasicNameValuePair("path", filePath));
 
-    String driveOnCloudDomain = ConfigUtils.getNcDomain(account.getDomainName());
+    String driveOnCloudDomain = mDriveProxy.getDriveDomainAssociatedToDomain(account.getDomainName());
     String searchRequestUrl = driveOnCloudDomain + GET_FILE_URL;
 
     HttpPost post = new HttpPost(searchRequestUrl);

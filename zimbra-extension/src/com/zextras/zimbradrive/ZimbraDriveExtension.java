@@ -46,14 +46,15 @@ public class ZimbraDriveExtension implements ZalExtension
     Zimbra mZimbra = new Zimbra();
     TokenManager tokenManager = new TokenManager();
     BackendUtils backendUtils = new BackendUtils(mZimbra.getProvisioning(), tokenManager);
-    CloudUtils cloudUtils = new CloudUtils(mZimbra.getProvisioning(), tokenManager);
+    DriveProxy driveProxy = new DriveProxy(mZimbra.getProvisioning());
+    CloudUtils cloudUtils = new CloudUtils(mZimbra.getProvisioning(), tokenManager, driveProxy);
 
     mSoapServiceManager = new SoapServiceManager();
     mNcSoapService = new NcSoapService(cloudUtils);
 
     mHttpServiceManager = new HttpServiceManager();
     mNcUserZimbraBackendHttpHandler = new NcUserZimbraBackendHttpHandler(backendUtils);
-    mUploadFileHttpHandler = new UploadFileHttpHandler(backendUtils);
+    mUploadFileHttpHandler = new UploadFileHttpHandler(backendUtils, driveProxy);
     mGetFileHttpHdlr = new GetFileHttpHandler(cloudUtils, backendUtils);
     mCreateTempAttachmentFileHttpHdlr = new CreateTempAttachmentFileHttpHandler(cloudUtils, backendUtils);
   }
