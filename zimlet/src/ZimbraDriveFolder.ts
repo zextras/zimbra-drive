@@ -139,9 +139,28 @@ export class ZimbraDriveFolder extends ZmFolder {
     return this.getPath(true).length <= targetPath.length && this.getPath(true) === targetPath.substring(0, this.getPath(true).length);
   }
 
+  // This isn't case sensitive
+  public alreadyContainsChild(childName: string) {
+    for (let child of this.children.getArray()) {
+      if (child.getName().toLowerCase() === childName.toLowerCase()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   public createQuery(pathOnly: boolean): string {
     return `in:"${this.getPath(false)}"`;
   }
+
+  public getChild(name: string): ZimbraDriveFolder {
+    for (let child of this.children.getArray()) {
+      if (child.name === name) {
+        return <ZimbraDriveFolder> child;
+      }
+    }
+    return null;
+  };
 
 }
 

@@ -750,7 +750,7 @@ export class ZimbraDriveController extends ZmListController {
       moveParams: ZimbraDriveMoveParams = {itemsName: [], itemsAlreadyExist: [], itemsError: [], countResponses: 0},
       changeCurrentFolder: boolean = false;
     for (let item of items) {
-      if (!ZimbraDriveController.checkMoveFeasible(item, folder.getPath(true))) {
+      if (!ZimbraDriveController.checkMoveFeasible(item, folder)) {
         appCtxt.setStatusMsg({msg: item.getName() + " cannot be moved in target destination.", level: ZmStatusView.LEVEL_WARNING});
         return;
       }
@@ -866,13 +866,13 @@ export class ZimbraDriveController extends ZmListController {
     }
   }
 
-  public static checkMoveFeasible(item: ZimbraDriveItem|ZimbraDriveFolder, destinationPath: string): boolean {
+  public static checkMoveFeasible(item: ZimbraDriveItem|ZimbraDriveFolder, destinationFolder: ZimbraDriveFolder): boolean {
     // check if item is folder and contains destination
-    if (item.containsTargetPath(destinationPath)) {
+    if (item.containsTargetPath(destinationFolder.getPath(true)) || destinationFolder.alreadyContainsChild(item.getName())) {
       return false;
     }
     // at last check if move is useless return
-    return item.getParentPath() !== destinationPath;
+    return item.getParentPath() !== destinationFolder.getPath(true);
   }
 
   public static getUploadManager(): ZimbraDriveUploadManager|AjxPost {
@@ -963,7 +963,7 @@ export class ZimbraDriveErrorController extends ZmBaseController {
       AjxTemplate.expand("com_zextras_drive_open.ZimbraDrive#ServerErrorContainer", {id: view, errMsg: ZimbraDriveApp.getMessage("errorSplash")})
     );
     this._view[view].getHtmlElement().style.textAlign = "center";
-    this._errorMsgElement = document.getElementById(`${view}_refresh`);
+    this._errorMsgElement = document.getElementById(`${view}_title`);
   }
 
   // Skip init toolbar (strange check )
