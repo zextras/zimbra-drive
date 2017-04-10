@@ -80,6 +80,7 @@ import {DwtTreeItem} from "./zimbra/ajax/dwt/widgets/DwtTreeItem";
 import {ZmSearchControllerSearchParams} from "./zimbra/zimbraMail/share/controller/ZmSearchController";
 import {ZmBaseController} from "./zimbra/zimbraMail/share/controller/ZmBaseController";
 import {ZmAppViewMgr} from "./zimbra/zimbraMail/core/ZmAppViewMgr";
+import {AjxTemplate} from "./zimbra/ajax/boot/AjxTemplate";
 
 declare let window: {
   csrfToken: string
@@ -926,6 +927,9 @@ export class ZimbraDriveController extends ZmListController {
 }
 
 export class ZimbraDriveErrorController extends ZmBaseController {
+
+  private _errorMsgElement: HTMLElement;
+
   public show(results: ZmCsfeException): void {
     this._setup(this._currentViewId);
     let elements = this.getViewElements(this._currentViewId, <DwtComposite> this._view[this._currentViewId]);
@@ -936,9 +940,15 @@ export class ZimbraDriveErrorController extends ZmBaseController {
       hide: ZmAppViewMgr.LEFT_NAV,
       isAppView: true
     });
-    this._view[this._currentViewId].setContent(
-      "<div> Test Text </div>"
-    );
+    if (results.msg.indexOf("SSLHandshakeException") > -1) {
+      this._errorMsgElement.innerHTML = ZimbraDriveApp.getMessage("errorSSLHandshake");
+    }
+    else if (results.msg.indexOf("Unauthorized") > -1) {
+      this._errorMsgElement.innerHTML = ZimbraDriveApp.getMessage("errorUnauthorized");
+    }
+    else {
+      this._errorMsgElement.innerHTML = ZimbraDriveApp.getMessage("errorSplash");
+    }
   }
 
   public _initializeView(view: string): void {
@@ -946,9 +956,16 @@ export class ZimbraDriveErrorController extends ZmBaseController {
     this._view[view] = new DwtComposite({
       parent: appCtxt.getShell(),
       posStyle: Dwt.ABSOLUTE_STYLE,
-      id: view
+      id: view,
+      className: "SplashScreen"
     });
+    this._view[view].setContent(
+      AjxTemplate.expand("com_zextras_drive_open.ZimbraDrive#ServerErrorContainer", {id: view, errMsg: ZimbraDriveApp.getMessage("errorSplash")})
+    );
+    this._view[view].getHtmlElement().style.textAlign = "center";
+    this._errorMsgElement = document.getElementById(`${view}_refresh`);
   }
+
   // Skip init toolbar (strange check )
   public _getToolBarOps(): string[] {
     return [];

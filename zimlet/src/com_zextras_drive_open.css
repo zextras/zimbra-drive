@@ -38,3 +38,20 @@
 .ZimbraDriveItemSmall {
     margin: 1px;
 }
+.ZimbraDriveServerErrorContainer {
+    margin: 10px;
+    width: 500px;
+    border-radius: 5px;
+    display: inline-block;
+}
+.ZimbraDriveServerErrorContainer .title {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+.ZimbraDriveServerErrorContainer .sadFace {
+    background: url("assets/sad-face.png") no-repeat 0 0;
+}
+.ZimbraDriveServerErrorContainer .refresh {
+    cursor: pointer;
+    background: url("assets/refresh.png") no-repeat 0 0;
+}

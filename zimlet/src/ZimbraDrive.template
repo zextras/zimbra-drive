@@ -111,3 +111,9 @@
         </table>
     </div>
 </template>
+
+<template id='com_zextras_drive_open.ZimbraDrive#ServerErrorContainer'>
+    <div class='contentBox ZimbraDriveServerErrorContainer' id=${id}>
+        <div class='content title' id='${id}_refresh'></div>
+    </div>
+</template>
