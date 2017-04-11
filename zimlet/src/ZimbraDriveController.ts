@@ -114,7 +114,6 @@ export class ZimbraDriveController extends ZmListController {
   private _waitingDialog: ZimbraDriveWaitingDialog;
   private query: string;
 
-  private static _currentFolderInstance: ZimbraDriveFolder;
   private static _uploadManager: ZimbraDriveUploadManager|AjxPost;
 
   constructor(container: DwtControl, app: ZmApp, type?: string, sessionId?: string, searchResultsController?: ZmSearchResultsController) {
@@ -176,7 +175,7 @@ export class ZimbraDriveController extends ZmListController {
     let itemsResults: ZmList = (<ZmSearchResult>results).getResults(ZDId.ZIMBRADRIVE_ITEM);
     // this._folderId = results && results.search && results.search.folderId;
 
-    // this.query = results.getAttribute("query");
+    this.query = (<ZmSearchResult>results).getAttribute("query");
     // let itemsResults: ZmList = results.getResults(ZDId.ZIMBRADRIVE_ITEM),
     //   tree: ZimbraDriveFolderTree = <ZimbraDriveFolderTree> appCtxt.getTree(ZimbraDriveApp.APP_NAME);
     let firstItem: ZimbraDriveItem = itemsResults.getArray().length > 0 && <ZimbraDriveItem> itemsResults.getArray()[0];
@@ -184,6 +183,9 @@ export class ZimbraDriveController extends ZmListController {
       itemsResults.getArray().pop();
     }
     if (!this.isSearchResults) {
+      // Block any promised goToFolder
+      (<ZimbraDriveApp> appCtxt.getApp(ZimbraDriveApp.APP_NAME)).resetPromisedGoToFolder();
+
       let currentFolderPath: string = (<ZmSearchResult>results).search.query.replace("in:", "").replace(/"/g, ""),
         treeFolder: ZimbraDriveFolder = rootFolder;
       if (currentFolderPath !== "" && currentFolderPath !== "/") {
@@ -408,8 +410,10 @@ export class ZimbraDriveController extends ZmListController {
 
   private setCurrentFolder(currentFolder: ZimbraDriveFolder): void {
     this._currentFolder = currentFolder;
-    (<ZimbraDriveTreeController> appCtxt.getOverviewController().getTreeController(ZimbraDriveApp.TREE_ID)).setCurrentFolder(currentFolder);
-    ZimbraDriveController._currentFolderInstance = currentFolder;
+    let overview: ZmOverview = appCtxt.getOverviewController().getOverview("main_" + ZimbraDriveApp.APP_NAME);
+    if (overview) {
+      overview.focus();
+    }
   }
 
   private _setupDeleteButton(parent: ZmButtonToolBar): void {
@@ -516,15 +520,18 @@ export class ZimbraDriveController extends ZmListController {
   }
 
   public _uploadFileListener(ev: DwtSelectionEvent, folder?: ZimbraDriveFolder): void {
-    folder = folder || ZimbraDriveController.getCurrentFolder() || (<ZimbraDriveFolder> appCtxt.getTree(ZmOrganizer.FOLDER).root.getChildByPath("/"));
+    folder = folder || this.getCurrentFolder() || (<ZimbraDriveFolder> appCtxt.getTree(ZmOrganizer.FOLDER).root.getChildByPath("/"));
     if (!this._uploadDialog) {
       this._uploadDialog = new ZimbraDriveUploadDialog(appCtxt.getShell());
     }
     this._uploadDialog.popup(this, folder, undefined, ZmMsg.uploadDocs + " - " + folder.getName(), null, !AjxEnv.supportsHTML5File);
   }
 
-  private _deleteListener(): void {
-    const items = this.getSelectedItems();
+  private _deleteListener(ev: DwtSelectionEvent): void {
+    this.deleteItems(this.getSelectedItems());
+  }
+
+  public deleteItems(items: any[]): void {
     if (items.length < 1) { return; }
     // TODO: These are not really deleted, are moved into the *Cloud trash
     let message: string;
@@ -552,23 +559,29 @@ export class ZimbraDriveController extends ZmListController {
     });
   }
 
-  private _onDeleteDone(items: ZimbraDriveItem[]): void {
-    let treeController: ZimbraDriveTreeController = <ZimbraDriveTreeController> appCtxt.getOverviewController().getTreeController(ZimbraDriveApp.TREE_ID),
-      promiseRefreshSearch: boolean = false;
+  private _onDeleteDone(items: (ZimbraDriveFolder|ZimbraDriveItem)[]): void {
+    let zdApp: ZimbraDriveApp = <ZimbraDriveApp> appCtxt.getApp(ZimbraDriveApp.APP_NAME),
+      mainController: ZimbraDriveController = zdApp.getZimbraDriveController(ZmApp.MAIN_SESSION);
     for (let item of items) {
+      (<ZimbraDriveFolder> item)._notify("DELETE");
       if (item.isFolder()) {
-        if (treeController._treeView["ZIMBRA_DRIVE"] && treeController._treeView["ZIMBRA_DRIVE"].getTreeItemById(item.id)) {
-          treeController._treeView["ZIMBRA_DRIVE"].getTreeItemById(item.id).dispose();
-        }
-        // need refresh because a lot of items can be changed
-        promiseRefreshSearch = this.isSearchResults;
+        let folder: ZimbraDriveFolder = item.isItem() ? (<ZimbraDriveFolderItem> item).getFolder() : <ZimbraDriveFolder> item;
+        folder.deleteLocal();
+        folder._notify("DELETE");
       }
-      (<PreviewPaneView> this._parentView[this._currentViewId]).getListView().removeItem(item);
+      else {
+        mainController.getList().remove(<ZimbraDriveFolderItem> item);
+      }
+      mainController.getViewMgr().getListView().removeItem(item);
     }
-    if (promiseRefreshSearch) {
-      ZimbraDriveController.goToFolder(this.query, true);
+    // If deleted folder contains current folder then reset view to root
+    if (items[0].containsTargetPath && items[0].containsTargetPath(mainController.getCurrentFolder().getPath(true))) {
+      let queryPath: string = "/";
+      this.isSearchResults ? zdApp.promiseGoToFolder(queryPath) : ZimbraDriveController.goToFolder(queryPath, false);
     }
-    (<PreviewPaneView> this._parentView[this._currentViewId]).getPreviewView().enablePreview(false);
+    if (this.isSearchResults) {
+      this.refreshList(false);
+    }
   }
 
   private _renameFileListener(ev: DwtUiEvent): void {
@@ -585,7 +598,7 @@ export class ZimbraDriveController extends ZmListController {
 
   private _newListener(ev: DwtSelectionEvent): void {
     let treeController: ZimbraDriveTreeController = <ZimbraDriveTreeController> appCtxt.getOverviewController().getTreeController(ZimbraDriveApp.TREE_ID);
-    treeController.popupNewFolderDialog(ZimbraDriveController.getCurrentFolder());
+    treeController.popupNewFolderDialog(this.getCurrentFolder());
   }
 
   private _moveListener(ev: DwtSelectionEvent): void {
@@ -602,7 +615,7 @@ export class ZimbraDriveController extends ZmListController {
   }
 
   private _moveCallback(items: ZimbraDriveItem[], moveDialog: ZimbraDriveChooseFolderDialog, folder: ZimbraDriveFolder): void {
-    ZimbraDriveController.doMove(items, folder, this.isSearchResults);
+    this.doMove(items, folder);
     moveDialog.popdown();
   }
 
@@ -709,6 +722,7 @@ export class ZimbraDriveController extends ZmListController {
   }
 
   public static goToFolder(folderPath: string, userInitiated: boolean, givenBatchCommand?: ZmBatchCommand): void {
+    folderPath = ZimbraDriveController.checkFolderExists(folderPath) ? folderPath : "/";
     // folder path must have last slash
     let batchCommand: ZmBatchCommand,
       searchParams: ZmSearchControllerSearchParams = {
@@ -727,48 +741,81 @@ export class ZimbraDriveController extends ZmListController {
     batchCommand.run();
   }
 
-  public static refreshList(): void {
-    let batchCommand = new ZmBatchCommand(),
-      searchParams: ZmSearchControllerSearchParams = {
-      query: `in:"${ZimbraDriveController._currentFolderInstance.getPath()}"`,
-      userInitiated: false
+  public static checkFolderExists(folderPath: string): boolean {
+    let currentFolder: ZimbraDriveFolder;
+    for (let tmpFldr of appCtxt.getTree(ZmOrganizer.FOLDER).root.children.getArray()) {
+      if (tmpFldr.type === ZDId.ZIMBRADRIVE_ITEM) {
+        currentFolder = <ZimbraDriveFolder>tmpFldr;
+        break;
+      }
+    }
+    for (let folderName of folderPath.split("/")) {
+      if (folderName === "") {
+        continue;
+      }
+      if (currentFolder.hasChild(folderName)) {
+        currentFolder = currentFolder.getChild(folderName);
+      }
+      else {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  public refreshList(isMainSession: boolean, batchCommand: ZmBatchCommand = new ZmBatchCommand(), folderPath: string = "/"): void {
+    if (this.getCurrentFolder()) {
+      folderPath = this.getCurrentFolder().getPath(true);
+    }
+    let searchParams: ZmSearchControllerSearchParams = {
+      query: isMainSession ? `in:"${folderPath}"` : this.query,
+      userInitiated: !isMainSession
     };
     batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadSearchRequestParams, [searchParams]));
     batchCommand.run();
   }
 
-  public static getCurrentFolder(): ZimbraDriveFolder {
-    return ZimbraDriveController._currentFolderInstance;
+  public getCurrentFolder(): ZimbraDriveFolder {
+    return this._currentFolder;
   }
 
-  public static getCurrentFolderPath(): string {
-    return ZimbraDriveController.getCurrentFolder().getPath(true);
-  }
-
-  public static doMove(items: ZimbraDriveItem[]|ZimbraDriveFolder[], folder: ZimbraDriveFolder, skipGoToFolder?: boolean): void {
+  // 'this' can be mainController(isSearchResults === false) or SR-controller(isSearchResults === true)
+  public doMove(items: ZimbraDriveItem[]|ZimbraDriveFolder[], folder: ZimbraDriveFolder): void {
     let batchCommand: ZmBatchCommand = new ZmBatchCommand(),
       moveParams: ZimbraDriveMoveParams = {itemsName: [], itemsAlreadyExist: [], itemsError: [], countResponses: 0},
-      changeCurrentFolder: boolean = false;
+      changeCurrentFolder: boolean = false,
+      zdApp: ZimbraDriveApp,
+      mainController: ZimbraDriveController;
+    if (!this.isSearchResults) {
+      mainController = this;
+    }
+    else {
+      zdApp = <ZimbraDriveApp> appCtxt.getApp(ZimbraDriveApp.APP_NAME);
+      mainController = zdApp.getZimbraDriveController(ZmApp.MAIN_SESSION);
+    }
     for (let item of items) {
-      if (!ZimbraDriveController.checkMoveFeasible(item, folder)) {
+      if (!this.checkMoveFeasible(item, folder)) {
         appCtxt.setStatusMsg({msg: item.getName() + " cannot be moved in target destination.", level: ZmStatusView.LEVEL_WARNING});
         return;
       }
       moveParams.itemsName.push(item.getName());
       batchCommand.add(new AjxCallback(null, ZimbraDriveApp.loadMoveRequestParams, [item, folder, batchCommand, moveParams]));
-    // check if the current folder view has to change
-      if (!skipGoToFolder && !changeCurrentFolder) {
+      // check if the current folder view exists and has to change
+      if (mainController.getCurrentFolder() && !changeCurrentFolder) {
         changeCurrentFolder =
-          item.getPath().length <= ZimbraDriveController.getCurrentFolderPath().length &&
-          item.getPath() === ZimbraDriveController.getCurrentFolderPath().substring(0, item.getPath().length);
+          item.getPath().length <= mainController.getCurrentFolder().getPath(true).length &&
+          item.getPath() === mainController.getCurrentFolder().getPath(true).substring(0, item.getPath().length);
       }
     }
-    if (!skipGoToFolder) {
-      let nextFolderView: string = changeCurrentFolder ? folder.getPath(true) : ZimbraDriveController.getCurrentFolderPath();
+    if (!this.isSearchResults) {
+      let nextFolderView: string = changeCurrentFolder ? folder.getPath(true) : this.getCurrentFolder().getPath(true);
       ZimbraDriveController.goToFolder(nextFolderView, false, batchCommand);
     }
     else {
-      batchCommand.run();
+      if (changeCurrentFolder) {
+        zdApp.promiseGoToFolder(folder.getPath(true));
+      }
+      this.refreshList(false, batchCommand);
     }
   }
 
@@ -793,7 +840,6 @@ export class ZimbraDriveController extends ZmListController {
       folder.reparent(destinationFolder);
       folder._notify("MOVE");
     }
-    // ZimbraDriveFolder.
     return true;
   }
 
@@ -866,7 +912,7 @@ export class ZimbraDriveController extends ZmListController {
     }
   }
 
-  public static checkMoveFeasible(item: ZimbraDriveItem|ZimbraDriveFolder, destinationFolder: ZimbraDriveFolder): boolean {
+  public checkMoveFeasible(item: ZimbraDriveItem|ZimbraDriveFolder, destinationFolder: ZimbraDriveFolder): boolean {
     // check if item is folder and contains destination
     if (item.containsTargetPath(destinationFolder.getPath(true)) || destinationFolder.alreadyContainsChild(item.getName())) {
       return false;

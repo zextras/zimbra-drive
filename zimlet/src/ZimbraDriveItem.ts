@@ -18,6 +18,9 @@
 import {ZmList} from "./zimbra/zimbraMail/share/model/ZmList";
 import {ZmItem} from "./zimbra/zimbraMail/share/model/ZmItem";
 import {ZDId} from "./ZDId";
+import {ZimbraDriveFolder} from "./ZimbraDriveFolder";
+import {appCtxt} from "./zimbra/zimbraMail/appCtxt";
+import {ZimbraDriveApp} from "./ZimbraDriveApp";
 
 export class ZimbraDriveItem extends ZmItem {
 
@@ -55,8 +58,23 @@ export class ZimbraDriveItem extends ZmItem {
     return true;
   }
 
+  // TODO Change me pls
+  // (not every item has node_type: can't set this.node_type === "folder")
   public isFolder(): boolean {
     return (this.node_type !== "file");
+  }
+
+  // Needed for any operation in Search view
+  public getFolder(): ZimbraDriveFolder {
+    if (this.isFolder()) {
+      let allFolders: ZimbraDriveFolder[] = <ZimbraDriveFolder[]> appCtxt.getFolderTree().getByType(ZimbraDriveApp.TREE_ID);
+      for (let folder of allFolders) {
+        if (folder.id === this.id) {
+          return folder;
+        }
+      }
+    }
+    return null;
   }
 
   public static createFromDom(node: ZimbraDriveItemObj, args: {list: ZmList}): ZimbraDriveItem {

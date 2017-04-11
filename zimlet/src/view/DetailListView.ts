@@ -94,7 +94,7 @@ export class DetailListView extends ZimbraDriveBaseView {
       this.dragDeselect(div);
       if (dropFolder && dropFolder.folder) {
         let items: ZimbraDriveItem[]|ZimbraDriveFolder[] = <ZimbraDriveItem[]|ZimbraDriveFolder[]> ((data instanceof Array) ? data : [data]);
-        ZimbraDriveController.doMove(items, dropFolder.folder);
+        (<ZimbraDriveController> this._controller).doMove(items, dropFolder.folder);
       }
     } else if (ev.action === DwtDropEvent.DRAG_LEAVE) {
       this.dragDeselect(div);

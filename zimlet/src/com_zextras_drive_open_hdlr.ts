@@ -45,6 +45,7 @@ import {ZmOperation} from "./zimbra/zimbraMail/core/ZmOperation";
 import {ZmSearchResultsToolBar} from "./zimbra/zimbraMail/share/view/ZmSearchResultsToolBar";
 import {ZmAppViewMgrCreatedViewDescriptor} from "./zimbra/zimbraMail/core/ZmAppViewMgr";
 import {ZmSearchControllerSearchParams} from "./zimbra/zimbraMail/share/controller/ZmSearchController";
+import {Dwt} from "./zimbra/ajax/dwt/core/Dwt";
 
 export class ZimbraDriveZimlet extends ZmZimletBase implements CreateAppZimlet {
 
@@ -92,7 +93,7 @@ export class ZimbraDriveZimlet extends ZmZimletBase implements CreateAppZimlet {
 
     let searchDomainData: SearchDomainData = {
       icon: "ZimbraDrive-icon",
-      text: this.getMessage("searchZimbraDrive"),
+      text: "",
       listener: new AjxListener(this, this.onSearchRequested)
     };
     this.addSearchDomainItem(
@@ -104,23 +105,15 @@ export class ZimbraDriveZimlet extends ZmZimletBase implements CreateAppZimlet {
     // Dirty hack to set the correct default search item also for this non-app
     let searchToolbar: ZmMainSearchToolBar = appCtxt.getSearchController().getSearchToolbar();
     if (searchToolbar) {
-      let menu = searchToolbar.getButton(ZmSearchToolBar.TYPES_BUTTON).getMenu();
-      let menuChildren = menu.getChildren();
-      for (let mi of menuChildren) {
-        if ((mi.getData(ZmOperation.MENUITEM_ID) === ZmId.SEARCH_CUSTOM)) {
-          let tmpSDD: SearchDomainData = mi.getData(ZmMainSearchToolBar.CUSTOM_ITEM_ID);
-          if (tmpSDD.icon === searchDomainData.icon && tmpSDD.text === searchDomainData.text) {
-            mi.setData(ZmOperation.MENUITEM_ID, ZDId.ZIMBRADRIVE_ITEM);
+      let searchToolbarMenu: DwtMenu = searchToolbar.getButton(ZmSearchToolBar.TYPES_BUTTON).getMenu();
+      for (let menuItem of searchToolbarMenu.getItems()) {
+        if (menuItem.getHTMLElId() === ZmId.getMenuItemId(ZmId.SEARCH, ZDId.ZIMBRADRIVE_ITEM)) {
+          let tmpSDD: SearchDomainData = menuItem.getData(ZmMainSearchToolBar.CUSTOM_ITEM_ID);
+          if (tmpSDD.icon === searchDomainData.icon) {
+            menuItem.setData(ZmOperation.MENUITEM_ID, ZDId.ZIMBRADRIVE_ITEM);
           }
+          menuItem.setText(this.getMessage("searchZimbraDrive"));
         }
-      }
-    }
-
-    let searchToolbarMenu: DwtMenu = appCtxt.getSearchController().getSearchToolbar().getButton(ZmSearchToolBar.TYPES_BUTTON).getMenu();
-    // There is any function to get the menu item!! just a getMenuItemById() where id is a zimbra id or "CUSTOM"!!
-    for (let menuItem of searchToolbarMenu.getItems()) {
-      if (menuItem.getHTMLElId() === ZmId.getMenuItemId(ZmId.SEARCH, ZDId.ZIMBRADRIVE_ITEM)) {
-        menuItem.setText(this.getMessage("searchZimbraDrive"));
       }
     }
     return this._app.getName();

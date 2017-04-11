@@ -86,6 +86,7 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
   private _attachDialog: ZimbraDriveAttachDialog;
   private dropDownMenuItemsLoaded: boolean;
   private errorController: ZimbraDriveErrorController;
+  private _promisedGoToFolder: string;
 
   constructor(zimlet: ZimbraDriveZimlet, container: DwtControl) {
     super(ZimbraDriveApp.APP_NAME, zimlet, container);
@@ -466,6 +467,18 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
     else {
       toolbarButton.setMenu(this._defaultNewButtonMenu);
     }
+    if (this._promisedGoToFolder) {
+      ZimbraDriveController.goToFolder(this._promisedGoToFolder, false);
+      this._promisedGoToFolder = "";
+    }
+  }
+
+  public promiseGoToFolder(folderPath: string): void {
+    this._promisedGoToFolder = folderPath;
+  }
+
+  public resetPromisedGoToFolder(): void {
+    this._promisedGoToFolder = "";
   }
 
   public getZDNewButtonMenu(): ZmActionMenu {
@@ -483,9 +496,10 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
   }
 
   public runRefresh(): void {
+    let mainController: ZimbraDriveController = (<ZimbraDriveApp> appCtxt.getApp(ZimbraDriveApp.APP_NAME)).getZimbraDriveController(ZmApp.MAIN_SESSION);
     if (this.isActive()) {
-      if (ZimbraDriveController.getCurrentFolder()) {
-        ZimbraDriveController.goToFolder(ZimbraDriveController.getCurrentFolder().getPath(true), false);
+      if (mainController && mainController.getCurrentFolder()) {
+        ZimbraDriveController.goToFolder(mainController.getCurrentFolder().getPath(true), false);
       }
       else if (appCtxt.getCurrentViewType() === ZDId.VIEW_ZIMBRADRIVE_ERROR) {
         ZimbraDriveController.goToFolder("/", false);
