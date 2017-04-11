@@ -18,6 +18,8 @@
 package com.zextras.zimbradrive;
 
 import org.json.JSONObject;
+import org.openzal.zal.Provisioning;
+import org.openzal.zal.lib.ZimbraVersion;
 import org.openzal.zal.log.ZimbraLog;
 
 import java.io.IOException;
@@ -25,12 +27,46 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-public class ConfigUtils
+public class DriveProxy
 {
 
   private static String CONFIG_FILE = "/opt/zimbra/lib/ext/zimbradrive/zimbradrive-extension.conf";
+  private static String KEY_DRIVE_DOMAIN = "zimbraDriveOwnCloudURL";
 
-  public static String getNcDomain(String domain) throws IOException
+  private final Provisioning mProvisioning;
+
+  public DriveProxy(Provisioning provisioning) {
+    this.mProvisioning = provisioning;
+  }
+
+  public String getDriveDomainAssociatedToDomain(String domainName) throws IOException {
+    if (ZimbraVersion.current.isAtLeast(8, 7, 6)) {
+      return this.assertDriveDomainAssociatedToDomain(domainName);
+    }
+    else {
+      return this.getDriveDomainFromConfigurationFile(domainName);
+    }
+  }
+
+  private String assertDriveDomainAssociatedToDomain(String domainName) throws IOException
+  {
+    try
+    {
+      String driveDomain = this.mProvisioning.assertDomainByName(domainName).getAttr(KEY_DRIVE_DOMAIN, "");
+      if (driveDomain.isEmpty()) 
+      {
+        throw new RuntimeException("Domain attribute zimbraDriveOwnCloudURL is empty");
+      }
+      return driveDomain;
+    }
+    catch (Exception ex) {
+      ZimbraLog.extensions.error("Unable to get Drive Domain", ex);
+      throw new RuntimeException(ex);
+    }
+  }
+
+
+  private String getDriveDomainFromConfigurationFile(String domain) throws IOException
   {
     JSONObject jsonConf;
     try
@@ -38,7 +74,7 @@ public class ConfigUtils
       jsonConf = new JSONObject(readFile(CONFIG_FILE, Charset.defaultCharset()));
     } catch (IOException e)
     {
-      ZimbraLog.mailbox.error("IO exception: error reading configFile.", e);
+      ZimbraLog.mailbox.error("Unable to get Drive Domain", e);
       throw e;
     }
     JSONObject domainMap = jsonConf.getJSONObject("domains");
@@ -58,5 +94,5 @@ public class ConfigUtils
     }
     return new String(encoded, encoding);
   }
-
 }
+

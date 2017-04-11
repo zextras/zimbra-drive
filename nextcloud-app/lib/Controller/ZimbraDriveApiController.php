@@ -292,7 +292,7 @@ class ZimbraDriveApiController extends ApiController
      */
     public function newDirectory($username, $token, $path)
     {
-        $this->logger->debug($username . ' call newDirectory.');
+        $this->logger->debug($username . ' call newDirectory with path = "'. $path . '"" .');
         try {
             $this->loginService->login($username, $token);
         } catch (UnauthorizedException $unauthorizedException) {
