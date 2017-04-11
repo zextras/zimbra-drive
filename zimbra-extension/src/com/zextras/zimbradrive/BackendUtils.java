@@ -147,7 +147,7 @@ public class BackendUtils
   public static HttpEntity getEncodedForm(List<NameValuePair> driveOnCloudParameters)  throws UnsupportedEncodingException
   {
     try {
-      return new UrlEncodedFormEntity(driveOnCloudParameters);
+      return new UrlEncodedFormEntity(driveOnCloudParameters, "UTF-8");
     }
     catch (UnsupportedEncodingException ex) {
       ZimbraLog.extensions.error("Unsupported encoding exception: error encoding drive on cloud parameters.", ex);
