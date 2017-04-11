@@ -300,6 +300,7 @@ export class ZimbraDriveTreeController extends ZmFolderTreeController {
       moveDialogOverview.setTreeView(ZimbraDriveApp.TREE_ID);
     }
     // moveParams.hideNewButton = true;
+    moveParams.noRootSelect = true;
     ZmController.showDialog(this._moveToDialog, new AjxCallback(this, this._moveCallback), moveParams);
     this._moveToDialog.registerCallback(DwtDialog.CANCEL_BUTTON, this._clearDialog, this, this._moveToDialog);
     return true;

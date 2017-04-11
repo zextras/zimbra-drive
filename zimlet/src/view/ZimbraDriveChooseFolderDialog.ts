@@ -34,10 +34,6 @@ export class ZimbraDriveChooseFolderDialog extends ZmChooseFolderDialog {
   constructor(parent: DwtControl, className: string, treeController: ZimbraDriveTreeController) {
     super(parent, className);
     this._treeController = treeController;
-  }
-
-  public setActionedFolder(actionedItem: DwtTreeItem|ZimbraDriveFolderItem): void {
-    this._actionedItem = actionedItem;
     this._getNewButton().removeAllListeners(DwtEvent.SELECTION);
     this._getNewButton().addSelectionListener(
       new AjxListener(
@@ -45,6 +41,10 @@ export class ZimbraDriveChooseFolderDialog extends ZmChooseFolderDialog {
         this.newFolderListener
       )
     );
+  }
+
+  public setActionedFolder(actionedItem: DwtTreeItem|ZimbraDriveFolderItem): void {
+    this._actionedItem = actionedItem;
   }
 
   public getActionedFolder(): DwtTreeItem|ZimbraDriveFolderItem {
