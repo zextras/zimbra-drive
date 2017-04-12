@@ -115,5 +115,9 @@
 <template id='com_zextras_drive_open.ZimbraDrive#ServerErrorContainer'>
     <div class='contentBox ZimbraDriveServerErrorContainer' id=${id}>
         <div class='content title' id='${id}_title'></div>
+        <div class='content retry' id='${id}_retry'>
+            <br>
+            <span class='retry-span' id='${id}_retry_span'></span>
+        </div>
     </div>
 </template>

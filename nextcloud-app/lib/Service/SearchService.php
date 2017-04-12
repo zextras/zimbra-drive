@@ -23,6 +23,7 @@ use OCA\ZimbraDrive\Service\Filter\NoSuchFilterException;
 use OCP\Files\Folder;
 use OCA\ZimbraDrive\Service\Filter\FilterFactoryProvider;
 use OCA\ZimbraDrive\Service\Filter\FilterUtils;
+use OCP\Files\NotFoundException;
 
 class SearchService
 {
@@ -150,10 +151,17 @@ class SearchService
     /**
      * @param $path
      * @return array
+     * @throws BadRequestException
      */
     private function getFoldersContentCaseSensitive($path)
     {
-        $folder = $searchedFolder = $this->storageService->getFolder($path);
+        try
+        {
+            $folder = $searchedFolder = $this->storageService->getFolder($path);
+        } catch (NotFoundException $notFoundException)
+        {
+            throw new BadRequestException($notFoundException->getMessage());
+        }
 
         $folders =  array($folder);
 
