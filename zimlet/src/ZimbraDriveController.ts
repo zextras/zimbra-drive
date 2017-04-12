@@ -81,6 +81,7 @@ import {ZmSearchControllerSearchParams} from "./zimbra/zimbraMail/share/controll
 import {ZmBaseController} from "./zimbra/zimbraMail/share/controller/ZmBaseController";
 import {ZmAppViewMgr} from "./zimbra/zimbraMail/core/ZmAppViewMgr";
 import {AjxTemplate} from "./zimbra/ajax/boot/AjxTemplate";
+import {ZmSearch} from "./zimbra/zimbraMail/share/model/ZmSearch";
 
 declare let window: {
   csrfToken: string
@@ -976,6 +977,7 @@ export class ZimbraDriveController extends ZmListController {
 export class ZimbraDriveErrorController extends ZmBaseController {
 
   private _errorMsgElement: HTMLElement;
+  private _retrySpanElement: HTMLElement;
 
   public show(results: ZmCsfeException): void {
     this._setup(this._currentViewId);
@@ -987,15 +989,21 @@ export class ZimbraDriveErrorController extends ZmBaseController {
       hide: ZmAppViewMgr.LEFT_NAV,
       isAppView: true
     });
+    // if (!this.isSearchResults)
     if (results.msg.indexOf("SSLHandshakeException") > -1) {
       this._errorMsgElement.innerHTML = ZimbraDriveApp.getMessage("errorSSLHandshake");
     }
     else if (results.msg.indexOf("Unauthorized") > -1) {
       this._errorMsgElement.innerHTML = ZimbraDriveApp.getMessage("errorUnauthorized");
     }
+    else if (results.msg.indexOf("Bad request") > -1) {
+      this._errorMsgElement.innerHTML = ZimbraDriveApp.getMessage("errorNoFolder");
+    }
     else {
       this._errorMsgElement.innerHTML = ZimbraDriveApp.getMessage("errorSplash");
     }
+    this._retrySpanElement.innerHTML = ZimbraDriveApp.getMessage("retry");
+    this._centerElements();
   }
 
   public _initializeView(view: string): void {
@@ -1011,6 +1019,11 @@ export class ZimbraDriveErrorController extends ZmBaseController {
     );
     this._view[view].getHtmlElement().style.textAlign = "center";
     this._errorMsgElement = document.getElementById(`${view}_title`);
+    this._retrySpanElement = document.getElementById(`${view}_retry_span`);
+    this._retrySpanElement.onclick = function (ev) {
+      this.innerHTML += "<br><div style='cursor: none; font-weight: normal; display: inline-block;'>loading...</div>";
+      ZimbraDriveController.goToFolder("/", false);
+    };
   }
 
   // Skip init toolbar (strange check )
@@ -1020,6 +1033,16 @@ export class ZimbraDriveErrorController extends ZmBaseController {
 
   public static getDefaultViewType(): string {
     return ZDId.VIEW_ZIMBRADRIVE_ERROR;
+  }
+
+  private _centerElements(): void {
+    let contentBox: HTMLElement = this._errorMsgElement.parentElement,
+    childrenHeight: number = 50; // Include padding
+    for (let i = 0; i < contentBox.childNodes.length; i++) {
+      childrenHeight += (<HTMLElement> contentBox.childNodes.item(i)).offsetHeight;
+    }
+    contentBox.style.paddingTop = String((contentBox.offsetHeight - childrenHeight) / 2);
+    this._errorMsgElement.setAttribute("style", "margin-top: " + (contentBox.offsetHeight - childrenHeight) / 2 + "px" );
   }
 }
 

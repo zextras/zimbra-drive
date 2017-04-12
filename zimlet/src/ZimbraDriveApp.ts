@@ -447,6 +447,7 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
   public getNewButtonProps(): SetNewButtonPropsParams {
     let params: SetNewButtonPropsParams = {
       text: ZmMsg.uploadDocs,
+      icon: "Upload",
       tooltip: ZmMsg.uploadDocs,
       defaultId: ZDId.ZD_NEW_FILE
     };

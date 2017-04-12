@@ -54,4 +54,12 @@
 .ZimbraDriveServerErrorContainer .refresh {
     cursor: pointer;
     background: url("assets/refresh.png") no-repeat 0 0;
+    width: 163px;
+    height: 176px;
+}
+.ZimbraDriveServerErrorContainer .retry-span {
+    cursor: pointer;
+    text-decoration: underline;
+    font-weight: bold;
+    font-size: 2rem;
 }
