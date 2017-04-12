@@ -94,7 +94,7 @@ dist/zimbra_drive.tgz: build/README.md \
 						build/zimlet/com_zextras_drive_open.zip build/zimbra-drive.md5
 	mkdir -p build
 	mkdir -p dist
-	cd build && tar -czvf ../dist/zimbra_drive.tgz nextcloud-app/ zimbra-extension/ zimlet/ README.md LICENSE zimbra-drive.md5
+	cd build && tar -czvf ../dist/zimbra_drive.tgz nextcloud-app/ zimbra-extension/ zimlet/ README.md LICENSE zimbra-drive.md5 --owner=0 --group=0
 
 dist/zimbra-drive.md5: dist/zimbra_drive.tgz
 	cd dist && md5sum zimbra_drive.tgz > zimbra-drive.md5

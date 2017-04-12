@@ -33,7 +33,7 @@ dist/zimbradrive.tar.gz:
 		--exclude=dist \
 		--exclude=.git \
 		. build/$(app_name)/
-	cd build/ && tar cvzf $(app_name).tar.gz $(app_name)
+	cd build/ && tar cvzf $(app_name).tar.gz $(app_name) --owner=0 --group=0
 	mv build/$(app_name).tar.gz dist/
 
 install: guard-MYCLOUD_DEV_SERVER dist/zimbradrive.tar.gz
