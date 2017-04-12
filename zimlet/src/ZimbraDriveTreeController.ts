@@ -58,13 +58,13 @@ import {ZmOrganizer} from "./zimbra/zimbraMail/share/model/ZmOrganizer";
 import {DwtHeaderTreeItem} from "./zimbra/ajax/dwt/widgets/DwtHeaderTreeItem";
 import {DwtMenu} from "./zimbra/ajax/dwt/widgets/DwtMenu";
 import {AjxImg} from "./zimbra/ajax/core/AjxImg";
+import {ZmApp} from "./zimbra/zimbraMail/core/ZmApp";
 
 export class ZimbraDriveTreeController extends ZmFolderTreeController {
 
   private _dnd: ZmDragAndDrop;
   private _pendingActionData: ZimbraDriveFolder;
   private _newFolderDialog: ZimbraDriveNewFolderDialog;
-  private _currentFolder: ZimbraDriveFolder;
   private _moveToDialog: ZimbraDriveChooseFolderDialog;
 
   constructor(type: string) {
@@ -75,6 +75,7 @@ export class ZimbraDriveTreeController extends ZmFolderTreeController {
     this._listeners[ZmOperation.RENAME_FOLDER] = new AjxListener(this, this._renameListener);
   }
 
+  // No more used. Left in code due to reference
   public _createTreeView(params: ZmTreeViewParams): ZmTreeView {
     return new ZimbraDriveTreeView(params);
   }
@@ -89,7 +90,9 @@ export class ZimbraDriveTreeController extends ZmFolderTreeController {
 
     treeView._controller = this;
     this._initDragAndDrop(treeView);
-    headerItem.getChildren()[0].setExpanded(true);
+    if (headerItem.getChildren().length > 0) {
+      headerItem.getChildren()[0].setExpanded(true);
+    }
     headerItem.enableSelection(false);
     headerItem.enableAction(false);
     AjxImg.setImage(headerItem._nodeCell);
@@ -102,7 +105,9 @@ export class ZimbraDriveTreeController extends ZmFolderTreeController {
   }
 
   public _itemClicked(folder: ZimbraDriveFolder) {
-    if (!this._currentFolder || this._currentFolder.getPath(true) !== folder.getPath(true)) {
+    let zdApp: ZimbraDriveApp = <ZimbraDriveApp> appCtxt.getApp(ZimbraDriveApp.APP_NAME),
+      mainController: ZimbraDriveController = zdApp.getZimbraDriveController(ZmApp.MAIN_SESSION);
+    if (!mainController.getCurrentFolder() || mainController.getCurrentFolder().getPath(true) !== folder.getPath(true)) {
       ZimbraDriveController.goToFolder(folder.getPath(true), false);
     }
   }
@@ -118,18 +123,6 @@ export class ZimbraDriveTreeController extends ZmFolderTreeController {
       ZmOperation.MOVE,
       ZmOperation.RENAME_FOLDER
     ];
-  }
-
-  public getCurrentFolder(): ZimbraDriveFolder {
-    return this._currentFolder;
-  }
-
-  public setCurrentFolder(folder: ZimbraDriveFolder): void {
-    this._currentFolder = folder;
-    let overview: ZmOverview = appCtxt.getOverviewController().getOverview("main_" + ZimbraDriveApp.APP_NAME);
-    if (overview) {
-      overview.focus();
-    }
   }
 
   /**************
@@ -183,6 +176,8 @@ export class ZimbraDriveTreeController extends ZmFolderTreeController {
 
   private _newFolderCallback(parentFolder: ZimbraDriveFolder, result: ZmCsfeResult): void {
     let newFolder: ZimbraDriveFolder = new ZimbraDriveFolder();
+    let mainController: ZimbraDriveController =
+      (<ZimbraDriveApp> appCtxt.getApp(ZimbraDriveApp.APP_NAME)).getZimbraDriveController(ZmApp.MAIN_SESSION);
     newFolder.parent = parentFolder;
     newFolder._loadFromDom(
       <ZimbraDriveFolderObj>(result.getResponse()[ZimbraDriveApp.NEW_DIRECTORY_RESP])[ZDId.F_NEW_FOLDER][0],
@@ -190,7 +185,7 @@ export class ZimbraDriveTreeController extends ZmFolderTreeController {
     );
     parentFolder.children.add(newFolder);
     newFolder._notify("CREATE");
-    if (parentFolder.getPath() === ZimbraDriveController.getCurrentFolder().getPath()) {
+    if (parentFolder.getPath() === mainController.getCurrentFolder().getPath()) {
       ZimbraDriveController.addItemToCurrentList(newFolder.getFolderItem());
     }
   }
@@ -198,7 +193,8 @@ export class ZimbraDriveTreeController extends ZmFolderTreeController {
   // Rename folder
   public renameFolderItemListener(ev: DwtUiEvent, item: ZimbraDriveFolderItem): void {
     let backupActionData: ZmFolder = this._actionedOrganizer;
-    this._actionedOrganizer = (<ZimbraDriveFolderTree> appCtxt.getTree(ZmOrganizer.FOLDER)).getFolderById(item.id);
+    this._actionedOrganizer = <ZimbraDriveFolder> appCtxt.getTree(ZmOrganizer.FOLDER).root.getById(item.id);
+    // this._actionedOrganizer = (<ZimbraDriveFolderTree> appCtxt.getTree(ZmOrganizer.FOLDER)).getFolderById(item.id);
     this._renameListener(ev);
     this._actionedOrganizer = backupActionData;
   }
@@ -230,9 +226,10 @@ export class ZimbraDriveTreeController extends ZmFolderTreeController {
 
   public _renameFolderCallback(renameDialog: ZmRenameFolderDialog, newFolderName: string, folder: ZimbraDriveFolder): boolean {
     folder.notifyModify({name: newFolderName, id: folder.id});
+    let mainController: ZimbraDriveController = (<ZimbraDriveApp> appCtxt.getApp(ZimbraDriveApp.APP_NAME)).getZimbraDriveController(ZmApp.MAIN_SESSION);
     // if ((<ZimbraDriveController>appCtxt.getCurrentController()).getCurrentFolder().containsTargetPath(folder.getParentPath())) {
-    if (ZimbraDriveController.getCurrentFolder().containsTargetPath(folder.getParentPath())) {
-      ZimbraDriveController.refreshList();
+    if (mainController.getCurrentFolder().containsTargetPath(folder.getParentPath())) {
+      mainController.refreshList(true);
     }
 
     else {
@@ -287,7 +284,7 @@ export class ZimbraDriveTreeController extends ZmFolderTreeController {
     let data = ev.srcData.data;
     if (ev.action === DwtDropEvent.DRAG_DROP) {
       let items = (data instanceof Array) ? data : [data];
-      ZimbraDriveController.doMove(items, dropFolder);
+      (<ZimbraDriveController>appCtxt.getCurrentController()).doMove(items, dropFolder);
     }
     return true;
   }
@@ -300,9 +297,10 @@ export class ZimbraDriveTreeController extends ZmFolderTreeController {
     let moveParams: ZmFolderSearchFilterGetMoveParamsValue = this._getMoveParams(this._moveToDialog);
     let moveDialogOverview: ZmOverview = appCtxt.getOverviewController().getOverview(moveParams.overviewId);
     if (moveDialogOverview) {
-      moveDialogOverview.setTreeView("ZIMBRA_DRIVE");
+      moveDialogOverview.setTreeView(ZimbraDriveApp.TREE_ID);
     }
     // moveParams.hideNewButton = true;
+    moveParams.noRootSelect = true;
     ZmController.showDialog(this._moveToDialog, new AjxCallback(this, this._moveCallback), moveParams);
     this._moveToDialog.registerCallback(DwtDialog.CANCEL_BUTTON, this._clearDialog, this, this._moveToDialog);
     return true;
@@ -311,11 +309,12 @@ export class ZimbraDriveTreeController extends ZmFolderTreeController {
   /** Used by
    *  @see ZmTreeController._moveCallback */
   public _doMove(movingFolder: ZimbraDriveFolder, targetFolder: ZimbraDriveFolder): void {
+    let currentController: ZimbraDriveController = <ZimbraDriveController>appCtxt.getCurrentController();
     if (this._moveToDialog.getActionedFolder().isDwtTreeItem) {
-      ZimbraDriveController.doMove([movingFolder], targetFolder);
+      currentController.doMove([movingFolder], targetFolder);
     }
     else {
-      ZimbraDriveController.doMove((<ZimbraDriveController> appCtxt.getCurrentController()).getSelectedItems(), targetFolder);
+      currentController.doMove(currentController.getSelectedItems(), targetFolder);
     }
     this._moveToDialog.popdown();
   }
@@ -329,9 +328,11 @@ export class ZimbraDriveTreeController extends ZmFolderTreeController {
 
   // Delete Folder Listener
   private _deleteListener(ev: DwtSelectionEvent): void {
-    let items: (ZimbraDriveFolder|ZimbraDriveItem)[];
+    let items: (ZimbraDriveFolder | ZimbraDriveItem)[];
     let folder: ZimbraDriveFolder = <ZimbraDriveFolder> this._getActionMenu(ev, ev.item).getData(Dwt.KEY_OBJECT),
-      itemActioned: DwtTreeItem|ZimbraDriveFolderItem = this._getActionMenu(ev, ev.item).getData(ZDId.ZIMBRADRIVE_ITEM_ACTIONED);
+      itemActioned:
+        DwtTreeItem
+        | ZimbraDriveFolderItem = this._getActionMenu(ev, ev.item).getData(ZDId.ZIMBRADRIVE_ITEM_ACTIONED);
     if ((<DwtTreeItem>itemActioned).isDwtTreeItem) {
       if (folder.getPath() === "") {
         appCtxt.setStatusMsg({
@@ -345,49 +346,7 @@ export class ZimbraDriveTreeController extends ZmFolderTreeController {
     else {
       items = (<ZimbraDriveController> appCtxt.getCurrentController()).getSelectedItems();
     }
-    if (items.length < 1) { return; }
-    // TODO: These are not really deleted, are moved into the *Cloud trash
-    let message: string;
-    if (items.length > 1) {
-      message = ZmMsg.confirmPermanentDeleteItemList;
-    } else {
-      let delMsgFormatter = new AjxMessageFormat(ZmMsg.confirmPermanentDeleteItem);
-      message = delMsgFormatter.format(AjxStringUtil.htmlEncode(items[0].getName()));
-    }
-    let dialog = appCtxt.getConfirmationDialog();
-    dialog.popup(message, new AjxCallback(this, this._doDeleteItems, [items, itemActioned]));
-  }
-
-  private _doDeleteItems(items: any[], itemActioned: DwtTreeItem|ZimbraDriveFolderItem): void {
-    const paths: string[] = [];
-    for (let item of items) {
-      paths.push(item.getPath());
-    }
-    let soapDoc = AjxSoapDoc.create("DeleteRequest", "urn:zimbraDrive");
-    soapDoc.set(ZDId.F_PATH, JSON.stringify(paths));
-    (<ZmZimbraMail>appCtxt.getAppController()).sendRequest({
-      soapDoc: soapDoc,
-      asyncMode: true,
-      callback: new AjxCallback(this, this._onDeleteDone, [items, itemActioned])
-    });
-  }
-
-
-  private _onDeleteDone(items: (ZimbraDriveFolder|ZimbraDriveItem)[], itemActioned: DwtTreeItem|ZimbraDriveFolderItem): void {
-    for (let item of items) {
-      (<ZimbraDriveFolder> item)._notify("DELETE");
-      if (item.isFolder()) {
-        if (item.isItem()) {
-          (<ZimbraDriveFolderItem> item).getFolder()._notify("DELETE");
-        }
-        (<ZimbraDriveController> appCtxt.getCurrentController()).getViewMgr().getListView().removeItem(item);
-      }
-    }
-    // If deleted folder contains current folder then reset view to root
-    if (items[0].containsTargetPath && items[0].containsTargetPath(this._currentFolder.getPath(true))) {
-      let queryPath: string = "/";
-      ZimbraDriveController.goToFolder(queryPath, false);
-    }
+    (<ZimbraDriveController> appCtxt.getCurrentController()).deleteItems(items);
   }
 
   public _setupOptButton(params: ZmTreeControllerShowParams): void {

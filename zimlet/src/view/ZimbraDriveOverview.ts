@@ -19,11 +19,16 @@ import {ZmOverview} from "../zimbra/zimbraMail/share/view/ZmOverview";
 import {DwtTreeItem} from "../zimbra/ajax/dwt/widgets/DwtTreeItem";
 import {ZimbraDriveApp} from "../ZimbraDriveApp";
 import {ZimbraDriveTreeView} from "./ZimbraDriveTreeView";
+import {appCtxt} from "../zimbra/zimbraMail/appCtxt";
+import {ZimbraDriveController} from "../ZimbraDriveController";
+import {ZmApp} from "../zimbra/zimbraMail/core/ZmApp";
 
 export class ZimbraDriveOverview extends ZmOverview {
   public focus(): DwtTreeItem {
+    let zdApp: ZimbraDriveApp = <ZimbraDriveApp> appCtxt.getApp(ZimbraDriveApp.APP_NAME),
+      mainController: ZimbraDriveController = zdApp.getZimbraDriveController(ZmApp.MAIN_SESSION);
     let zimbraDriveTreeView: ZimbraDriveTreeView = <ZimbraDriveTreeView> this.getTreeView(ZimbraDriveApp.TREE_ID),
-      currentFolderTreeItem: DwtTreeItem = zimbraDriveTreeView.getCurrentFolderTreeItem();
+      currentFolderTreeItem: DwtTreeItem = zimbraDriveTreeView.getTreeItemById(mainController.getCurrentFolder().id);
     this.clearSelection();
     this.itemSelected(currentFolderTreeItem);
     zimbraDriveTreeView.setSelection(currentFolderTreeItem, true, false, true);

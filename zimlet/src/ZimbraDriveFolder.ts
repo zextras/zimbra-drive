@@ -51,12 +51,14 @@ export class ZimbraDriveFolder extends ZmFolder {
     this.parentName = (this.parent) ? (<ZimbraDriveFolder> this.parent).name : undefined;
     this.owner = node.author;
     // if (this.path === "/") {
+    this.id = `${node.id}_zd`;
     if (!this.parent) {
-      this.id = `${ZmFolder.ID_ROOT}_zd`;
+      // this.id = `${ZmFolder.ID_ROOT}_zd`;
       this.name = ZimbraDriveApp.getMessage("rootName");
-      ZmFolder.HIDE_ID[`${ZmFolder.ID_ROOT}_zd`] = true;
-    } else {
-      this.id = `${node.id}_zd`;
+      ZmFolder.HIDE_ID[this.id] = true;
+      // ZmFolder.HIDE_ID[`${ZmFolder.ID_ROOT}_zd`] = true;
+    // } else {
+    //   this.id = `${node.id}_zd`;
     }
     if (node.children) {
       for (let childObj of node.children) {
@@ -139,8 +141,39 @@ export class ZimbraDriveFolder extends ZmFolder {
     return this.getPath(true).length <= targetPath.length && this.getPath(true) === targetPath.substring(0, this.getPath(true).length);
   }
 
+  // This isn't case sensitive
+  public alreadyContainsChild(childName: string) {
+    for (let child of this.children.getArray()) {
+      if (child.getName().toLowerCase() === childName.toLowerCase()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   public createQuery(pathOnly: boolean): string {
     return `in:"${this.getPath(false)}"`;
+  }
+
+  public hasChild(name: string): boolean {
+    return (this.getChildCS(name, false) != null);
+  };
+
+  public getChild(name: string): ZimbraDriveFolder {
+    return this.getChildCS(name, true);
+  };
+
+  // Get child with case sensitive argument
+  private getChildCS(name: string, caseSensitive: boolean): ZimbraDriveFolder {
+    for (let child of this.children.getArray()) {
+      if (caseSensitive && child.name === name) {
+        return <ZimbraDriveFolder> child;
+      }
+      else if (!caseSensitive && child.name.toLowerCase() === name.toLowerCase()) {
+        return <ZimbraDriveFolder> child;
+      }
+    }
+    return null;
   }
 
 }

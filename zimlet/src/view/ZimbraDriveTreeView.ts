@@ -16,17 +16,11 @@
  */
 
 import {ZmTreeView, ZmTreeViewParams} from "../zimbra/zimbraMail/share/view/ZmTreeView";
-import {DwtTreeItem} from "../zimbra/ajax/dwt/widgets/DwtTreeItem";
-import {ZimbraDriveTreeController} from "../ZimbraDriveTreeController";
 
 export class ZimbraDriveTreeView extends ZmTreeView {
 
   constructor(params: ZmTreeViewParams) {
     super(params);
-  }
-
-  public getCurrentFolderTreeItem(): DwtTreeItem {
-    return this.getTreeItemById((<ZimbraDriveTreeController>this._controller).getCurrentFolder().id);
   }
 
 }

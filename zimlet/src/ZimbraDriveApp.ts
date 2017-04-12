@@ -18,7 +18,7 @@
 import {ZmZimletApp, ZmZimletAppLaunchParams} from "./zimbra/zimbraMail/share/view/ZmZimletApp";
 import {DwtControl} from "./zimbra/ajax/dwt/widgets/DwtControl";
 import {ZimbraDriveZimlet} from "./com_zextras_drive_open_hdlr";
-import {ZimbraDriveController, ZimbraDriveMoveParams} from "./ZimbraDriveController";
+import {ZimbraDriveController, ZimbraDriveErrorController, ZimbraDriveMoveParams} from "./ZimbraDriveController";
 import {ZmSearchResult} from "./zimbra/zimbraMail/share/model/ZmSearchResult";
 import {ZmSearchResultsController} from "./zimbra/zimbraMail/share/controller/ZmSearchResultsController";
 import {AjxDispatcher} from "./zimbra/ajax/boot/AjxDispatcher";
@@ -85,6 +85,8 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
   private _zimbraDriveNewButtonMenu: ZmActionMenu;
   private _attachDialog: ZimbraDriveAttachDialog;
   private dropDownMenuItemsLoaded: boolean;
+  private errorController: ZimbraDriveErrorController;
+  private _promisedGoToFolder: string;
 
   constructor(zimlet: ZimbraDriveZimlet, container: DwtControl) {
     super(ZimbraDriveApp.APP_NAME, zimlet, container);
@@ -159,15 +161,35 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
       params.soapInfo.additional["casesensitive"] = {};
     }
     let search = new ZmSearch(params);
-    search.execute(
-      {
-        callback: new AjxCallback(
-          appCtxt.getSearchController(),
-          appCtxt.getSearchController()._handleResponseDoSearch,
-          [search, false, undefined, false]
-        ),
-        batchCmd: batchCommand
+    /***
+     * Old execute, search.execute doesn't accept in params both batchCmd and errorCallback!!!
+     * search.execute(
+     *   {
+     *     callback: new AjxCallback(
+     *       appCtxt.getSearchController(),
+     *       appCtxt.getSearchController()._handleResponseDoSearch,
+     *       [search, false, undefined, false]
+     *     ),
+     *     batchCmd: batchCommand
+     *   }
+     * );
+     */
+    let soapDoc: AjxSoapDoc = AjxSoapDoc.create(ZimbraDriveApp.SEARCH_REQ, ZimbraDriveApp.URN);
+    if (!params.userInitiated) {
+      soapDoc.set("casesensitive", "true");
+    }
+    let soapMethod: Element = search._getStandardMethod(soapDoc); // this load query
+    let types: string[] = [];
+    for (let type of params.types) {
+      if (ZmSearch.TYPE[type]) {
+        types.push(ZmSearch.TYPE[type]);
       }
+    }
+    soapMethod.setAttribute("types", types.join(","));
+    batchCommand.addRequestParams(
+      soapDoc,
+      new AjxCallback(null, ZimbraDriveApp.onDriveSearchRequest, [search]),
+      new AjxCallback(null, ZimbraDriveApp.onDriveSearchRequestError)
     );
   }
 
@@ -190,6 +212,7 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
 
   public _defineAPI(): void {
     AjxDispatcher.registerMethod("GetZimbraDriveController", [], new AjxCallback(this, this.getZimbraDriveController));
+    AjxDispatcher.registerMethod("GetZimbraDriveErrorController", [], new AjxCallback(this, this.getZimbraDriveErrorController));
   }
 
   public _registerItems(): void {
@@ -338,6 +361,13 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
     return zimbraDriveController;
   }
 
+  public getZimbraDriveErrorController(): ZimbraDriveErrorController {
+    return <ZimbraDriveErrorController>this.getSessionController({
+      controllerClass: "ZmZimbraDriveErrorController",
+      sessionId: ZmApp.MAIN_SESSION
+    });
+  }
+
   private static onGetAllFolders(result: ZmCsfeResult): boolean {
     const rootObj: ZimbraDriveFolderObj = (<GetAllFoldersResponse>result.getResponse()[ZimbraDriveApp.GET_ALL_FOLDERS_RESP]).root[0];
     rootObj.name = "";
@@ -379,6 +409,19 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
     return true; // handled
   }
 
+  private static onDriveSearchRequest(search: ZmSearch, result: ZmCsfeResult): boolean {
+    let searchResult: ZmSearchResult = new ZmSearchResult(search);
+    searchResult.set(result.getResponse()[search.soapInfo.response]);
+    result.set(searchResult);
+    appCtxt.getSearchController()._handleResponseDoSearch(search, false, undefined, false, result);
+    return true;
+  }
+
+  private static onDriveSearchRequestError(result: ZmCsfeException): boolean {
+    let controller: ZimbraDriveErrorController = AjxDispatcher.run("GetZimbraDriveErrorController", ZmApp.MAIN_SESSION);
+    controller.show(result);
+    return true;
+  }
 
   public static getMessage(msg: string, substitutions?: string[]): string {
     try {
@@ -424,6 +467,18 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
     else {
       toolbarButton.setMenu(this._defaultNewButtonMenu);
     }
+    if (this._promisedGoToFolder) {
+      ZimbraDriveController.goToFolder(this._promisedGoToFolder, false);
+      this._promisedGoToFolder = "";
+    }
+  }
+
+  public promiseGoToFolder(folderPath: string): void {
+    this._promisedGoToFolder = folderPath;
+  }
+
+  public resetPromisedGoToFolder(): void {
+    this._promisedGoToFolder = "";
   }
 
   public getZDNewButtonMenu(): ZmActionMenu {
@@ -441,8 +496,14 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
   }
 
   public runRefresh(): void {
-    if (this.isActive() && ZimbraDriveController.getCurrentFolder()) {
-      ZimbraDriveController.goToFolder(ZimbraDriveController.getCurrentFolder().getPath(true), false);
+    let mainController: ZimbraDriveController = (<ZimbraDriveApp> appCtxt.getApp(ZimbraDriveApp.APP_NAME)).getZimbraDriveController(ZmApp.MAIN_SESSION);
+    if (this.isActive()) {
+      if (mainController && mainController.getCurrentFolder()) {
+        ZimbraDriveController.goToFolder(mainController.getCurrentFolder().getPath(true), false);
+      }
+      else if (appCtxt.getCurrentViewType() === ZDId.VIEW_ZIMBRADRIVE_ERROR) {
+        ZimbraDriveController.goToFolder("/", false);
+      }
     }
   }
 

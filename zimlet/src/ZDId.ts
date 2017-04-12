@@ -18,6 +18,7 @@
 export class ZDId {
 
   public static VIEW_ZIMBRADRIVE_DETAIL: string = "ZDRIVE_DLV";
+  public static VIEW_ZIMBRADRIVE_ERROR: string = "ZDRIVE_ERR";
   public static ITEM_ZIMBRADRIVE: string = "ZIMBRADRIVE_ITEM";
   public static ZIMBRADRIVE_ITEM: string = "ZIMBRADRIVE_ITEM";
   public static ZIMBRADRIVE_FOLDER: string = "ZIMBRADRIVE_FOLDER";
