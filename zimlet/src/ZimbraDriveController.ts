@@ -173,7 +173,8 @@ export class ZimbraDriveController extends ZmListController {
         break;
       }
     }
-    let itemsResults: ZmList = (<ZmSearchResult>results).getResults(ZDId.ZIMBRADRIVE_ITEM);
+    let itemsResults: ZmList = (<ZmSearchResult>results).getResults(ZDId.ZIMBRADRIVE_ITEM),
+      finalList: ZmList = new ZmList(ZDId.ZIMBRADRIVE_ITEM);
     // this._folderId = results && results.search && results.search.folderId;
 
     this.query = (<ZmSearchResult>results).getAttribute("query");
@@ -182,6 +183,16 @@ export class ZimbraDriveController extends ZmListController {
     let firstItem: ZimbraDriveItem = itemsResults.getArray().length > 0 && <ZimbraDriveItem> itemsResults.getArray()[0];
     if (firstItem && firstItem.getName && !firstItem.getName()) {
       itemsResults.getArray().pop();
+    }
+    for (let item of itemsResults.getArray()) {
+      if ((<ZimbraDriveItem> item).isFolder()) {
+        // Recover folder
+        let folder: ZimbraDriveFolder =  <ZimbraDriveFolder> rootFolder.getChildByPath(ZimbraDriveController.removeStartingAndEndingSlash((<ZimbraDriveItem> item).getPath()));
+        finalList.add(folder.getFolderItem());
+      }
+      else {
+        finalList.add(item);
+      }
     }
     if (!this.isSearchResults) {
       // Block any promised goToFolder
@@ -193,14 +204,19 @@ export class ZimbraDriveController extends ZmListController {
         treeFolder = <ZimbraDriveFolder>rootFolder.getChildByPath(ZimbraDriveController.removeStartingAndEndingSlash(currentFolderPath));
       }
       this.setCurrentFolder(treeFolder);
+      // if (treeFolder.children.size() > 0) {
+      //   for (let i = treeFolder.children.size() - 1; i >= 0; i--) {
+      //     itemsResults.add((<ZimbraDriveFolder>treeFolder.children.getArray()[i]).getFolderItem(), 0);
+      //   }
+      // }
       if (treeFolder.children.size() > 0) {
-        for (let i = treeFolder.children.size() - 1; i >= 0; i--) {
-          itemsResults.add((<ZimbraDriveFolder>treeFolder.children.getArray()[i]).getFolderItem(), 0);
+        for (let childFolder of treeFolder.children.getArray()) {
+          finalList.add((<ZimbraDriveFolder> childFolder).getFolderItem());
         }
       }
     }
-    itemsResults.getArray().sort(ZimbraDriveController.sortItems);
-    this.setList(itemsResults);
+    finalList.getArray().sort(ZimbraDriveController.sortItems);
+    this.setList(finalList);
 
     this.getList().setHasMore(false);
     // this._list.setHasMore(results.getAttribute("more"));

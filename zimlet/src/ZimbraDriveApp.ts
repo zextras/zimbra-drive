@@ -318,6 +318,8 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
     let sessionId: string = searchResultsController ? searchResultsController.getCurrentViewId() : ZmApp.MAIN_SESSION;
     let controller: ZimbraDriveController = AjxDispatcher.run("GetZimbraDriveController", sessionId, searchResultsController);
     controller.show(results);
+    // Create overview if not exists
+    this.setOverviewPanelContent(false);
     this._setLoadedTime(this.toString(), new Date());
     if (loadCallback) {
       loadCallback.run(controller);
@@ -451,8 +453,15 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
       tooltip: ZmMsg.uploadDocs,
       defaultId: ZDId.ZD_NEW_FILE
     };
-    let currentViewId: string = this.getSessionController({controllerClass: "ZmZimbraDriveController", sessionId: "main"}).getCurrentViewId();
-    if (currentViewId !== appCtxt.getCurrentViewId()) {
+    let mainViewId: string = this.getSessionController({
+          controllerClass: "ZmZimbraDriveController",
+          sessionId: "main"
+      }).getCurrentViewId(),
+      mainErrorViewId: string = this.getSessionController({
+        controllerClass: "ZmZimbraDriveErrorController",
+        sessionId: "main"
+      }).getCurrentViewId();
+    if (appCtxt.getCurrentViewId() !== mainViewId && appCtxt.getCurrentViewId() !== mainErrorViewId) {
       params.disabled = true;
     }
     return params;

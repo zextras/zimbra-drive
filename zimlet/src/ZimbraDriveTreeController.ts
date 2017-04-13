@@ -176,6 +176,7 @@ export class ZimbraDriveTreeController extends ZmFolderTreeController {
 
   private _newFolderCallback(parentFolder: ZimbraDriveFolder, result: ZmCsfeResult): void {
     let newFolder: ZimbraDriveFolder = new ZimbraDriveFolder();
+    let currentController: ZimbraDriveController = <ZimbraDriveController>appCtxt.getCurrentController();
     let mainController: ZimbraDriveController =
       (<ZimbraDriveApp> appCtxt.getApp(ZimbraDriveApp.APP_NAME)).getZimbraDriveController(ZmApp.MAIN_SESSION);
     newFolder.parent = parentFolder;
@@ -185,8 +186,13 @@ export class ZimbraDriveTreeController extends ZmFolderTreeController {
     );
     parentFolder.children.add(newFolder);
     newFolder._notify("CREATE");
-    if (parentFolder.getPath() === mainController.getCurrentFolder().getPath()) {
-      ZimbraDriveController.addItemToCurrentList(newFolder.getFolderItem());
+    if (!currentController.isSearchResults) {
+      if (currentController.getCurrentFolder() && currentController.getCurrentFolder().getPath() === parentFolder.getPath()) {
+        ZimbraDriveController.addItemToCurrentList(newFolder.getFolderItem());
+      }
+    }
+    else {
+      currentController.refreshList(false);
     }
   }
 
@@ -263,6 +269,9 @@ export class ZimbraDriveTreeController extends ZmFolderTreeController {
   // Action menu
   public _treeViewListener(ev: DwtUiEvent): void {
     super._treeViewListener(ev);
+    if (!this._actionMenu) {
+      this._initializeActionMenus();
+    }
     if ((<DwtSelectionEvent>ev).detail === DwtTree.ITEM_ACTIONED) {
       let itemActioned: any = (<DwtSelectionEvent>ev).item,
         folder: ZimbraDriveFolder = itemActioned.getData(Dwt.KEY_OBJECT),
