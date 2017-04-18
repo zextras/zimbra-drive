@@ -90,12 +90,11 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
 
   constructor(zimlet: ZimbraDriveZimlet, container: DwtControl) {
     super(ZimbraDriveApp.APP_NAME, zimlet, container);
+    this._defaultNewButtonMenu = (<ZmZimbraMail> appCtxt.getAppController()).getNewButton().getMenu(true);
   }
 
   public launch(params?: ZmZimletAppLaunchParams, callback?: AjxCallback): void {
     this._setLaunchTime(this.toString(), new Date());
-    let newButton: DwtToolBarButton = (<ZmZimbraMail> appCtxt.getAppController()).getNewButton();
-    this._defaultNewButtonMenu = newButton.getMenu(true);
     ZimbraDriveController.goToFolder("/", false);
     if (callback) { callback.run(); }
   }

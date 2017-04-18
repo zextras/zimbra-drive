@@ -113,6 +113,7 @@ export class ZimbraDriveZimlet extends ZmZimletBase implements CreateAppZimlet {
             menuItem.setData(ZmOperation.MENUITEM_ID, ZDId.ZIMBRADRIVE_ITEM);
           }
           menuItem.setText(this.getMessage("searchZimbraDrive"));
+          menuItem.addSelectionListener(new AjxListener(appCtxt.getSearchController(), appCtxt.getSearchController()._searchMenuListener));
         }
       }
     }
