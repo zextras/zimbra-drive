@@ -20,7 +20,7 @@ namespace OCA\ZimbraDrive\Service;
 
 use OCP\ILogger;
 
-class LogService implements ILogger
+class LogService
 {
     private $logger;
     private $appName;
@@ -147,27 +147,6 @@ class LogService implements ILogger
     public function log($level, $message, array $context = array())
     {
         $context['app'] = $this->appName;
-        $this->logger->log($message, $context);
-    }
-
-    /**
-     * Logs an exception very detailed
-     * An additional message can we written to the log by adding it to the
-     * context.
-     *
-     * <code>
-     * $logger->logException($ex, [
-     *     'message' => 'Exception during cron job execution'
-     * ]);
-     * </code>
-     *
-     * @param \Exception | \Throwable $exception
-     * @param array $context
-     * @return void
-     */
-    public function logException($exception, array $context = array())
-    {
-        $context['app'] = $this->appName;
-        $this->logger->logException($exception, $context);
+        $this->logger->log($level, $message, $context);
     }
 }
