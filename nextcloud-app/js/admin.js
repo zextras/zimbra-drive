@@ -43,7 +43,7 @@ var documentsSettings = {
 
     if (elementValue !== null) {
       OC.msg.startAction('#zimbradrive-admin-msg', t('zimbradrive', 'Saving...'));
-      OCP.AppConfig.setValue(
+      OC.AppConfig.setValue( //Deprecated in NextCloud 11 but OCP.AppConfig is not supported on OwnCloud 9.1.4
         'zimbradrive',
         elementName,
         elementValue,

@@ -16,11 +16,13 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-OC::$CLASSPATH['OC_User_Zimbra'] = 'zimbradrive/lib/Auth/OC_User_Zimbra.php';
+namespace OCA\ZimbraDrive\AppInfo;
 
-use OCA\ZimbraDrive\Service\StorageService;
 use OCA\ZimbraDrive\Service\LogService;
 use OCP\AppFramework\App;
+use OC;
+
+OC::$CLASSPATH['OC_User_Zimbra'] = 'zimbradrive/lib/Auth/OC_User_Zimbra.php';
 
 class Application extends App {
 
@@ -51,6 +53,11 @@ class Application extends App {
 }
 
 $app = new Application();
+
+if(!interface_exists('ISettings'))  // ISettings not supported in OwnCloud 9.1.4
+{
+    \OCP\App::registerAdmin('zimbradrive', 'admin');
+}
 
 $container = $app->getContainer();
 

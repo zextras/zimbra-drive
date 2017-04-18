@@ -64,6 +64,7 @@ class OC_User_Zimbra extends \OC_User_Backend
      */
     public function checkPassword($uid, $password)
     {
+        $this->logger->info('checkPassword user ' . $uid, ['app' => 'zimbradriveAuth']);
         $fields = array(
             "username" => $uid,
             "password" => $password
@@ -88,8 +89,8 @@ class OC_User_Zimbra extends \OC_User_Backend
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
         } else {
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, TRUE);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, TRUE);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 2);
         }
 
         //execute post
