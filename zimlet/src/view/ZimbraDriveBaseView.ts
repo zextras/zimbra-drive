@@ -50,9 +50,6 @@ import {ZimbraDriveController} from "../ZimbraDriveController";
 export class ZimbraDriveBaseView extends ZmListView {
 
   public _zmList: ZmList;
-  private _renameField: DwtInputField;
-  private _fileItem: ZimbraDriveItem;
-  private _fileItemNameEl: HTMLElement;
 
   constructor(params: ZimbraDriveBaseViewParams) {
     params.posStyle = params.posStyle || DwtControl.ABSOLUTE_STYLE;
@@ -61,148 +58,11 @@ export class ZimbraDriveBaseView extends ZmListView {
     super(<ZmListViewParams>params);
   }
 
-  public renameFile(item: ZimbraDriveItem): void {
-    this._fileItemNameEl = document.getElementById(item.getNameElId());
-    let fileNameBounds: DwtRectangle = Dwt.getBounds(this._fileItemNameEl),
-      fileInput: DwtInputField = this._enableRenameInput(true, fileNameBounds);
-    fileInput.setValue(item.getName());
-    this._fileItem = item;
-  }
-
-  public _enableRenameInput(enable: boolean, bounds?: DwtRectangle): DwtInputField {
-    let fileInput = this._getRenameInput();
-    if (enable) {
-      fileInput.setBounds(bounds.x, bounds.y, bounds.width ,  18);
-      fileInput.setDisplay(Dwt.DISPLAY_INLINE);
-      fileInput.focus();
-    }else {
-      fileInput.setDisplay(Dwt.DISPLAY_NONE);
-      fileInput.setLocation("-10000px", "-10000px");
-    }
-    return fileInput;
-  }
-
-  public _getRenameInput(): DwtInputField {
-    if (!this._renameField) {
-      this._renameField = new DwtInputField({
-        parent: appCtxt.getShell(),
-        className: "RenameInput DwtInputField",
-        posStyle: Dwt.ABSOLUTE_STYLE
-      });
-      this._renameField.setZIndex(Dwt.Z_VIEW + 10); // One layer above the VIEW
-      this._renameField.setDisplay(Dwt.DISPLAY_NONE);
-      this._renameField.setLocation("-10000px", "-10000px");
-      this._renameField.addListener(DwtEvent.ONKEYUP, new AjxListener(this, this._handleKeyUp));
-    }
-    return this._renameField;
-  }
-
-  public _handleKeyUp(ev: DwtKeyEvent): void {
-    let allowDefault: boolean = true,
-      key: number = DwtKeyEvent.getCharCode(ev),
-      item: ZimbraDriveItem = this._fileItem;
-    if (key === DwtKeyEvent.KEY_RETURN) {
-      this._doRename(item);
-      allowDefault = false;
-    }
-    else if (key === DwtKeyEvent.KEY_ESCAPE) {
-      this._redrawItem(item);
-      allowDefault = false;
-    }
-    DwtUiEvent.setBehaviour(ev, true, allowDefault);
-  }
-
   public _mouseDownAction(mouseEv: DwtMouseEvent, div: HTMLElement): void {
-    if (this._renameField && this._renameField.getVisibility() && this._fileItem) {
-      this._doRename(this._fileItem);
-      this.resetRenameFile();
-    }
+    (<ZimbraDriveController> this._controller)._mouseDownAction();
     super._mouseDownAction(mouseEv, div);
   }
 
-  private _doRename(item: ZimbraDriveItem): void {
-    let fileName: string = this._renameField.getValue();
-    if (fileName !== "" && (fileName !== item.getName())) {
-      let warning: DwtMessageDialog = appCtxt.getMsgDialog();
-      if (this._checkDuplicate(fileName)) {
-        this._redrawItem(item);
-        warning.setMessage(AjxMessageFormat.format(ZmMsg.itemWithFileNameExits, fileName), DwtMessageDialog.CRITICAL_STYLE, "Zimbra Drive");
-        warning.popup();
-      } else if (ZmAppCtxt.INVALID_NAME_CHARS_RE.test(fileName)) {
-        warning.setMessage(AjxMessageFormat.format(ZmMsg.errorInvalidName, AjxStringUtil.htmlEncode(fileName)), DwtMessageDialog.WARNING_STYLE, "Zimbra Drive");
-        warning.popup();
-      } else {
-        this._sendRenameRequest(fileName, item);
-      }
-    } else {
-      this.redrawItem(item);
-    }
-  }
-
-  private _sendRenameRequest(fileName: string, item: ZimbraDriveItem): void {
-    let soapDoc = AjxSoapDoc.create("RenameRequest", "urn:zimbraDrive");
-    soapDoc.set(ZDId.F_NEW_NAME, fileName);
-    soapDoc.set(ZDId.F_SOURCE_PATH, item.getPath());
-    (<ZmZimbraMail>appCtxt.getAppController()).sendRequest({
-      soapDoc: soapDoc,
-      asyncMode: true,
-      callback: new AjxCallback(this, this._renameFileCallback, [fileName]),
-      errorCallback: new AjxCallback(this, this._renameFileErrorCallback, [fileName])
-    });
-  }
-
-  public _renameFileCallback(fileName: string): boolean {
-    // It's a rename, need to change only item.path name part
-    this._fileItem.setName(fileName);
-    let pathArray: string [] = this._fileItem.getPath().split("/");
-    pathArray.pop();
-    pathArray.push(fileName);
-    this._fileItem.setPath(pathArray.join("/"));
-    this._fileItemNameEl.textContent = fileName;
-    this._enableRenameInput(false);
-    this.resetRenameFile();
-    let msg: string = ZimbraDriveApp.getMessage("successfulRename"),
-      level: number = ZmStatusView.LEVEL_INFO;
-    appCtxt.setStatusMsg({msg: msg, level: level});
-    ZimbraDriveController.sortCurrentList();
-    return true;
-  }
-
-  private _renameFileErrorCallback(fileName: string, exception: ZmCsfeException): boolean {
-    this.resetRenameFile();
-    let exceptionMessage = exception.msg;
-    let msg: string = ZimbraDriveApp.getMessage("errorServer"),
-      level: number = ZmStatusView.LEVEL_CRITICAL;
-    if (exceptionMessage.substring(exceptionMessage.length - 3) === "405") {
-      msg = ZimbraDriveApp.getMessage("errorRenameFile", [fileName]);
-    }
-    appCtxt.setStatusMsg({msg: msg, level: level});
-    return true;
-  }
-
-  public resetRenameFile(): void {
-    this._enableRenameInput(false);
-    this._fileItemNameEl = null;
-    this._fileItem = null;
-  }
-
-  private _redrawItem(item: ZimbraDriveItem): void {
-    this.resetRenameFile();
-    this.redrawItem(item);
-  }
-
-  public _checkDuplicate(name: string): boolean {
-    name = name.toLowerCase();
-    let list: AjxVector<ZimbraDriveItem> = this.getList();
-    if (list) {
-      let listItems: ZimbraDriveItem[] = list.getArray();
-      for (let item of listItems) {
-        if (item.getName().toLowerCase() === name)
-          return true;
-      }
-    }
-    return false;
-  }
 }
 
 export interface ZimbraDriveBaseViewParams {
