@@ -47,7 +47,6 @@ export class DetailListView extends ZimbraDriveBaseView {
   private _isMultiColumn: boolean;
   private headerColCreated: boolean;
   private _normalClass: string;
-  private _controller: ZimbraDriveController;
 
   public _colHeaderActionMenu: ZmActionMenu;
   private _dragSrc: DwtDragSource;
@@ -63,7 +62,6 @@ export class DetailListView extends ZimbraDriveBaseView {
       dropTgt: dropTarget,
       type: ZDId.ZIMBRADRIVE_ITEM
     });
-    this._controller = controller;
 
     if (controller.supportsDnD()) {
       this._dragSrc = new DwtDragSource(Dwt.DND_DROP_MOVE);
@@ -110,7 +108,7 @@ export class DetailListView extends ZimbraDriveBaseView {
 
   public isMultiColumn(controller?: ZimbraDriveController): boolean {
     let ctlr = controller || this._controller;
-    return !ctlr.isReadingPaneOnRight();
+    return !(<ZimbraDriveController> ctlr).isReadingPaneOnRight();
   };
 
   public reRenderListView(force?: boolean): void {
