@@ -269,7 +269,7 @@ export class ZimbraDriveTreeController extends ZmFolderTreeController {
   // Action menu
   public _treeViewListener(ev: DwtUiEvent): void {
     if (
-      ev && ev.dwtObj && (<DwtSelectionEvent> ev).detail === 0 &&
+      ev && ev.dwtObj && (<DwtSelectionEvent> ev).detail === DwtTree.ITEM_SELECTED &&
       (<DwtSelectionEvent> ev).dwtObj.getHtmlElement() === ev.target
     ) {
       return;
