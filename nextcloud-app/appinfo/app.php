@@ -22,7 +22,6 @@ use OCA\ZimbraDrive\Service\LogService;
 use OCP\AppFramework\App;
 use OC;
 
-OC::$CLASSPATH['OC_User_Zimbra'] = 'zimbradrive/lib/Auth/OC_User_Zimbra.php';
 
 class Application extends App {
 
@@ -51,6 +50,8 @@ class Application extends App {
         });
     }
 }
+
+OC::$CLASSPATH['OC_User_Zimbra'] = 'zimbradrive/lib/auth/oc_user_zimbra.php';
 
 $app = new Application();
 

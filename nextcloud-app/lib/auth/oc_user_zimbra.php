@@ -64,7 +64,6 @@ class OC_User_Zimbra extends \OC_User_Backend
      */
     public function checkPassword($uid, $password)
     {
-        $this->logger->info('checkPassword user ' . $uid, ['app' => 'zimbradriveAuth']);
         $fields = array(
             "username" => $uid,
             "password" => $password
