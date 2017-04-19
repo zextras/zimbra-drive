@@ -1,0 +1,12 @@
+\section{Remove packages}
+    \begin{verbatim}
+    # As zimbra
+    zmzimletctl undeploy com_zextras_drive_open
+    # As root
+    rm -rf /opt/zimbra/lib/ext/zimbradrive/
+    \end{verbatim}
+    Once the packages are removed is required a mailbox restart to fully unload the extension:
+    \begin{verbatim}
+    # As zimbra
+    zmmailboxdctl restart
+    \end{verbatim}

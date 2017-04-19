@@ -1,0 +1,28 @@
+\section{Zimbra packages installation}
+
+\begin{warning}
+    The Zimbra Drive Zimlet and Extension are already installed in the default Zimbra installation
+    starting from Zimbra 8.7.6.
+    Usually the administrator does not need to manually install Zimbra Drive.
+\end{warning}
+
+    \subsection{Extension}
+    \begin{verbatim}
+    # As root
+    mkdir -p /opt/zimbra/lib/ext/zimbradrive
+    cp zimbradrive-extension.jar /opt/zimbra/lib/ext/zimbradrive/
+    cp zal.jar /opt/zimbra/lib/ext/zimbradrive/
+    \end{verbatim}
+    Once the packages are in the right place is required a mailbox restart to load the extension:
+    \begin{verbatim}
+    # As zimbra
+    zmmailboxdctl restart
+    \end{verbatim}
+
+    \subsection{Zimlet}
+    \begin{verbatim}
+    # As zimbra
+    zmzimletctl deploy /tmp/openchat/com_zextras_chat_open.zip
+    \end{verbatim}
+    By default the zimlet is enabled for the `default` COS.
+    Enable the zimlet on the required COSes from the administration console.

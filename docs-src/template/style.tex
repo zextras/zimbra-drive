@@ -1,0 +1,16 @@
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyfoot[LE,RO]{\thepage} % Add page number in corner
+\cfoot{} % Remove centered page number
+\renewcommand{\chaptermark}[1]{\markboth{\MakeUppercase{\thechapter.\ #1}}{}} % Add number. chapter in header
+\renewcommand{\rightmark}[1]{\markboth{\MakeUppercase{\thechapter.\ #1}}{}} % Remove section name and number
+\renewcommand{\footrulewidth}{0pt} % Remove footer line
+\fancypagestyle{plain}{
+    \fancyhf{} % Rewrite chapter page
+    \fancyfoot[LE,RO]{\thepage} % Add page number in corner
+    \renewcommand{\headrulewidth}{0pt} % Remove header line
+}
+
+\usepackage{titlesec}
+\titleformat{\chapter}[hang] % Remove "'Chapter' number"
+{\normalfont\huge\bfseries}{\Huge\thechapter.}{1em}{\Huge}

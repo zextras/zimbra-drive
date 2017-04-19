@@ -1,0 +1,31 @@
+\section{Overview}
+    Here it will provided a short overview of Zimbra Open Drive contents. 
+
+    \subsection{General architecture}
+    Zimbra Open Drive links the end user to external cloud service through Zimbra.
+    The main feature consists to pair the Zimbra domains with the external service url:
+    the domain attribute 'zimbraDriveOwnCloudURL' must be set with the service url.\\
+    The end user will be able to create a private account with which he can communicate with
+    the virtual device.
+
+    \subsection{Components}
+    Zimbra Drive elements are the following:
+    \begin{enumerate}
+        \item Zimlet
+        \item Zimbra Extension
+        \item Cloud App
+    \end{enumerate}
+    \begin{warning}
+        Each component does not work without the others and without a careful configuration.
+        However any lack in installation should not block Zimbra.
+    \end{warning}
+
+        \subsubsection{Zimlet}
+        The Zimbra Open Drive zimlet improves the user Zimbra interface adding a new tab before Preferences tab,
+        this tab is titled "Drive". Furthermore the zimlet let user to perform search in linked cloud.\\
+        The zimlet component is contained in package com\_zextras\_drive\_open.zip and the zimlet name is precisely
+        "com\_zextras\_drive\_open".
+
+        \subsubsection{Extension}
+
+        \subsubsection{Cloud App}
