@@ -16,6 +16,8 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
+use OCA\ZimbraDrive\AppInfo\Application;
+
 class OC_User_Zimbra extends \OC_User_Backend
 {
     const ZIMBRA_GROUP = "zimbra";
@@ -38,10 +40,11 @@ class OC_User_Zimbra extends \OC_User_Backend
         $this->userManager = $server->getUserManager();
         $this->groupManager = $server->getGroupManager();
 
-        $this->zimbra_url = $this->config->getAppValue("zimbradrive", "zimbra_url");
-        $this->zimbra_port = $this->config->getAppValue("zimbradrive", "zimbra_port");
-        $this->use_ssl = $this->config->getAppValue("zimbradrive", "use_ssl", "true") == "true";
-        $this->trust_invalid_certs = $this->config->getAppValue("zimbradrive", "trust_invalid_certs", "false") == "true";
+        $appName = Application::APP_NAME;
+        $this->zimbra_url = $this->config->getAppValue($appName, "zimbra_url");
+        $this->zimbra_port = $this->config->getAppValue($appName, "zimbra_port");
+        $this->use_ssl = $this->config->getAppValue($appName, "use_ssl", "true") == "true";
+        $this->trust_invalid_certs = $this->config->getAppValue($appName, "trust_invalid_certs", "false") == "true";
 
         $this->url = sprintf(
             "%s://%s:%s/service/extension/ZimbraDrive_NcUserZimbraBackend",
@@ -126,7 +129,7 @@ class OC_User_Zimbra extends \OC_User_Backend
      */
     private function initializeUser($userId, $userDisplayName)
     {
-        $this->logger->info('Initialize user ' . $userId . '.', ['app' => 'zimbradriveAuth']);
+        $this->logger->debug('Initialize user ' . $userId . '.', ['app' => Application::APP_NAME]);
         $this->storeUser(
             $userId,
             $userDisplayName
@@ -198,6 +201,9 @@ class OC_User_Zimbra extends \OC_User_Backend
     /**
      * Get a list of all display names and user ids.
      *
+     * @param string $search
+     * @param null $limit
+     * @param null $offset
      * @return array with all displayNames (value) and the corresponding uids (key)
      */
     public function getDisplayNames($search = '', $limit = null, $offset = null)
@@ -224,6 +230,9 @@ class OC_User_Zimbra extends \OC_User_Backend
     /**
      * Get a list of all users
      *
+     * @param string $search
+     * @param null $limit
+     * @param null $offset
      * @return array with all uids
      */
     public function getUsers($search = '', $limit = null, $offset = null)

@@ -16,28 +16,15 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
+//File created to display admin's configuration on ownCloud 9.0
 namespace OCA\ZimbraDrive;
 
-
-use OCP\AppFramework\Http\TemplateResponse;
+use OCA\ZimbraDrive\Settings\AdminTemplate;
 
 $server = \OC::$server;
 $config = $server->getConfig();
 
-$template = new TemplateResponse(
-    'zimbradrive',
-    'admin',
-    [
-        "zimbra_url" => $config->getAppValue('zimbradrive', 'zimbra_url'),
-        "zimbra_port" => $config->getAppValue('zimbradrive', 'zimbra_port'),
-        "use_ssl" => $config->getAppValue('zimbradrive', 'use_ssl', 'true') == 'true',
-        "trust_invalid_certs" => $config->getAppValue('zimbradrive', 'trust_invalid_certs', 'false') == 'true',
-        "preauth_key" => $config->getAppValue('zimbradrive', 'preauth_key'),
-    ],
-    'blank'
-);
+$template = AdminTemplate::getTemplate($config);
 
 return $template->render();
-
-?>
 

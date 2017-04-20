@@ -23,7 +23,7 @@ the content like the example:
 ```json
 {
   "domains": {
-    "example.com": "https://mycloud.example.com"
+    "example.com": "https://mycloud.example.com/index.php"
   }
 }
 ```
@@ -34,13 +34,4 @@ Install and activate the `ZimbraDrive` App for NextCloud.
 ### 4. Configure NextCloud ZimbraDrive App
 Configure the Zimbra Server into to the `Zimbra Drive` section in the **Admin Configuration** of Your NextCloud instance.
 
-### 5. Edit NextCloud Configuration
-Add these lines to the NextCloud configuration to allow Zimbra users to use their credentials to use NextCloud:
-```php
-'user_backends' => array (
-    0 => array (
-      'class' => 'OC_User_Zimbra',
-      'arguments' => array(),
-    ),
-  ),
-```
+`Enable authentication through Zimbra` must be enabled to let `Zimbra Drive` work correctly.
