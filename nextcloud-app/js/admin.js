@@ -77,6 +77,7 @@ var documentsSettings = {
 
   setValue: function (name, value){
     documentsSettings.beforeSave();
+    if (typeof OCP !== 'object') {
       OC.AppConfig.setValue( //Deprecated in NextCloud 11 but OCP.AppConfig is not supported on OwnCloud 9.1.4
         documentsSettings.appName,
         name,
@@ -86,6 +87,17 @@ var documentsSettings = {
           error: documentsSettings.afterSave
         }
       );
+    } else {
+      OCP.AppConfig.setValue(
+        documentsSettings.appName,
+        name,
+        value,
+        {
+          success: documentsSettings.afterSave,
+          error: documentsSettings.afterSave
+        }
+      );
+    }
   },
 
   beforeSave: function () {
