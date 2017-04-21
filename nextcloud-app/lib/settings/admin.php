@@ -18,6 +18,7 @@
 
 namespace OCA\ZimbraDrive\Settings;
 
+use OCA\ZimbraDrive\AppInfo\Application;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\IConfig;
 use OCP\Settings\ISettings;
@@ -48,7 +49,7 @@ class Admin implements ISettings
      */
     public function getSection()
     {
-        return 'zimbradrive';
+        return Application::APP_NAME;
     }
 
     /**

@@ -77,7 +77,7 @@ var documentsSettings = {
 
   setValue: function (name, value){
     documentsSettings.beforeSave();
-    if (typeof OCP !== 'object') {
+    if (typeof OCP === 'undefined') {
       OC.AppConfig.setValue( //Deprecated in NextCloud 11 but OCP.AppConfig is not supported on OwnCloud 9.1.4
         documentsSettings.appName,
         name,
