@@ -13,10 +13,15 @@
     cp zimbradrive-extension.jar /opt/zimbra/lib/ext/zimbradrive/
     cp zal.jar /opt/zimbra/lib/ext/zimbradrive/
     \end{verbatim}
-    Once the packages are in the right place is required a mailbox restart to load the extension:
+    Once the packages are in the right place,a mailbox restart is required to load the extension:
     \begin{verbatim}
     # As zimbra
     zmmailboxdctl restart
+    \end{verbatim}
+    Everything is successfully done if extension start correctly and the output of following command match with the last mailbox restart:
+    \begin{verbatim}
+    str="Initialized extension Zimbra Abstraction Layer for: zimbradrive";
+    grep "${str}" /opt/zimbra/log/mailbox.log | tail -n 1;
     \end{verbatim}
 
     \subsection{Zimlet}
