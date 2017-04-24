@@ -62,7 +62,7 @@ var documentsSettings = {
 
 
   modifyZimbraAuthentication: function (element) {
-    var requestUrl = "/index.php/apps/zimbradrive/api/1.0/";
+    var requestUrl = "/index.php/apps/zimbradrive/admin/";
     if((element.attr('checked') === 'checked'))
     {
       requestUrl += "EnableZimbraAuthentication";
