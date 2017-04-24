@@ -564,7 +564,7 @@ export class ZimbraDriveController extends ZmListController {
       message = ZmMsg.confirmPermanentDeleteItemList;
     } else {
       let delMsgFormatter = new AjxMessageFormat(ZmMsg.confirmPermanentDeleteItem);
-      message = delMsgFormatter.format(AjxStringUtil.htmlEncode(items[0].getName()));
+      message = delMsgFormatter.format(items[0].getName());
     }
     let dialog = appCtxt.getConfirmationDialog();
     dialog.popup(message, new AjxCallback(this, this._doDeleteItems, [items]));
