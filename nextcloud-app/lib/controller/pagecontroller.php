@@ -60,17 +60,24 @@ class PageController extends Controller
      */
     public function index()
     {
-        $timestamp = time()*1000;
-        $preauthToken = hash_hmac("sha1", $this->userId."|id|0|".$timestamp, $this->zimbra_preauth_key);
-        $url = sprintf(
-            "%s://%s:%s/service/preauth?account=%s&by=id&timestamp=%s&expires=0&preauth=%s",
-            "http" . ($this->use_ssl ? "s" : ""),
+        $baseUrl = sprintf(
+            "http%s://%s:%s",
+            ($this->use_ssl ? "s" : ""),
             $this->zimbra_url,
-            $this->zimbra_port,
-            $this->userId,
-            $timestamp,
-            $preauthToken
-        );
-        return new RedirectResponse($url);
+            $this->zimbra_port);
+        $loginUrlPart = "";
+
+        if($this->zimbra_preauth_key !== '')
+        {
+            $timestamp = time()*1000;
+            $preauthToken = hash_hmac("sha1", $this->userId."|id|0|".$timestamp, $this->zimbra_preauth_key);
+            $loginUrlPart = sprintf(
+                "/service/preauth?account=%s&by=id&timestamp=%s&expires=0&preauth=%s",
+                $this->userId,
+                $timestamp,
+                $preauthToken
+            );
+        }
+        return new RedirectResponse($baseUrl . $loginUrlPart);
     }
 }
