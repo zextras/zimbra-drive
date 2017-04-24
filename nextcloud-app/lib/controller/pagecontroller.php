@@ -20,7 +20,6 @@ namespace OCA\ZimbraDrive\Controller;
 
 use OCP\AppFramework\Http\RedirectResponse;
 use OCP\AppFramework\Controller;
-use OCP;
 
 use OCP\IRequest;
 use OCP\IConfig;

@@ -16,39 +16,15 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace OCA\ZimbraDrive\Settings;
+//File created to display admin's configuration on ownCloud 9.0
+namespace OCA\ZimbraDrive;
 
-use OCP\Settings\ISection;
+use OCA\ZimbraDrive\Settings\AdminTemplate;
 
-class Section implements ISection
-{
+$server = \OC::$server;
+$config = $server->getConfig();
 
-    public function __construct()
-    {
-    }
+$template = AdminTemplate::getTemplate($config);
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getID()
-    {
-        return 'zimbradrive';
-    }
+return $template->render();
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getName()
-    {
-        return 'Zimbra Drive';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getPriority()
-    {
-        return 75;
-    }
-
-}
