@@ -70,10 +70,13 @@ To manually enable the authentication through Zimbra add these lines to the Own/
 ),
 ```
 
-`Domain Preauth Key` must be set to let Own/Next Cloud user go to Zimbra mail box, 
-To get the preauth key can be generate with:
+`Domain Preauth Key` must be set to let Own/Next Cloud user go to Zimbra mail box.
+The preauth key can be generate with:
 ```bash
 zmprov generateDomainPreAuthKey domain.com
 ```
-
+If the preauth key already exists, it can be obtained with:
+```bash
+zmprov getDomain domain.com zimbraPreAuthKey
+```
 
