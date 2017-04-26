@@ -502,7 +502,7 @@ export class ZimbraDriveController extends ZmListController {
       const item: ZimbraDriveItem = items[0];
       if (!item.isFolder()) {
         let url: string = `${ZimbraDriveApp.DOWNLOAD_URL}${item.getPath(true)}`;
-        this._downloadFile(AjxStringUtil.urlComponentEncode(url));
+        this._downloadFile(url);
       }
       else {
         let itemFolder: ZimbraDriveFolderItem = <ZimbraDriveFolderItem> item;
