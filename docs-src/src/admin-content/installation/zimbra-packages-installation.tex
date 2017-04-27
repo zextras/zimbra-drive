@@ -3,28 +3,28 @@
 \begin{warning}
     The Zimbra Drive Zimlet and Extension are already installed in the default Zimbra installation
     starting from Zimbra 8.7.6.
-    Usually the administrator does not need to manually install Zimbra Drive.
 \end{warning}
-
+In this section is described how to manually install the Zimbra Drive Extension and the Zimbra Drive Zimlet.
     \subsection{Extension}
+    First of all copy the file zimbradrive-extension.jar and zal.jar in the right place;
+    then a mailbox restart is required to load the extension.
     \begin{verbatim}
     # As root
     mkdir -p /opt/zimbra/lib/ext/zimbradrive
     cp zimbradrive-extension.jar /opt/zimbra/lib/ext/zimbradrive/
     cp zal.jar /opt/zimbra/lib/ext/zimbradrive/
-    \end{verbatim}
-    Once the packages are in the right place,a mailbox restart is required to load the extension:
-    \begin{verbatim}
     # As zimbra
-    zmmailboxdctl restart
+    mailboxdctl restart
     \end{verbatim}
-    Everything is successfully done if extension start correctly and the output of following command match with the last mailbox restart:
+    Everything is successfully done if extension start correctly. In order to verify it check in the mailbox.log;
+    for example the following command must match with the last mailbox restart:
     \begin{verbatim}
     str="Initialized extension Zimbra Abstraction Layer for: zimbradrive";
     grep "${str}" /opt/zimbra/log/mailbox.log | tail -n 1;
     \end{verbatim}
 
     \subsection{Zimlet}
+    Deploy the zimlet with the following command:
     \begin{verbatim}
     # As zimbra
     zmzimletctl deploy /tmp/openchat/com_zextras_chat_open.zip
