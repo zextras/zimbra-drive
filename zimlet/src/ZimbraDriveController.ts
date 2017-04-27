@@ -501,24 +501,24 @@ export class ZimbraDriveController extends ZmListController {
     else if (items.length === 1) {
       const item: ZimbraDriveItem = items[0];
       if (!item.isFolder()) {
-        let url: string = `${ZimbraDriveApp.DOWNLOAD_URL}${item.getPath()}`;
-        this._downloadFile(AjxStringUtil.urlComponentEncode(url));
+        let url: string = `${ZimbraDriveApp.DOWNLOAD_URL}${item.getPath(true)}`;
+        this._downloadFile(url);
       }
       else {
         let itemFolder: ZimbraDriveFolderItem = <ZimbraDriveFolderItem> item;
         let treeController: ZimbraDriveTreeController = <ZimbraDriveTreeController> appCtxt.getOverviewController().getTreeController(ZimbraDriveApp.TREE_ID);
-        treeController.downloadFolderAsZip(itemFolder.getPath());
+        treeController.downloadFolderAsZip(itemFolder.getPath(true));
       }
     }
     else {
       let urlArray: string[] = [];
       for (let item of items) {
         if (!item.isFolder()) {
-          urlArray.push(`${ZimbraDriveApp.DOWNLOAD_URL}${item.getPath()}`);
+          urlArray.push(`${ZimbraDriveApp.DOWNLOAD_URL}${item.getPath(true)}`);
         }
         else {
           let itemFolder: ZimbraDriveFolderItem = <ZimbraDriveFolderItem> item;
-          urlArray.push(`${ZimbraDriveApp.DOWNLOAD_URL}${itemFolder.getPath()}`);
+          urlArray.push(`${ZimbraDriveApp.DOWNLOAD_URL}${itemFolder.getPath(true)}`);
         }
       }
       ZmZimbraMail.unloadHackCallback();
