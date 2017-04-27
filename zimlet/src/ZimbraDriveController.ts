@@ -674,7 +674,6 @@ export class ZimbraDriveController extends ZmListController {
   public _mouseDownAction(): void {
     if (this._renameField && this._renameField.getVisibility() && this._fileItem) {
       this._doRename(this._fileItem);
-      this.resetRenameFile();
     }
   }
 
