@@ -23,22 +23,38 @@ var documentsSettings = {
   save: function (event) {
     var element = $(event.srcElement);
     var elementName = element.attr('name');
+    var elementValue;
 
     switch (elementName) {
       case 'zimbra_url':
       case 'preauth_key':
+      {
         documentsSettings.setAppValueFromInputTextElement(element);
         break;
+      }
       case 'zimbra_port':
+      {
         documentsSettings.setAppValueFromInputNumber(element);
         break;
+      }
       case 'use_ssl':
-      case 'trust_invalid_certs':
-        documentsSettings.setAppValueFromInputCheckbox(element);
+      {
+        elementValue = (element.attr('checked') === 'checked');
+        documentsSettings.setValue(elementName, elementValue);
         break;
+      }
+
+      case 'check_certs':
+      {
+        elementValue = (element.attr('checked') !== 'checked');
+        documentsSettings.setValue('trust_invalid_certs', elementValue);
+        break;
+      }
       case 'use_zimbra_auth':
+      {
         documentsSettings.modifyZimbraAuthentication(element);
         break;
+      }
     }
   },
 
@@ -53,13 +69,6 @@ var documentsSettings = {
     var elementValue = parseInt(element.val(), 10);
     documentsSettings.setValue(elementName, elementValue);
   },
-
-  setAppValueFromInputCheckbox: function (element) {
-    var elementName = element.attr('name');
-    var elementValue = (element.attr('checked') === 'checked');
-    documentsSettings.setValue(elementName, elementValue);
-  },
-
 
   modifyZimbraAuthentication: function (element) {
     var requestUrl = "/index.php/apps/zimbradrive/admin/";
@@ -112,7 +121,7 @@ var documentsSettings = {
     $('#zimbra_url').on('focusout', documentsSettings.save);
     $('#zimbra_port').on('focusout', documentsSettings.save);
     $('#use_ssl').on('click', documentsSettings.save);
-    $('#trust_invalid_certs').on('click', documentsSettings.save);
+    $('#check_certs').on('click', documentsSettings.save);
     $('#preauth_key').on('focusout', documentsSettings.save);
     $('#use_zimbra_auth').on('click', documentsSettings.save);
   }
