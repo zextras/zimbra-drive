@@ -33,7 +33,7 @@ class Section implements ISection
      */
     public function getID()
     {
-        return Application::APP_NAME;
+        return 'zimbradrive';
     }
 
     /**
