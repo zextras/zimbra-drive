@@ -20,11 +20,14 @@
 namespace OCA\ZimbraDrive;
 
 use OCA\ZimbraDrive\Settings\AdminTemplate;
+use OCA\ZimbraDrive\Settings\AppSettings;
 
 $server = \OC::$server;
 $config = $server->getConfig();
 
-$template = AdminTemplate::getTemplate($config);
+$appSettings = new AppSettings($config);
+$adminTemplate = new AdminTemplate($config, $appSettings);
+$template = $adminTemplate->getTemplate();
 
 return $template->render();
 

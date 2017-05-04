@@ -18,11 +18,11 @@
 
 namespace OCA\ZimbraDrive\Controller;
 
+use OCA\ZimbraDrive\Settings\AppSettings;
 use OCP\AppFramework\Http\RedirectResponse;
 use OCP\AppFramework\Controller;
 
 use OCP\IRequest;
-use OCP\IConfig;
 
 class PageController extends Controller
 {
@@ -32,20 +32,27 @@ class PageController extends Controller
     private $use_ssl;
     private $zimbra_preauth_key;
 
+    /**
+     * PageController constructor.
+     * @param string $AppName
+     * @param IRequest $request
+     * @param $UserId
+     * @param AppSettings $appSettings
+     */
     public function __construct(
         $AppName,
         IRequest $request,
         $UserId,
-        IConfig $config
+        AppSettings $appSettings
     )
     {
         parent::__construct($AppName, $request);
         $this->userId = $UserId;
 
-        $this->zimbra_url = $config->getAppValue("zimbradrive", "zimbra_url");
-        $this->zimbra_port = $config->getAppValue("zimbradrive", "zimbra_port");
-        $this->zimbra_preauth_key = $config->getAppValue("zimbradrive", "preauth_key");
-        $this->use_ssl = $config->getAppValue("zimbradrive", "use_ssl", "true") == "true";
+        $this->zimbra_url = $appSettings->getServerUrl();
+        $this->zimbra_port = $appSettings->getServerPort();
+        $this->zimbra_preauth_key = $appSettings->getZimbraPreauthKey();
+        $this->use_ssl = $appSettings->useSSLDuringZimbraAuthentication();
     }
 
     /**

@@ -20,10 +20,11 @@ use OCA\ZimbraDrive\AppInfo\Application;
 use OCA\ZimbraDrive\Settings\AppSettings;
 
 script(Application::APP_NAME, 'admin');
-
+style(Application::APP_NAME, 'style');
 $urlGenerator = \OC::$server->getURLGenerator();
-$allTestUrl = $urlGenerator->linkToRouteAbsolute('zimbradrive.test.all');
-
+$allTestUrl = $urlGenerator->linkToRoute('zimbradrive.test.all');
+$enableZimbraAuthUrl = $urlGenerator->linkToRoute('zimbradrive.admin_api.enableZimbraAuthentication');
+$disableZimbraAuth = $urlGenerator->linkToRoute('zimbradrive.admin_api.disableZimbraAuthentication');
 ?>
 <div class="section" id="zimbradrive">
     <h2>Zimbra Drive</h2>
@@ -31,6 +32,8 @@ $allTestUrl = $urlGenerator->linkToRouteAbsolute('zimbradrive.test.all');
         <input type="checkbox" class="checkbox" name="use_zimbra_auth" id="use_zimbra_auth"
                value="1" <?php if ($_['use_zimbra_auth']) print_unescaped('checked="checked"'); ?>>
         <label for="use_zimbra_auth"><?php p($l->t('Enable authentication through Zimbra')) ?></label>
+        <p><a href="<?php p($enableZimbraAuthUrl); ?>" class="link_modify_zimbra_auth" id="link_enable_use_zimbra_auth">Link to enable authentication through Zimbra</a></p>
+        <p><a href="<?php p($disableZimbraAuth); ?>" class="link_modify_zimbra_auth" id="link_disable_use_zimbra_auth">Link to disable authentication through Zimbra</a></p>
     </div>
     <div>
         <label for="zimbra_url"><?php p($l->t('Zimbra Server')) ?></label>

@@ -20,64 +20,41 @@
 var documentsSettings = {
   appName: 'zimbradrive',
 
-  save: function (event) {
+  saveUseSslValueFromCheckbox: function (event) {
     var element = $(event.srcElement);
-    var elementName = element.attr('name');
-    var elementValue;
-
-    switch (elementName) {
-      case 'zimbra_url':
-      case 'preauth_key':
-      {
-        documentsSettings.setAppValueFromInputTextElement(element);
-        break;
-      }
-      case 'zimbra_port':
-      {
-        documentsSettings.setAppValueFromInputNumber(element);
-        break;
-      }
-      case 'use_ssl':
-      {
-        elementValue = (element.attr('checked') === 'checked');
-        documentsSettings.setValue(elementName, elementValue);
-        break;
-      }
-
-      case 'check_certs':
-      {
-        elementValue = (element.attr('checked') !== 'checked');
-        documentsSettings.setValue('trust_invalid_certs', elementValue);
-        break;
-      }
-      case 'use_zimbra_auth':
-      {
-        documentsSettings.modifyZimbraAuthentication(element);
-        break;
-      }
-    }
+    var elementValue = (element.attr('checked') === 'checked');
+    documentsSettings.setValue('use_ssl', elementValue);
   },
 
-  setAppValueFromInputTextElement: function (element) {
+  saveCheckCertsFromCheckbox: function (event) {
+    var element = $(event.srcElement);
+    var elementValue = (element.attr('checked') !== 'checked');
+    documentsSettings.setValue('trust_invalid_certs', elementValue);
+  },
+
+  setAppValueFromInputTextElement: function (event) {
+    var element = $(event.srcElement);
     var elementName = element.attr('name');
     var elementValue = element.val();
     documentsSettings.setValue(elementName, elementValue);
   },
 
-  setAppValueFromInputNumber: function (element) {
+  setAppValueFromInputNumber: function (event) {
+    var element = $(event.srcElement);
     var elementName = element.attr('name');
     var elementValue = parseInt(element.val(), 10);
     documentsSettings.setValue(elementName, elementValue);
   },
 
-  modifyZimbraAuthentication: function (element) {
-    var requestUrl = "/index.php/apps/zimbradrive/admin/";
+  modifyZimbraAuthentication: function (event) {
+    var element = $(event.srcElement);
+    var requestUrl;
     if((element.attr('checked') === 'checked'))
     {
-      requestUrl += "EnableZimbraAuthentication";
+      requestUrl = $('#link_enable_use_zimbra_auth').attr('href');
     } else
     {
-      requestUrl += "DisableZimbraAuthentication";
+      requestUrl = $('#link_disable_use_zimbra_auth').attr('href');
     }
     $.post(requestUrl,function(){
       documentsSettings.afterSave()
@@ -117,13 +94,31 @@ var documentsSettings = {
     OC.msg.finishedSuccess('#zimbradrive-admin-msg', t(documentsSettings.appName, 'Settings saved'));
   },
 
+  updateCheckCertsCheckbox: function () {
+    var use_ssl_element = $('#use_ssl');
+    var check_certs_checkbox = $('#check_certs');
+    if((use_ssl_element.attr('checked') === 'checked'))
+    {
+      check_certs_checkbox.removeAttr('disabled');
+    } else
+    {
+      check_certs_checkbox.attr('disabled', 'disabled');
+    }
+  },
+
   initialize: function () {
-    $('#zimbra_url').on('focusout', documentsSettings.save);
-    $('#zimbra_port').on('focusout', documentsSettings.save);
-    $('#use_ssl').on('click', documentsSettings.save);
-    $('#check_certs').on('click', documentsSettings.save);
-    $('#preauth_key').on('focusout', documentsSettings.save);
-    $('#use_zimbra_auth').on('click', documentsSettings.save);
+    $('#zimbra_url').on('focusout', documentsSettings.setAppValueFromInputTextElement);
+    $('#zimbra_port').on('focusout', documentsSettings.setAppValueFromInputNumber);
+
+    var use_ssl_checkbox = $('#use_ssl');
+    use_ssl_checkbox.on('click', documentsSettings.saveUseSslValueFromCheckbox);
+    use_ssl_checkbox.on('click', documentsSettings.updateCheckCertsCheckbox);
+
+    $('#check_certs').on('click', documentsSettings.saveCheckCertsFromCheckbox);
+    $('#preauth_key').on('focusout', documentsSettings.setAppValueFromInputTextElement);
+    $('#use_zimbra_auth').on('click', documentsSettings.modifyZimbraAuthentication);
+
+    documentsSettings.updateCheckCertsCheckbox();
   }
 };
 
