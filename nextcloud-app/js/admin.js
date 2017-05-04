@@ -51,10 +51,10 @@ var documentsSettings = {
     var requestUrl;
     if((element.attr('checked') === 'checked'))
     {
-      requestUrl = $('#link_enable_use_zimbra_auth').attr('href');
+      requestUrl = $('#url_enable_use_zimbra_auth').attr('value');
     } else
     {
-      requestUrl = $('#link_disable_use_zimbra_auth').attr('href');
+      requestUrl = $('#url_disable_use_zimbra_auth').attr('value');
     }
     $.post(requestUrl,function(){
       documentsSettings.afterSave()

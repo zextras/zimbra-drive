@@ -29,11 +29,14 @@ $disableZimbraAuth = $urlGenerator->linkToRoute('zimbradrive.admin_api.disableZi
 <div class="section" id="zimbradrive">
     <h2>Zimbra Drive</h2>
     <div>
+        <p><?php p($l->t('Version: 1.0')) ?></p>
+    </div>
+    <div>
         <input type="checkbox" class="checkbox" name="use_zimbra_auth" id="use_zimbra_auth"
                value="1" <?php if ($_['use_zimbra_auth']) print_unescaped('checked="checked"'); ?>>
         <label for="use_zimbra_auth"><?php p($l->t('Enable authentication through Zimbra')) ?></label>
-        <p><a href="<?php p($enableZimbraAuthUrl); ?>" class="link_modify_zimbra_auth" id="link_enable_use_zimbra_auth">Link to enable authentication through Zimbra</a></p>
-        <p><a href="<?php p($disableZimbraAuth); ?>" class="link_modify_zimbra_auth" id="link_disable_use_zimbra_auth">Link to disable authentication through Zimbra</a></p>
+        <input type="hidden" value="<?php p($enableZimbraAuthUrl); ?>" id="url_enable_use_zimbra_auth">
+        <input type="hidden" value="<?php p($disableZimbraAuth); ?>" id="url_disable_use_zimbra_auth">
     </div>
     <div>
         <label for="zimbra_url"><?php p($l->t('Zimbra Server')) ?></label>
