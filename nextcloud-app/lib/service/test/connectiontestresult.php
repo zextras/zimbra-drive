@@ -16,40 +16,40 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace OCA\ZimbraDrive\Controller;
+namespace OCA\ZimbraDrive\Service\Test;
 
 
-use OCP\AppFramework\ApiController;
-use OCP\IRequest;
-use OCA\ZimbraDrive\Service\LogService;
-use OCP\AppFramework\Http\DataDisplayResponse;
-
-class ConnectivityTestController extends ApiController
+class ConnectionTestResult
 {
-    private $logger;
+    /** @var  bool */
+    private $isConnected;
+    /** @var  string */
+    private $errorMessage;
 
-    public function __construct(
-        $appName,
-        IRequest $request,
-        LogService $logger
-    )
+    /**
+     * ConnectionTestResult constructor.
+     * @param bool $isConnected
+     * @param string $errorMessage
+     */
+    public function __construct($isConnected, $errorMessage)
     {
-        parent::__construct(
-            $appName,
-            $request
-        );
-
-        $this->logger = $logger;
+        $this->isConnected = $isConnected;
+        $this->errorMessage = $errorMessage;
     }
 
     /**
-     * @CORS
-     * @NoCSRFRequired
-     * @PublicPage
+     * @return bool
      */
-    public function connectivityTest()
+    public function isIsConnected()
     {
-        $this->logger->info('connectivityTest');
-        return new DataDisplayResponse("OK");
+        return $this->isConnected;
+    }
+
+    /**
+     * @return string
+     */
+    public function getErrorMessage()
+    {
+        return $this->errorMessage;
     }
 }

@@ -40,6 +40,7 @@ public class ZimbraDriveExtension implements ZalExtension
   private final GetFileHttpHandler mGetFileHttpHdlr;
   private final UploadFileHttpHandler mUploadFileHttpHandler;
   private final CreateTempAttachmentFileHttpHandler mCreateTempAttachmentFileHttpHdlr;
+  private final ConnectivityTest mConnectivityTest;
 
   public ZimbraDriveExtension()
   {
@@ -54,6 +55,7 @@ public class ZimbraDriveExtension implements ZalExtension
 
     mHttpServiceManager = new HttpServiceManager();
     mNcUserZimbraBackendHttpHandler = new NcUserZimbraBackendHttpHandler(backendUtils);
+    mConnectivityTest = new ConnectivityTest();
     mUploadFileHttpHandler = new UploadFileHttpHandler(backendUtils, driveProxy);
     mGetFileHttpHdlr = new GetFileHttpHandler(cloudUtils, backendUtils);
     mCreateTempAttachmentFileHttpHdlr = new CreateTempAttachmentFileHttpHandler(cloudUtils, backendUtils);
@@ -84,6 +86,7 @@ public class ZimbraDriveExtension implements ZalExtension
     {
       mSoapServiceManager.register(mNcSoapService);
       mHttpServiceManager.registerHandler(mNcUserZimbraBackendHttpHandler);
+      mHttpServiceManager.registerHandler(mConnectivityTest);
       mHttpServiceManager.registerHandler(mGetFileHttpHdlr);
       mHttpServiceManager.registerHandler(mUploadFileHttpHandler);
       mHttpServiceManager.registerHandler(mCreateTempAttachmentFileHttpHdlr);
@@ -101,6 +104,7 @@ public class ZimbraDriveExtension implements ZalExtension
   {
     mSoapServiceManager.unregister(mNcSoapService);
     mHttpServiceManager.unregisterHandler(mNcUserZimbraBackendHttpHandler);
+    mHttpServiceManager.unregisterHandler(mConnectivityTest);
     mHttpServiceManager.unregisterHandler(mGetFileHttpHdlr);
     mHttpServiceManager.unregisterHandler(mUploadFileHttpHandler);
     mHttpServiceManager.unregisterHandler(mCreateTempAttachmentFileHttpHdlr);
