@@ -29,6 +29,8 @@ class AppSettings
     const USE_SSL = "use_ssl";
     const TRUST_INVALID_CERTS = "trust_invalid_certs";
     const PREAUTH_KEY = "preauth_key";
+    const ALLOW_ZIMBRA_USERS_LOGIN = "allow_zimbra_users_login";
+    const ENABLE_ZIMBRA_USERS = "enable_zimbra_users";
 
     /** @var IConfig */
     private $config;
@@ -67,6 +69,11 @@ class AppSettings
     public function getZimbraPreauthKey()
     {
         return $this->config->getAppValue(Application::APP_NAME, self::PREAUTH_KEY);
+    }
+
+    public function allowZimbraUsersLogin()
+    {
+        return $this->config->getAppValue(Application::APP_NAME, self::ALLOW_ZIMBRA_USERS_LOGIN, 'false') === 'true';
     }
 
 }

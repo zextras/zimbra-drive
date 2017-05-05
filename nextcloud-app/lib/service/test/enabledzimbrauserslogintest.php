@@ -20,21 +20,24 @@ namespace OCA\ZimbraDrive\Service\Test;
 
 
 use OCA\ZimbraDrive\Controller\AdminApiController;
+use OCA\ZimbraDrive\Service\LogService;
+use OCA\ZimbraDrive\Settings\AppSettings;
 use OCP\IConfig;
 
-class EnabledConfigurationTest implements Test
+class EnabledZimbraUsersLoginTest implements Test
 {
-    /**
-     * @var IConfig
-     */
-    private $config;
+    private $appSettings;
+    private $logger;
 
     /**
-     * @param IConfig $config
+     * @param LogService $logger
+     * @param AppSettings $appSettings
+     * @internal param IConfig $config
      */
-    public function __construct(IConfig $config)
+    public function __construct(LogService $logger, AppSettings $appSettings)
     {
-        $this->config = $config;
+        $this->logger = $logger;
+        $this->appSettings = $appSettings;
     }
 
     /**
@@ -42,7 +45,8 @@ class EnabledConfigurationTest implements Test
      */
     public function run()
     {
-        if($this->isZimbraDriveAuthenticationEnabled())
+        $allowZimbraUsersLogin = $this->appSettings->allowZimbraUsersLogin();
+        if($allowZimbraUsersLogin)
         {
             $message = "Zimbra Drive authentication is enabled.";
             return new TestOk($this->name(), $message);
@@ -58,23 +62,6 @@ class EnabledConfigurationTest implements Test
      */
     public function name()
     {
-        return "Enabled configuration test";
-    }
-
-    public function isZimbraDriveAuthenticationEnabled()
-    {
-        $isZimbraDriveAuthenticationEnabled = false;
-
-        $userBackEnds = $this->config->getSystemValue(AdminApiController::USER_BACKEND_VAR_NAME, array());
-
-        foreach($userBackEnds as $userBackEnd)
-        {
-            if($userBackEnd['class'] === AdminApiController::ZIMBRA_USER_BACKEND_CLASS_VALUE)
-            {
-                $isZimbraDriveAuthenticationEnabled = true;
-            }
-        }
-
-        return $isZimbraDriveAuthenticationEnabled;
+        return "Enabled Zimbra's user login";
     }
 }

@@ -23,8 +23,8 @@ script(Application::APP_NAME, 'admin');
 style(Application::APP_NAME, 'style');
 $urlGenerator = \OC::$server->getURLGenerator();
 $allTestUrl = $urlGenerator->linkToRoute('zimbradrive.test.all');
-$enableZimbraAuthUrl = $urlGenerator->linkToRoute('zimbradrive.admin_api.enableZimbraAuthentication');
-$disableZimbraAuth = $urlGenerator->linkToRoute('zimbradrive.admin_api.disableZimbraAuthentication');
+$enableZimbraUsersUrl = $urlGenerator->linkToRoute('zimbradrive.admin_api.enableZimbraAuthentication');
+$disableZimbraUsersUrl = $urlGenerator->linkToRoute('zimbradrive.admin_api.disableZimbraAuthentication');
 ?>
 <div class="section" id="zimbradrive">
     <h2>Zimbra Drive</h2>
@@ -32,24 +32,29 @@ $disableZimbraAuth = $urlGenerator->linkToRoute('zimbradrive.admin_api.disableZi
         <p><?php p($l->t('Version: 1.0')) ?></p>
     </div>
     <div>
-        <input type="checkbox" class="checkbox" name="use_zimbra_auth" id="use_zimbra_auth"
-               value="1" <?php if ($_['use_zimbra_auth']) print_unescaped('checked="checked"'); ?>>
-        <label for="use_zimbra_auth"><?php p($l->t('Enable authentication through Zimbra')) ?></label>
-        <input type="hidden" value="<?php p($enableZimbraAuthUrl); ?>" id="url_enable_use_zimbra_auth">
-        <input type="hidden" value="<?php p($disableZimbraAuth); ?>" id="url_disable_use_zimbra_auth">
+        <input type="checkbox" class="checkbox" name="<?php print(AppSettings::ENABLE_ZIMBRA_USERS);?>" id="<?php print(AppSettings::ENABLE_ZIMBRA_USERS);?>"
+               value="1" <?php if ($_[AppSettings::ENABLE_ZIMBRA_USERS]) print_unescaped('checked="checked"'); ?>>
+        <label for="<?php print(AppSettings::ENABLE_ZIMBRA_USERS);?>"><?php p($l->t('Enable Zimbra users')) ?></label>
+        <input type="hidden" value="<?php p($enableZimbraUsersUrl); ?>" id="url_enable_zimbra_users">
+        <input type="hidden" value="<?php p($disableZimbraUsersUrl); ?>" id="url_disable_zimbra_users">
     </div>
     <div>
-        <label for="zimbra_url"><?php p($l->t('Zimbra Server')) ?></label>
-        <input type="text" name="zimbra_url" id="zimbra_url" value="<?php p($_[AppSettings::ZIMBRA_URL]) ?>">
+        <input type="checkbox" class="checkbox" name="<?php print(AppSettings::ALLOW_ZIMBRA_USERS_LOGIN);?>" id="<?php print(AppSettings::ALLOW_ZIMBRA_USERS_LOGIN);?>"
+               value="1" <?php if ($_[AppSettings::ALLOW_ZIMBRA_USERS_LOGIN]) print_unescaped('checked="checked"'); ?>>
+        <label for="<?php print(AppSettings::ALLOW_ZIMBRA_USERS_LOGIN);?>"><?php p($l->t('Allow login to Zimbra\'s users')) ?></label>
     </div>
     <div>
-        <label for="zimbra_port"><?php p($l->t('Zimbra Port')) ?></label>
-        <input type="number" name="zimbra_port" id="zimbra_port" value="<?php p($_[AppSettings::ZIMBRA_PORT]) ?>">
+        <label for="<?php print(AppSettings::ZIMBRA_URL);?>"><?php p($l->t('Zimbra Server')) ?></label>
+        <input type="text" name="<?php print(AppSettings::ZIMBRA_URL);?>" id="<?php print(AppSettings::ZIMBRA_URL);?>" value="<?php p($_[AppSettings::ZIMBRA_URL]) ?>">
     </div>
     <div>
-        <input type="checkbox" class="checkbox" name="use_ssl" id="use_ssl"
+        <label for="<?php print(AppSettings::ZIMBRA_PORT);?>"><?php p($l->t('Zimbra Port')) ?></label>
+        <input type="number" name="<?php print(AppSettings::ZIMBRA_PORT);?>" id="<?php print(AppSettings::ZIMBRA_PORT);?>" value="<?php p($_[AppSettings::ZIMBRA_PORT]) ?>">
+    </div>
+    <div>
+        <input type="checkbox" class="checkbox" name="<?php print(AppSettings::USE_SSL);?>" id="<?php print(AppSettings::USE_SSL);?>"
            value="1" <?php if ($_[AppSettings::USE_SSL]) print_unescaped('checked="checked"'); ?>>
-        <label for="use_ssl"><?php p($l->t('Use SSL')) ?></label>
+        <label for="<?php print(AppSettings::USE_SSL);?>"><?php p($l->t('Use SSL')) ?></label>
     </div>
     <div>
         <input type="checkbox" class="checkbox" name="check_certs" id="check_certs"
@@ -57,8 +62,8 @@ $disableZimbraAuth = $urlGenerator->linkToRoute('zimbradrive.admin_api.disableZi
         <label for="check_certs"><?php p($l->t('Enable certificate verification')) ?></label>
     </div>
     <div>
-        <label for="preauth_key"><?php p($l->t('Domain Preauth Key')) ?></label>
-        <input type="text" name="preauth_key" id="preauth_key" value="<?php p($_[AppSettings::PREAUTH_KEY]) ?>">
+        <label for="<?php print(AppSettings::PREAUTH_KEY);?>"><?php p($l->t('Domain Preauth Key')) ?></label>
+        <input type="text" name="<?php print(AppSettings::PREAUTH_KEY);?>" id="<?php print(AppSettings::PREAUTH_KEY);?>" value="<?php p($_[AppSettings::PREAUTH_KEY]) ?>">
     </div>
     <div>
         <a href="<?php p($allTestUrl); ?>">Link to test page</a>

@@ -103,6 +103,7 @@ class ZimbraAuthenticationServiceConnectionTest implements Test
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 2);
         }
 
+        $raw_response = curl_exec($ch);
         $response_info = curl_getinfo($ch);
         $http_code = $response_info["http_code"];
 
@@ -122,7 +123,7 @@ class ZimbraAuthenticationServiceConnectionTest implements Test
                 $error_message = 'ssl verify result: ' . $ssl_message;
             } else
             {
-                $error_message = 'response http code: '. $http_code;
+                $error_message = 'response http code: '. $http_code . '; url = ' . $url;
             };
             $message = "Impossible to connect to Zimbra ( " . $error_message . " )";
         }

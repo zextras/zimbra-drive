@@ -19,7 +19,8 @@
 namespace OCA\ZimbraDrive\Controller;
 
 
-use OCA\ZimbraDrive\Service\Test\EnabledConfigurationTest;
+use OCA\ZimbraDrive\Service\Test\EnabledZimbraUsersLoginTest;
+use OCA\ZimbraDrive\Service\Test\EnabledZimbraUsersTest;
 use OCA\ZimbraDrive\Service\Test\IsServerPortSetTest;
 use OCA\ZimbraDrive\Service\Test\IsServerUrlSetTest;
 use OCA\ZimbraDrive\Service\Test\Test;
@@ -44,12 +45,13 @@ class TestController extends ApiController
         IRequest $request,
         LogService $logger,
         CloudConnectivityTest $cloudConnectivityTest,
-        EnabledConfigurationTest $enabledConfigurationTest,
+        EnabledZimbraUsersTest $enabledZimbraUsersTest,
         IsServerUrlSetTest $isServerUrlSetTest,
         IsServerPortSetTest $isServerPortSetTest,
         ZimbraHostConnectionTest $zimbraConnectionTest,
         ZimbraAuthenticationServiceConnectionTest $zimbraAuthenticationServiceConnectionTest,
-        ZimbraDriveExtensionConnectivityTest $zimbradriveExtensionConnectivityTest
+        ZimbraDriveExtensionConnectivityTest $zimbraDriveExtensionConnectivityTest,
+        EnabledZimbraUsersLoginTest $enabledZimbraUsersLoginTest
     )
     {
         parent::__construct(
@@ -61,12 +63,13 @@ class TestController extends ApiController
 
         $this->tests = array(
             $cloudConnectivityTest,
-            $enabledConfigurationTest,
+            $enabledZimbraUsersTest,
+            $enabledZimbraUsersLoginTest,
             $isServerUrlSetTest,
             $isServerPortSetTest,
             $zimbraConnectionTest,
             $zimbraAuthenticationServiceConnectionTest,
-            $zimbradriveExtensionConnectivityTest
+            $zimbraDriveExtensionConnectivityTest
         );
     }
 

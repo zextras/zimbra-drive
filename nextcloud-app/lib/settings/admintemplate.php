@@ -69,7 +69,8 @@ class AdminTemplate
                 AppSettings::USE_SSL => $this->appConfig->useSSLDuringZimbraAuthentication(),
                 AppSettings::TRUST_INVALID_CERTS => $this->appConfig->trustInvalidCertificatesDuringZimbraAuthentication(),
                 AppSettings::PREAUTH_KEY => $this->appConfig->getZimbraPreauthKey(),
-                "use_zimbra_auth" => $isUserBackEndOC_User_ZimbraDefined,
+                AppSettings::ENABLE_ZIMBRA_USERS => $isUserBackEndOC_User_ZimbraDefined,
+                AppSettings::ALLOW_ZIMBRA_USERS_LOGIN => $this->appConfig->allowZimbraUsersLogin()
             ],
             'blank'
         );

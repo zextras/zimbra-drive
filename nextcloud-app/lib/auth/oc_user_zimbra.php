@@ -31,6 +31,7 @@ class OC_User_Zimbra extends \OC_User_Backend
     private $url;
     private $userManager;
     private $groupManager;
+    private $allow_zimbra_users_login;
 
     public function __construct()
     {
@@ -47,6 +48,7 @@ class OC_User_Zimbra extends \OC_User_Backend
         $this->zimbra_port = $appSettings->getServerPort();
         $this->use_ssl = $appSettings->useSSLDuringZimbraAuthentication();
         $this->trust_invalid_certs = $appSettings->trustInvalidCertificatesDuringZimbraAuthentication();
+        $this->allow_zimbra_users_login = $appSettings->allowZimbraUsersLogin();
 
         $this->url = sprintf(
             "%s://%s:%s/service/extension/ZimbraDrive_NcUserZimbraBackend",
@@ -69,6 +71,11 @@ class OC_User_Zimbra extends \OC_User_Backend
      */
     public function checkPassword($uid, $password)
     {
+        if(!$this->allow_zimbra_users_login)
+        {
+            return false;
+        }
+
         $fields = array(
             "username" => $uid,
             "password" => $password

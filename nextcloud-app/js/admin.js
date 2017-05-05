@@ -46,15 +46,15 @@ var documentsSettings = {
     documentsSettings.setValue(elementName, elementValue);
   },
 
-  modifyZimbraAuthentication: function (event) {
+  saveEnableZimbraUsersValueFromCheckbox: function (event) {
     var element = $(event.srcElement);
     var requestUrl;
     if((element.attr('checked') === 'checked'))
     {
-      requestUrl = $('#url_enable_use_zimbra_auth').attr('value');
+      requestUrl = $('#url_enable_zimbra_users').attr('value');
     } else
     {
-      requestUrl = $('#url_disable_use_zimbra_auth').attr('value');
+      requestUrl = $('#url_disable_zimbra_users').attr('value');
     }
     $.post(requestUrl,function(){
       documentsSettings.afterSave()
@@ -106,6 +106,12 @@ var documentsSettings = {
     }
   },
 
+  saveAllowZimbraUsersLoginValueFromCheckbox: function () {
+    var element = $(event.srcElement);
+    var elementValue = (element.attr('checked') === 'checked');
+    documentsSettings.setValue('allow_zimbra_users_login', elementValue);
+  },
+
   initialize: function () {
     $('#zimbra_url').on('focusout', documentsSettings.setAppValueFromInputTextElement);
     $('#zimbra_port').on('focusout', documentsSettings.setAppValueFromInputNumber);
@@ -116,7 +122,8 @@ var documentsSettings = {
 
     $('#check_certs').on('click', documentsSettings.saveCheckCertsFromCheckbox);
     $('#preauth_key').on('focusout', documentsSettings.setAppValueFromInputTextElement);
-    $('#use_zimbra_auth').on('click', documentsSettings.modifyZimbraAuthentication);
+    $('#enable_zimbra_users').on('click', documentsSettings.saveEnableZimbraUsersValueFromCheckbox);
+    $('#allow_zimbra_users_login').on('click', documentsSettings.saveAllowZimbraUsersLoginValueFromCheckbox);
 
     documentsSettings.updateCheckCertsCheckbox();
   }

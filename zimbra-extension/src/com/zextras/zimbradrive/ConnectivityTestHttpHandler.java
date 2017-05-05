@@ -25,7 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-public class ConnectivityTest implements HttpHandler
+public class ConnectivityTestHttpHandler implements HttpHandler
 {
 
   @Override
@@ -47,7 +47,7 @@ public class ConnectivityTest implements HttpHandler
     }
   }
 
-    @Override
+  @Override
   public void doOptions(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException
   {
     throw new RuntimeException();
