@@ -1,12 +1,12 @@
 \section{Cloud app upgrade}
 Unlike Zimlet and Extension, the Zimbra Drive Cloud app has to be manually upgraded on every version change.
 
-The upgrade of Zimbra Drive App in NextCloud/OwnCloud requires that files are just replaced.
-Perform the steps as installation(\ref{subsec:nextcloudOwncloudInstallation}):
+The upgrade of Zimbra Drive App in Nextcloud/ownCloud requires that files are just replaced.
+Perform the steps as installation(\ref{subsec:NextcloudownCloudInstallation}):
     \begin{enumerate}
-        \item Copy \texttt{zimbradrive.tar.gz} in Owncloud/Nextcloud drive\\ \\
+        \item Copy \texttt{zimbradrive.tar.gz} in Nextcloud/ownCloud drive\\ \\
         \texttt{scp zimbradrive.tar.gz root@cloud:/tmp}\\
-        \item Extract \texttt{zimbradrive.tar.gz} in Nextcloud drive in \texttt{PATH\textunderscore TO\textunderscore CLOUD/apps}\\ \\
+        \item Extract \texttt{zimbradrive.tar.gz} in Nextcloud/ownCloud drive in \texttt{PATH\textunderscore TO\textunderscore CLOUD/apps}\\ \\
         \texttt{tar -xvzf zimbradrive.tar.gz -C \texttt{PATH\textunderscore TO\textunderscore CLOUD/apps}/apps}\\
         \item Change permissions of the extracted folder \texttt{PATH\textunderscore TO\textunderscore CLOUD/apps/zimbradrive}\\ \\
         \texttt{chown -R root:www-data \texttt{PATH\textunderscore TO\textunderscore CLOUD}/apps/zimbradrive/}\\

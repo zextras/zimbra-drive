@@ -24,8 +24,8 @@ str="Initialized extension Zimbra Abstraction Layer for: zimbradrive";
 grep "${str}" /opt/zimbra/log/mailbox.log | tail -n 1;
     \end{verbatim}
 
-    The last step consists to configure the domain attribute zimbraDriveOwnCloudURL with the nextcloud url.
-    
+    At last, the domain attribute zimbraDriveOwnCloudURL must be configured with the cloud url.
+
     \begin{verbatim}
 # As zimbra
 zmprov md domainExample.com zimbraDriveOwnCloudURL "https://cloudUrl"
