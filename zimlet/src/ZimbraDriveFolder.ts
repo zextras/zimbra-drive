@@ -101,7 +101,7 @@ export class ZimbraDriveFolder extends ZmFolder {
     // return this.path.substring(0, this.path.length - 1);
 
     // get path and remove root folder name Drive
-    let completePath: string = super.getPath().replace("Drive", "");
+    let completePath: string = super.getPath(false, false, null, true).replace("Drive", "");
     if (needLastSlash) {
       completePath += "/";
     }

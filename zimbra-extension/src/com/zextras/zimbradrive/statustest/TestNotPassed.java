@@ -14,3 +14,12 @@
  * You should have received a copy of the GNU General Public License.
  * If not, see <http://www.gnu.org/licenses/>.
  */
+
+package com.zextras.zimbradrive.statustest;
+
+public class TestNotPassed extends TestResult {
+  public TestNotPassed(String testName, String message)
+  {
+    super(testName, false, message);
+  }
+}

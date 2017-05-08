@@ -1,4 +1,5 @@
-/*
+<?php
+/**
  * Copyright (C) 2017 ZeXtras S.r.l.
  *
  * This program is free software; you can redistribute it and/or
@@ -14,3 +15,19 @@
  * You should have received a copy of the GNU General Public License.
  * If not, see <http://www.gnu.org/licenses/>.
  */
+
+namespace OCA\ZimbraDrive\Service\Test;
+
+
+class TestKo extends TestResult
+{
+
+    /**
+     * @param string $testName
+     * @param string $message
+     */
+    public function __construct($testName, $message = '')
+    {
+        parent::__construct($testName,false, $message);
+    }
+}

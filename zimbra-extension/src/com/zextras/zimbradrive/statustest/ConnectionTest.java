@@ -14,3 +14,12 @@
  * You should have received a copy of the GNU General Public License.
  * If not, see <http://www.gnu.org/licenses/>.
  */
+
+package com.zextras.zimbradrive.statustest;
+
+import java.net.URL;
+
+public interface ConnectionTest {
+  TestResult runOnTarget(URL cloudDomainUrl);
+  String getName();
+}

@@ -16,6 +16,9 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
+use OCA\ZimbraDrive\AppInfo\Application;
+use \OCA\ZimbraDrive\Settings\AppSettings;
+
 class OC_User_Zimbra extends \OC_User_Backend
 {
     const ZIMBRA_GROUP = "zimbra";
@@ -28,6 +31,7 @@ class OC_User_Zimbra extends \OC_User_Backend
     private $url;
     private $userManager;
     private $groupManager;
+    private $allow_zimbra_users_login;
 
     public function __construct()
     {
@@ -38,10 +42,13 @@ class OC_User_Zimbra extends \OC_User_Backend
         $this->userManager = $server->getUserManager();
         $this->groupManager = $server->getGroupManager();
 
-        $this->zimbra_url = $this->config->getAppValue("zimbradrive", "zimbra_url");
-        $this->zimbra_port = $this->config->getAppValue("zimbradrive", "zimbra_port");
-        $this->use_ssl = $this->config->getAppValue("zimbradrive", "use_ssl", "true") == "true";
-        $this->trust_invalid_certs = $this->config->getAppValue("zimbradrive", "trust_invalid_certs", "false") == "true";
+        $appSettings = new AppSettings($this->config);
+
+        $this->zimbra_url =$appSettings->getServerUrl();
+        $this->zimbra_port = $appSettings->getServerPort();
+        $this->use_ssl = $appSettings->useSSLDuringZimbraAuthentication();
+        $this->trust_invalid_certs = $appSettings->trustInvalidCertificatesDuringZimbraAuthentication();
+        $this->allow_zimbra_users_login = $appSettings->allowZimbraUsersLogin();
 
         $this->url = sprintf(
             "%s://%s:%s/service/extension/ZimbraDrive_NcUserZimbraBackend",
@@ -64,6 +71,11 @@ class OC_User_Zimbra extends \OC_User_Backend
      */
     public function checkPassword($uid, $password)
     {
+        if(!$this->allow_zimbra_users_login)
+        {
+            return false;
+        }
+
         $fields = array(
             "username" => $uid,
             "password" => $password
@@ -81,15 +93,15 @@ class OC_User_Zimbra extends \OC_User_Backend
 
         //set the url, number of POST vars, POST data
         curl_setopt($ch, CURLOPT_URL, $this->url);
-        curl_setopt($ch, CURLOPT_POST, count($fields));
+        curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $fields_string);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
         if ($this->trust_invalid_certs) {
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
         } else {
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, TRUE);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, TRUE);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 2);
         }
 
         //execute post
@@ -100,7 +112,7 @@ class OC_User_Zimbra extends \OC_User_Backend
         //close connection
         curl_close($ch);
 
-        if ($http_code == "200") {
+        if ($http_code === 200) {
             $response = json_decode($raw_response);
             $userId = $response->{'accountId'};
             $userDisplayName = $response->{'displayName'};
@@ -126,7 +138,7 @@ class OC_User_Zimbra extends \OC_User_Backend
      */
     private function initializeUser($userId, $userDisplayName)
     {
-        $this->logger->info('Initialize user ' . $userId . '.', ['app' => 'zimbradriveAuth']);
+        $this->logger->debug('Initialize user ' . $userId . '.', ['app' => Application::APP_NAME]);
         $this->storeUser(
             $userId,
             $userDisplayName
@@ -198,6 +210,9 @@ class OC_User_Zimbra extends \OC_User_Backend
     /**
      * Get a list of all display names and user ids.
      *
+     * @param string $search
+     * @param null $limit
+     * @param null $offset
      * @return array with all displayNames (value) and the corresponding uids (key)
      */
     public function getDisplayNames($search = '', $limit = null, $offset = null)
@@ -224,6 +239,9 @@ class OC_User_Zimbra extends \OC_User_Backend
     /**
      * Get a list of all users
      *
+     * @param string $search
+     * @param null $limit
+     * @param null $offset
      * @return array with all uids
      */
     public function getUsers($search = '', $limit = null, $offset = null)

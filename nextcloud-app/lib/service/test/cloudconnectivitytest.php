@@ -1,4 +1,5 @@
-/*
+<?php
+/**
  * Copyright (C) 2017 ZeXtras S.r.l.
  *
  * This program is free software; you can redistribute it and/or
@@ -14,3 +15,26 @@
  * You should have received a copy of the GNU General Public License.
  * If not, see <http://www.gnu.org/licenses/>.
  */
+
+namespace OCA\ZimbraDrive\Service\Test;
+
+
+class CloudConnectivityTest implements Test
+{
+    /**
+     * @return TestResult
+     */
+    public function run()
+    {
+        $message = "Zimbra Drive app is installed.";
+        return new TestOk($this->getName(), $message);
+    }
+
+    /**
+     * @return string
+     */
+    public function getName()
+    {
+        return "Zimbra Drive app installation test";
+    }
+}

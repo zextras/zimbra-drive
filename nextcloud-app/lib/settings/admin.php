@@ -18,6 +18,7 @@
 
 namespace OCA\ZimbraDrive\Settings;
 
+use OCA\ZimbraDrive\AppInfo\Application;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\IConfig;
 use OCP\Settings\ISettings;
@@ -40,18 +41,10 @@ class Admin implements ISettings
      */
     public function getForm()
     {
-        return new TemplateResponse(
-            'zimbradrive',
-            'admin',
-            [
-                "zimbra_url" => $this->config->getAppValue('zimbradrive', 'zimbra_url'),
-                "zimbra_port" => $this->config->getAppValue('zimbradrive', 'zimbra_port'),
-                "use_ssl" => $this->config->getAppValue('zimbradrive', 'use_ssl', 'true') == 'true',
-                "trust_invalid_certs" => $this->config->getAppValue('zimbradrive', 'trust_invalid_certs', 'false') == 'true',
-                "preauth_key" => $this->config->getAppValue('zimbradrive', 'preauth_key'),
-            ],
-            'blank'
-        );
+        $appSettings = new AppSettings($this->config);
+        $adminTemplate = new AdminTemplate($this->config, $appSettings);
+        $template = $adminTemplate->getTemplate();
+        return $template;
     }
 
     /**

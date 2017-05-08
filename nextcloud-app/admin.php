@@ -1,4 +1,5 @@
-/*
+<?php
+/**
  * Copyright (C) 2017 ZeXtras S.r.l.
  *
  * This program is free software; you can redistribute it and/or
@@ -14,3 +15,19 @@
  * You should have received a copy of the GNU General Public License.
  * If not, see <http://www.gnu.org/licenses/>.
  */
+
+//File created to display admin's configuration on ownCloud 9.0
+namespace OCA\ZimbraDrive;
+
+use OCA\ZimbraDrive\Settings\AdminTemplate;
+use OCA\ZimbraDrive\Settings\AppSettings;
+
+$server = \OC::$server;
+$config = $server->getConfig();
+
+$appSettings = new AppSettings($config);
+$adminTemplate = new AdminTemplate($config, $appSettings);
+$template = $adminTemplate->getTemplate();
+
+return $template->render();
+
