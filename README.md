@@ -4,7 +4,14 @@ Zimbra Drive
 Zimbra and NextCloud integration.
 
 Features:
-- Use Zimbra credentials in NextCloud
+- Use Zimbra credentials in NextCloud / OwnCloud.
+- Navigate NextCloud / OwnCloud files inside Zimbra.
+- Manage NextCloud / OwnCloud files inside Zimbra (Move, Rename).
+- Attach NextCloud / OwnCloud files to email.
+
+Supported Versions:
+- NextCloud: 10+
+- OwnCloud: 9+
 
 ## Installation
 
