@@ -1,3 +1,24 @@
 \section{Cloud app upgrade}
-Unlike Zimlet and Extension, the Zimbra Drive Cloud app has to be upgraded manually on every version change.
-% TODO
+Unlike Zimlet and Extension, the Zimbra Drive Cloud app has to be manually upgraded on every version change.
+
+The upgrade of Zimbra Drive App in NextCloud/OwnCloud requires that files are just replaced.
+Perform the steps as installation(\ref{subsec:nextcloudOwncloudInstallation}):
+    \begin{enumerate}
+        \item Copy \texttt{zimbradrive.tar.gz} in Owncloud/Nextcloud drive\\ \\
+        \texttt{scp zimbradrive.tar.gz root@cloud:/tmp}\\
+        \item Extract \texttt{zimbradrive.tar.gz} in Nextcloud drive in \texttt{PATH\textunderscore TO\textunderscore CLOUD/apps}\\ \\
+        \texttt{tar -xvzf zimbradrive.tar.gz -C \texttt{PATH\textunderscore TO\textunderscore CLOUD/apps}/apps}\\
+        \item Change permissions of the extracted folder \texttt{PATH\textunderscore TO\textunderscore CLOUD/apps/zimbradrive}\\ \\
+        \texttt{chown -R root:www-data \texttt{PATH\textunderscore TO\textunderscore CLOUD}/apps/zimbradrive/}\\
+%        \item Enable Zimbra Drive App from Admin Interface or with command% (replace PATH\textunderscore CLOUD)
+%        \\ \\
+%        \texttt{sudo -u www-data php \texttt{PATH\textunderscore TO\textunderscore CLOUD}/occ app:enable zimbradrive}
+    \end{enumerate}
+
+\subsection{Cloud platform change}
+The cloud platform can be set with the domain attribute zimbraDriveOwnCloudURL.\\
+Zimbra Drive Cloud App must be installed in the new cloud platform.
+\begin{verbatim}
+# As zimbra
+zmprov md domainExample.com zimbraDriveOwnCloudURL "https://newCloudUrl"
+\end{verbatim}

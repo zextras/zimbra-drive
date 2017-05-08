@@ -1,41 +1,41 @@
 \section{Zimbra packages installation}
 
 \begin{warning}
-    The Zimbra Drive Zimlet and Extension are already installed in the default Zimbra installation
-    starting from Zimbra 8.7.6. Only Extension needs the domain attribute zimbraDriveOwnCloudURL configuration.
+The Zimbra Drive Extension and Zimlet are already installed in the default Zimbra installation
+starting from Zimbra 8.7.6. However Zimbra Drive Extension requires the configuration of the domain attribute zimbraDriveOwnCloudURL.
 \end{warning}
 In this section is described how to manually install the Zimbra Drive Extension and the Zimbra Drive Zimlet.
-    \subsection{Extension}
-    First of all copy the file zimbradrive-extension.jar and zal.jar in the right place;
+\subsection{Extension}
+    The files zimbradrive-extension.jar and zal.jar must be copied in the right place;
     then a mailbox restart is required to load the extension.
     \begin{verbatim}
-    # As root
-    mkdir -p /opt/zimbra/lib/ext/zimbradrive
-    cp zimbradrive-extension.jar /opt/zimbra/lib/ext/zimbradrive/
-    cp zal.jar /opt/zimbra/lib/ext/zimbradrive/
-    
-    # As zimbra
-    mailboxdctl restart
+# As root
+mkdir -p /opt/zimbra/lib/ext/zimbradrive
+cp zimbradrive-extension.jar /opt/zimbra/lib/ext/zimbradrive/
+cp zal.jar /opt/zimbra/lib/ext/zimbradrive/
+
+# As zimbra
+mailboxdctl restart
     \end{verbatim}
-    Everything is successfully done if extension start correctly. In order to verify it check in the mailbox.log;
-    for example the following command must match with the last mailbox restart:
+    Everything is successfully done if extension start correctly and it can be verified in mailbox.log.
+    For example the following command must match with the last mailbox restart:
     \begin{verbatim}
-    str="Initialized extension Zimbra Abstraction Layer for: zimbradrive";
-    grep "${str}" /opt/zimbra/log/mailbox.log | tail -n 1;
+str="Initialized extension Zimbra Abstraction Layer for: zimbradrive";
+grep "${str}" /opt/zimbra/log/mailbox.log | tail -n 1;
     \end{verbatim}
 
-    At the end configure the domain attribute zimbraDriveOwnCloudURL with the nextcloud url.
+    The last step consists to configure the domain attribute zimbraDriveOwnCloudURL with the nextcloud url.
     
     \begin{verbatim}
-    # As zimbra
-    zmprov md domainExample.com zimbraDriveOwnCloudURL "https://cloudUrl"
+# As zimbra
+zmprov md domainExample.com zimbraDriveOwnCloudURL "https://cloudUrl"
     \end{verbatim}
 
-    \subsection{Zimlet}
+\subsection{Zimlet}
     Deploy the zimlet with the following command:
     \begin{verbatim}
-    # As zimbra
-    zmzimletctl deploy /tmp/openchat/com_zextras_drive_open.zip
+# As zimbra
+zmzimletctl deploy /tmp/openchat/com_zextras_drive_open.zip
     \end{verbatim}
     By default the zimlet is enabled for the `default` COS.
     Enable the zimlet on the required COSes from the administration console.

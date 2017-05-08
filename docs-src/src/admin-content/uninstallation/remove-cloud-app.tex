@@ -1,1 +1,15 @@
 \section{Remove Cloud app}
+\subsection{NextCloud/OwnCloud}\label{subsec:nextcloudOwncloudUninstallation}
+    In NextCloud/OwnCloud platform, the Zimbra Drive App can be removed from the Nextcloud/Owncloud Admin Interface:
+    it must be disabled from the "Enabled Apps" tab and then uninstalled from the "Disabled Apps".
+    
+    With the previous steps, the Zimbra Drive App folder ( \texttt{PATH\textunderscore TO\textunderscore CLOUD/apps/zimbradrive})
+    is deleted but all the users files still remains in the cloud service drive.//
+    NextCloud/Owncloud can be completely cleaned up with the following commands:
+
+    \begin{verbatim}
+###
+SQL > SELECT * FROM oc_zimbradrive_users;
+for (user in previous output) {add user; delete user;}
+###
+    \end{verbatim}

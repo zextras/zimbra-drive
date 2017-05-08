@@ -1,21 +1,52 @@
 \input{build/variables}
 
+\newcommand\dangersign[1][3ex]{
+  \renewcommand\stacktype{L}
+  \scaleto{\stackon[.8pt]{\color{red}$\triangle$}{\tiny\bfseries !}}{#1}
+}
+\newcommand\infosign[1][3ex]{
+  \renewcommand\stacktype{L}
+  \scaleto{\stackon[-1.5pt]{\scalebox{.3}{\bfseries i}}{\color{blue}$\circ$}}{#1}
+}
+
+\newcommand{\ccbyncsa}{
+  \begingroup
+  \normalfont
+  \includegraphics[height=\fontcharht\font`\B]{template/cc-by-nc-sa.png}
+  \endgroup
+}
+
 \newenvironment{warning}
 {
     \par
-    \begin{mdframed}[linewidth=0.5pt,linecolor=black]
     \begin{list}{}{
-        \leftmargin=1cm
+        \leftmargin=5ex
         \labelwidth=
         \leftmargin
     }
     \item[
-        \Large\ding{43}
+        \dangersign
     ]
 }
 {
     \end{list}
-    \end{mdframed}
+    \par
+}
+
+\newenvironment{info}
+{
+    \par
+    \begin{list}{}{
+        \leftmargin=5ex
+        \labelwidth=
+        \leftmargin
+    }
+    \item[
+        \infosign
+    ]
+}
+{
+    \end{list}
     \par
 }
 
@@ -24,10 +55,11 @@ Excuse
 "are weird"
 "does not like simple things"
 "like to compile things, also documentation papers"
-"dosen't want to"
+"doesn't want to"
 "want to write showy functions"
 "can live eating only pizza"
 "eat weird things"
+"developers shouldn't be allowed to take decisions during the Ballmer Peak"
 \end{filecontents*}
 
 \DTLloadrawdb[keys={Excuse}]{excusesToUseLatex}{excuses.txt} % Load excuses

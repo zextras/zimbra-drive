@@ -1,12 +1,21 @@
 \section{Zimbra Extension and Zimlet upgrade}
 \begin{warning}
-    Zimbra Drive Zimlet and Extension are upgraded automatically during the Zimbra Upgrade.
+Zimbra Drive Extension and Zimbra Drive Zimlet are upgraded automatically during the Zimbra Upgrade.
 \end{warning}
 
-The Zimbra Drive Zimlet can be upgraded with a deploy of the newest version.\\
-Then flush cache with:
+    
+The Zimbra Drive Extension can be upgraded replacing the zimbra-extension.jar and zal.jar files in \texttt{/opt/zimbra/lib/ext/zimbradrive/} and performing a mailbox restart.
 \begin{verbatim}
-    zmprov fc zimlet
+# As root
+cp zimbradrive-extension.jar /opt/zimbra/lib/ext/zimbradrive/
+cp zal.jar /opt/zimbra/lib/ext/zimbradrive/
+# As zimbra
+mailboxdctl restart
 \end{verbatim}
 
-The Zimbra Drive Extension can be upgraded replacing the zimbra-extension.jar and zal.jar files in \texttt{/opt/zimbra/lib/ext/zimbradrive/} and performing a mailbox restart.
+The Zimbra Drive Zimlet can be upgraded deploying the newest version and then flushing cache:
+\begin{verbatim}
+# As zimbra
+zmzimletctl deploy /tmp/openchat/com_zextras_drive_open.zip
+zmprov fc zimlet
+\end{verbatim}

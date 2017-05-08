@@ -1,1 +1,47 @@
 \section{Build from sources}
+This section will guide the administrator through the steps to build the Zimbra Drive components.
+The official Zimbra Drive source repository is hosted on GitHub.com/ZeXtras/ZimbraDrive.
+
+The build system uses relative path; the following example assumes that the working path is /tmp/
+but it can be changed at will.
+\begin{verbatim}
+# Clean the folder we will be using for the build
+rm -rf /tmp/ZimbraDrive && cd /tmp/
+
+# Clone the source repository
+git clone --recursive git@github.com:ZeXtras/ZimbraDrive.git
+
+# Jump into the source folder
+cd ZimbraDrive
+
+# Checkout the correct branch for the Zimbra release (assuming Zimbra 8.7.6 )
+git checkout release/8.7.6
+
+# Build the whole package (can take some minutes)
+make
+\end{verbatim}
+
+The final artifacts will be placed in folder \texttt{/tmp/zimbradrive/dist} and \texttt{/tmp/zimbradrive/build}.
+The whole package is located in \texttt{dist} which is made by single components located in \texttt{build}.\\
+The \texttt{dist} folder:
+    \dirtree{%
+    .1 /tmp/zimbradrive/dist.
+        .2 zimbra-drive.md5.
+        .2 zimbra\_drive.tgz.
+   }
+
+The \texttt{build} folder:
+    \dirtree{%
+    .1 /tmp/zimbradrive/build.
+        .2 zimbra-extension.
+            .3 zimbradrive-extension.jar.
+            .3 zal.jar.
+            .3 zimbradrive-extension.conf.example.
+        .2 zimlet.
+            .3 com\_zextras\_drive\_open.zip.
+        .2 nextcloud-app.
+            .3 zimbradrive.tar.gz.
+        .2 LICENSE.
+        .2 README.md.
+   }
+

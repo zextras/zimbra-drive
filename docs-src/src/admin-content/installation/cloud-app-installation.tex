@@ -1,30 +1,46 @@
 \section{Cloud app installation}
 
-In this section are provided the steps to install the Zimbra Drive Cloud App to the specific supported cloud.\\
-\\
-The cloud service supported are NextCloud and OwnCloud.
+In this section are provided the steps to install the Zimbra Drive Cloud App to the specific supported cloud.
+\begin{warning}
+The cloud services supported are NextCloud and OwnCloud.
+\end{warning}
 
-    \subsection{NextCloud/OwnCloud}
-        NextCloud and OwnCloud requires the same installation steps:
-        
-        \begin{itemize}
-            \item Copy \texttt{zimbradrive.tar.gz} in Owncloud/Nextcloud drive\\ \\
-            \texttt{scp zimbradrive.tar.gz root@cloud:/tmp}\\
-            \item Extract \texttt{zimbradrive.tar.gz} in Nextcloud drive in \texttt{/var/www/html/apps}\\ \\
-            \texttt{tar -xvzf zimbradrive.tar.gz -C /var/www/html/apps}\\
-            \item Change permissions of the extracted folder \texttt{/var/www/html/apps/zimbradrive}\\ \\
-            \texttt{chown -R www-data /var/www/html/apps/zimbradrive/}\\
-            \item Enable Zimbra Drive App from Admin Interface or with command (replace PATH\textunderscore CLOUD)\\ \\
-            \texttt{sudo -u www-data php /var/www/PATH\textunderscore CLOUD/occ app:enable zimbradrive}
-        \end{itemize}
+\subsection{NextCloud/OwnCloud}\label{subsec:nextcloudOwncloudInstallation}
+    NextCloud and OwnCloud requires the same following installation steps.
+    The placeholder \texttt{PATH\textunderscore TO\textunderscore CLOUD} is an absolute path and it can be "/var/www/html":
 
-        At this point the NextCloud/OwnCloud Zimbra Drive App is installed and is required the configuration.
-        In NextCloud/OwnCloud administration panel
+    \begin{enumerate}
+        \item Copy \texttt{zimbradrive.tar.gz} in Nextcloud/Owncloud drive\\ \\
+        \texttt{scp zimbradrive.tar.gz root@cloud:/tmp}\\
+        \item Extract \texttt{zimbradrive.tar.gz} in Nextcloud/Owncloud drive in \texttt{PATH\textunderscore TO\textunderscore CLOUD/apps}\\ \\
+        \texttt{tar -xvzf zimbradrive.tar.gz -C \texttt{PATH\textunderscore TO\textunderscore CLOUD}/apps}\\
+        \item Change permissions of the extracted folder \texttt{PATH\textunderscore TO\textunderscore CLOUD/apps/zimbradrive}\\ \\
+        \texttt{chown -R root:www-data PATH\textunderscore TO\textunderscore CLOUD/apps/zimbradrive/}\\
+        \item Enable Zimbra Drive App from Nextcloud/Owncloud Admin Interface or with command %(replace PATH\textunderscore CLOUD)
+        \\ \\
+        \texttt{sudo -u www-data php PATH\textunderscore TO\textunderscore CLOUD/occ app:enable zimbradrive}
+    \end{enumerate}
 
-            \textbf{Cloud configuration}\\
-            Enable: aggiunge la configurazione in config.php (necessario)\\
-            Zimbra server: zimbra domain or ip !senza http!\\
-            Zimbra port: zimbra webmail service port\\
-            Use SSL: da checkare se la porta precedente richiede crittografia, lasciare vuota altrimenti\\
-            Disable certificate: in caso di Use SSL checkato disabilita la verifica del certificato\\
-            Domain Preauth key: Serve ad accedere direttamente a zimbra da nextcloud
+    At this point the NextCloud/OwnCloud Zimbra Drive App is installed and is required the configuration.
+    In NextCloud/OwnCloud administration panel must appears a new "Zimbra Drive" entry in the left sidebar
+    that redirect to the configuration view. Here will be the following configurations:
+    \begin{itemize}
+        \item (CheckBox) \textbf{Enable authentication through Zimbra}\\
+        (Mandatory) Allows Zimbra users to use NextCloud/OwnCloud with their Zimbra credentials.
+        \item (InputField) \textbf{Zimbra Server}\\
+        (Mandatory) Zimbra webmail host or ip.
+        \item (InputField) \textbf{Zimbra Port}\\
+        (Mandatory) Zimbra webmail port.
+        \item (CheckBox) \textbf{Use SSL}\\
+        Check if the Zimbra webmail port uses SSL certification.
+        \item (CheckBox) \textbf{Enable certification verification}\\
+        Disable only if Zimbra has an untrusted certificate.
+        \item (InputField) \textbf{Domain Preauth Key}\\
+        The Zimbra users can log in NextCloud/OwnCloud after the first access in Zimbra Drive Zimlet
+        with their Zimbra credentials. The new icon in Apps menu added by Zimbra Drive App let 
+        Zimbra user to open a new Zimbra webmail tab skipping authentication.\\
+        The Domain PreAuth Key is required:\\
+        \texttt{\# As zimbra}\\
+        \texttt{zmprov generateDomainPreAuthKey domainExample.com} (first time)\\
+        \texttt{zmprov getDomain example860.com zimbraPreAuthKey}
+    \end{itemize}

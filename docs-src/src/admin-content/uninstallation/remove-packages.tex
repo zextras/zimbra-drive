@@ -1,12 +1,18 @@
 \section{Remove packages}
-    \begin{verbatim}
-    # As zimbra
-    zmzimletctl undeploy com_zextras_drive_open
-    # As root
-    rm -rf /opt/zimbra/lib/ext/zimbradrive/
-    \end{verbatim}
-    Once the packages are removed is required a mailbox restart to fully unload the extension:
-    \begin{verbatim}
-    # As zimbra
-    zmmailboxdctl restart
-    \end{verbatim}
+The uninstallation process of Zimbra Drive Zimlet and Zimbra Drive Extension requires just to undeploy zimlet and clean extension folder from zimbra;
+no more data is stored.\\ \\
+Remove Zimbra Drive zimlet:
+\begin{verbatim}
+# As zimbra
+zmzimletctl undeploy com_zextras_drive_open
+\end{verbatim}
+Remove Zimbra Drive Extension:
+\begin{verbatim}
+# As root
+rm -rf /opt/zimbra/lib/ext/zimbradrive/
+
+# As zimbra
+zmmailboxdctl restart
+\end{verbatim}
+The last but not necessary step is to clean the domain attribute with the command\\
+\texttt{zmprov md domainExample.com zimbraDriveOwnCloudURL ""}
