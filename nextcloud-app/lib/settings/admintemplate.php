@@ -25,10 +25,30 @@ use OCP\IConfig;
 
 class AdminTemplate
 {
-    public static function getTemplate(IConfig $config)
+    /**
+     * @var IConfig
+     */
+    private $config;
+    /**
+     * @var AppSettings
+     */
+    private $appConfig;
+
+    /**
+     * AdminTemplate constructor.
+     * @param IConfig $config
+     * @param AppSettings $appConfig
+     */
+    public function __construct(IConfig $config, AppSettings $appConfig)
+    {
+        $this->config = $config;
+        $this->appConfig = $appConfig;
+    }
+
+    public function getTemplate()
     {
         /** @var array $user_backends */
-        $user_backends = $config->getSystemValue(AdminApiController::USER_BACKEND_VAR_NAME, array());
+        $user_backends = $this->config->getSystemValue(AdminApiController::USER_BACKEND_VAR_NAME, array());
         /** @var bool $isUserBackEndOC_User_ZimbraDefined */
         $isUserBackEndOC_User_ZimbraDefined = false;
         foreach($user_backends as $user_backend){
@@ -44,12 +64,13 @@ class AdminTemplate
             Application::APP_NAME,
             'admin',
             [
-                "zimbra_url" => $config->getAppValue(Application::APP_NAME, 'zimbra_url'),
-                "zimbra_port" => $config->getAppValue(Application::APP_NAME, 'zimbra_port'),
-                "use_ssl" => $config->getAppValue(Application::APP_NAME, 'use_ssl', 'true') == 'true',
-                "trust_invalid_certs" => $config->getAppValue(Application::APP_NAME, 'trust_invalid_certs', 'false') == 'true',
-                "preauth_key" => $config->getAppValue(Application::APP_NAME, 'preauth_key'),
-                "use_zimbra_auth" => $isUserBackEndOC_User_ZimbraDefined,
+                AppSettings::ZIMBRA_URL => $this->appConfig->getServerUrl(),
+                AppSettings::ZIMBRA_PORT => $this->appConfig->getServerPort(),
+                AppSettings::USE_SSL => $this->appConfig->useSSLDuringZimbraAuthentication(),
+                AppSettings::TRUST_INVALID_CERTS => $this->appConfig->trustInvalidCertificatesDuringZimbraAuthentication(),
+                AppSettings::PREAUTH_KEY => $this->appConfig->getZimbraPreauthKey(),
+                AppSettings::ENABLE_ZIMBRA_USERS => $isUserBackEndOC_User_ZimbraDefined,
+                AppSettings::ALLOW_ZIMBRA_USERS_LOGIN => $this->appConfig->allowZimbraUsersLogin()
             ],
             'blank'
         );

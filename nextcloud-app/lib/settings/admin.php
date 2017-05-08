@@ -41,7 +41,10 @@ class Admin implements ISettings
      */
     public function getForm()
     {
-        return AdminTemplate::getTemplate($this->config);
+        $appSettings = new AppSettings($this->config);
+        $adminTemplate = new AdminTemplate($this->config, $appSettings);
+        $template = $adminTemplate->getTemplate();
+        return $template;
     }
 
     /**
@@ -49,7 +52,7 @@ class Admin implements ISettings
      */
     public function getSection()
     {
-        return Application::APP_NAME;
+        return 'zimbradrive';
     }
 
     /**

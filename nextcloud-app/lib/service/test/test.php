@@ -16,40 +16,19 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace OCA\ZimbraDrive\Settings;
+namespace OCA\ZimbraDrive\Service\Test;
 
-use OCA\ZimbraDrive\AppInfo\Application;
-use OCP\Settings\ISection;
 
-class Section implements ISection
+interface Test
 {
-
-    public function __construct()
-    {
-    }
+    /**
+     * @return string
+     */
+    public function getName();
 
     /**
-     * {@inheritdoc}
+     * @return TestResult
      */
-    public function getID()
-    {
-        return 'zimbradrive';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getName()
-    {
-        return 'Zimbra Drive';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getPriority()
-    {
-        return 75;
-    }
+    public function run();
 
 }

@@ -17,36 +17,56 @@
  */
 
 use OCA\ZimbraDrive\AppInfo\Application;
+use OCA\ZimbraDrive\Settings\AppSettings;
 
 script(Application::APP_NAME, 'admin');
+style(Application::APP_NAME, 'style');
+$urlGenerator = \OC::$server->getURLGenerator();
+$allTestUrl = $urlGenerator->linkToRoute('zimbradrive.test.all');
+$enableZimbraUsersUrl = $urlGenerator->linkToRoute('zimbradrive.admin_api.enableZimbraAuthentication');
+$disableZimbraUsersUrl = $urlGenerator->linkToRoute('zimbradrive.admin_api.disableZimbraAuthentication');
 ?>
 <div class="section" id="zimbradrive">
     <h2>Zimbra Drive</h2>
     <div>
-        <input type="checkbox" class="checkbox" name="use_zimbra_auth" id="use_zimbra_auth"
-               value="1" <?php if ($_['use_zimbra_auth']) print_unescaped('checked="checked"'); ?>>
-        <label for="use_zimbra_auth"><?php p($l->t('Enable authentication through Zimbra')) ?></label>
+        <p><?php p($l->t('Version: 8.8')) ?></p>
     </div>
     <div>
-        <label for="zimbra_url"><?php p($l->t('Zimbra Server')) ?></label>
-        <input type="text" name="zimbra_url" id="zimbra_url" value="<?php p($_['zimbra_url']) ?>">
+        <input type="checkbox" class="checkbox" name="<?php print(AppSettings::ENABLE_ZIMBRA_USERS);?>" id="<?php print(AppSettings::ENABLE_ZIMBRA_USERS);?>"
+               value="1" <?php if ($_[AppSettings::ENABLE_ZIMBRA_USERS]) print_unescaped('checked="checked"'); ?>>
+        <label for="<?php print(AppSettings::ENABLE_ZIMBRA_USERS);?>"><?php p($l->t('Enable Zimbra authentication back end')) ?></label>
+        <input type="hidden" value="<?php p($enableZimbraUsersUrl); ?>" id="url_enable_zimbra_users">
+        <input type="hidden" value="<?php p($disableZimbraUsersUrl); ?>" id="url_disable_zimbra_users">
     </div>
     <div>
-        <label for="zimbra_port"><?php p($l->t('Zimbra Port')) ?></label>
-        <input type="number" name="zimbra_port" id="zimbra_port" value="<?php p($_['zimbra_port']) ?>">
+        <input type="checkbox" class="checkbox" name="<?php print(AppSettings::ALLOW_ZIMBRA_USERS_LOGIN);?>" id="<?php print(AppSettings::ALLOW_ZIMBRA_USERS_LOGIN);?>"
+               value="1" <?php if ($_[AppSettings::ALLOW_ZIMBRA_USERS_LOGIN]) print_unescaped('checked="checked"'); ?>>
+        <label for="<?php print(AppSettings::ALLOW_ZIMBRA_USERS_LOGIN);?>"><?php p($l->t('Allow Zimbra\'s users to log in')) ?></label>
     </div>
     <div>
-        <input type="checkbox" class="checkbox" name="use_ssl" id="use_ssl"
-           value="1" <?php if ($_['use_ssl']) print_unescaped('checked="checked"'); ?>>
-        <label for="use_ssl"><?php p($l->t('Use SSL')) ?></label>
+        <label for="<?php print(AppSettings::ZIMBRA_URL);?>"><?php p($l->t('Zimbra Server')) ?></label>
+        <input type="text" name="<?php print(AppSettings::ZIMBRA_URL);?>" id="<?php print(AppSettings::ZIMBRA_URL);?>" value="<?php p($_[AppSettings::ZIMBRA_URL]) ?>">
     </div>
     <div>
-        <input type="checkbox" class="checkbox" name="trust_invalid_certs" id="trust_invalid_certs"
-           value="1" <?php if ($_['trust_invalid_certs']) print_unescaped('checked="checked"'); ?>>
-        <label for="trust_invalid_certs"><?php p($l->t('Disable certificate verification')) ?></label>
+        <label for="<?php print(AppSettings::ZIMBRA_PORT);?>"><?php p($l->t('Zimbra Port')) ?></label>
+        <input type="number" name="<?php print(AppSettings::ZIMBRA_PORT);?>" id="<?php print(AppSettings::ZIMBRA_PORT);?>" value="<?php p($_[AppSettings::ZIMBRA_PORT]) ?>">
     </div>
     <div>
-        <label for="preauth_key"><?php p($l->t('Domain Preauth Key')) ?></label>
-        <input type="text" name="preauth_key" id="preauth_key" value="<?php p($_['preauth_key']) ?>">
+        <input type="checkbox" class="checkbox" name="<?php print(AppSettings::USE_SSL);?>" id="<?php print(AppSettings::USE_SSL);?>"
+           value="1" <?php if ($_[AppSettings::USE_SSL]) print_unescaped('checked="checked"'); ?>>
+        <label for="<?php print(AppSettings::USE_SSL);?>"><?php p($l->t('Use SSL')) ?></label>
     </div>
+    <div>
+        <input type="checkbox" class="checkbox" name="check_certs" id="check_certs"
+           value="1" <?php if (!$_[AppSettings::TRUST_INVALID_CERTS]) print_unescaped('checked="checked"'); ?>>
+        <label for="check_certs"><?php p($l->t('Enable certificate verification')) ?></label>
+    </div>
+    <div>
+        <label for="<?php print(AppSettings::PREAUTH_KEY);?>"><?php p($l->t('Domain Preauth Key')) ?></label>
+        <input type="text" name="<?php print(AppSettings::PREAUTH_KEY);?>" id="<?php print(AppSettings::PREAUTH_KEY);?>" value="<?php p($_[AppSettings::PREAUTH_KEY]) ?>">
+    </div>
+    <form action="<?php p($allTestUrl); ?>">
+        <input type="submit" value="Test page" />
+    </form>
 </div>
+

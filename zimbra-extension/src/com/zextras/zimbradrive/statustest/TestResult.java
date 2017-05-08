@@ -1,5 +1,4 @@
-<?php
-/**
+/*
  * Copyright (C) 2017 ZeXtras S.r.l.
  *
  * This program is free software; you can redistribute it and/or
@@ -16,40 +15,32 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace OCA\ZimbraDrive\Settings;
+package com.zextras.zimbradrive.statustest;
 
-use OCA\ZimbraDrive\AppInfo\Application;
-use OCP\Settings\ISection;
+public class TestResult {
+  final private boolean mIsPassed;
+  final private String mTestName;
+  final private String mMessage;
 
-class Section implements ISection
-{
+  public TestResult(String testName, boolean isPassed, String message)
+  {
+    mIsPassed = isPassed;
+    mTestName = testName;
+    mMessage = message;
+  }
 
-    public function __construct()
-    {
-    }
+  public boolean isPassed()
+  {
+    return mIsPassed;
+  }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getID()
-    {
-        return 'zimbradrive';
-    }
+  public String getTestName()
+  {
+    return mTestName;
+  }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getName()
-    {
-        return 'Zimbra Drive';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getPriority()
-    {
-        return 75;
-    }
-
+  public String getMessage()
+  {
+    return mMessage;
+  }
 }

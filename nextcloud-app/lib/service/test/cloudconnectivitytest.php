@@ -16,40 +16,25 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace OCA\ZimbraDrive\Controller;
+namespace OCA\ZimbraDrive\Service\Test;
 
 
-use OCP\AppFramework\ApiController;
-use OCP\IRequest;
-use OCA\ZimbraDrive\Service\LogService;
-use OCP\AppFramework\Http\DataDisplayResponse;
-
-class ConnectivityTestController extends ApiController
+class CloudConnectivityTest implements Test
 {
-    private $logger;
-
-    public function __construct(
-        $appName,
-        IRequest $request,
-        LogService $logger
-    )
+    /**
+     * @return TestResult
+     */
+    public function run()
     {
-        parent::__construct(
-            $appName,
-            $request
-        );
-
-        $this->logger = $logger;
+        $message = "Zimbra Drive app is installed.";
+        return new TestOk($this->getName(), $message);
     }
 
     /**
-     * @CORS
-     * @NoCSRFRequired
-     * @PublicPage
+     * @return string
      */
-    public function connectivityTest()
+    public function getName()
     {
-        $this->logger->info('connectivityTest');
-        return new DataDisplayResponse("OK");
+        return "Zimbra Drive app installation test";
     }
 }

@@ -16,40 +16,40 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace OCA\ZimbraDrive\Settings;
+namespace OCA\ZimbraDrive\Service\Test;
 
-use OCA\ZimbraDrive\AppInfo\Application;
-use OCP\Settings\ISection;
 
-class Section implements ISection
+class ConnectionTestResult
 {
+    /** @var  bool */
+    private $isConnected;
+    /** @var  string */
+    private $errorMessage;
 
-    public function __construct()
+    /**
+     * ConnectionTestResult constructor.
+     * @param bool $isConnected
+     * @param string $errorMessage
+     */
+    public function __construct($isConnected, $errorMessage)
     {
+        $this->isConnected = $isConnected;
+        $this->errorMessage = $errorMessage;
     }
 
     /**
-     * {@inheritdoc}
+     * @return bool
      */
-    public function getID()
+    public function isIsConnected()
     {
-        return 'zimbradrive';
+        return $this->isConnected;
     }
 
     /**
-     * {@inheritdoc}
+     * @return string
      */
-    public function getName()
+    public function getErrorMessage()
     {
-        return 'Zimbra Drive';
+        return $this->errorMessage;
     }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getPriority()
-    {
-        return 75;
-    }
-
 }
