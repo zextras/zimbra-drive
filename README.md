@@ -13,7 +13,7 @@ Supported Versions:
 - NextCloud: 10+
 - OwnCloud: 9+
 
-## Installation
+## Install
 
 ### 0. Check package integrity
 Verify the files using the provided `md5` file:
@@ -87,3 +87,26 @@ If the preauth key already exists, it can be obtained with:
 zmprov getDomain domain.com zimbraPreAuthKey
 ```
 
+## Uninstall
+
+### Remove all Zimbra Users from NextCloud / OwnCloud
+
+If the administrator remove the NextCloud / OwnCloud App the Zimbra users will not be visible anymore in the
+NextCloud / OwnCloud administration panel.
+
+**WARNING:** This process will delete all the Zimbra Users data from NextCloud / OwnCloud and is not reversible.
+
+To remove all the Zimbra Users from the NextCloud / OwnCloud installation run this command:
+```bash
+cd /var/www/nextcloud # Go to the OCC path
+mysql_pwd='password'  # Set the database password
+occ_db='nextcloud'    # Set the database name for the NextCloud / OwnCloud
+
+mysql -u root --password="${mysql_pwd}" "${occ_db}" -N -s \
+    -e 'SELECT `uid` FROM `oc_zimbradrive_users`' \
+    | while read uid; do \
+        sudo -u www-data php ./occ user:delete "${uid}"; \
+        mysql -u root --password="${mysql_pwd}" "${occ_db}" \
+            -e "DELETE FROM oc_accounts WHERE uid = '${uid}' LIMIT 1"; \
+      done
+```
