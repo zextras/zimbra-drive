@@ -49,18 +49,18 @@ class EnabledZimbraUsersLoginTest implements Test
         if($allowZimbraUsersLogin)
         {
             $message = "Zimbra Drive authentication is enabled.";
-            return new TestOk($this->name(), $message);
+            return new TestOk($this->getName(), $message);
         } else
         {
             $message = "Zimbra Drive authentication is disabled.";
-            return new TestKo($this->name(), $message);
+            return new TestKo($this->getName(), $message);
         }
     }
 
     /**
      * @return string
      */
-    public function name()
+    public function getName()
     {
         return "Enabled Zimbra's user login";
     }

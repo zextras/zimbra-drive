@@ -77,7 +77,14 @@ class TestController extends ApiController
      * @CORS
      * @NoCSRFRequired
      * @PublicPage
-     * todo remove publicpage
+     */
+    public function connectivityTest()
+    {
+        return new DataDisplayResponse("OK");
+    }
+
+    /**
+     * @NoCSRFRequired
      */
     public function all()
     {
@@ -123,7 +130,7 @@ class TestController extends ApiController
             {
                 $testStatus = "FAILED";
             }
-            $htmlResults = $htmlResults . sprintf("[%s] %s : %s <br />", $testStatus, $testResult->getTestName(), $testResult->getMessage());
+            $htmlResults = $htmlResults . sprintf("[%s] %s : %s <br /> <br /> \n\n", $testStatus, $testResult->getTestName(), $testResult->getMessage());
         }
         return $htmlResults;
     }

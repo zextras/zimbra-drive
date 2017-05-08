@@ -59,18 +59,18 @@ class IsServerPortSetTest implements Test
         if($port > 0)
         {
             $message = "The server port is set.";
-            return new TestOk($this->name(), $message);
+            return new TestOk($this->getName(), $message);
         }else
         {
             $message = "The server port is not set.";
-            return new TestKo($this->name(), $message);
+            return new TestKo($this->getName(), $message);
         }
     }
 
     /**
      * @return string
      */
-    public function name()
+    public function getName()
     {
         return "Is server port set test";
     }

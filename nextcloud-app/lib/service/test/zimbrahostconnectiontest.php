@@ -58,17 +58,17 @@ class ZimbraHostConnectionTest implements Test
         if($connectionResult->isIsConnected())
         {
             $message = "Zimbra Drive app can reach the host.";
-            return new TestOk($this->name(), $message);
+            return new TestOk($this->getName(), $message);
         }else
         {
-            return new TestKo($this->name(), $connectionResult->getErrorMessage());
+            return new TestKo($this->getName(), $connectionResult->getErrorMessage());
         }
     }
 
     /**
      * @return string
      */
-    public function name()
+    public function getName()
     {
         return "Zimbra host connection test";
     }

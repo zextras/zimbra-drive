@@ -25,7 +25,7 @@
         <![CDATA[Add (Next|Own)Cloud as Briefcase in Zimbra with the full features of both applications.]]></description>
     <licence>GPL-2.0</licence>
     <author>ZeXtras</author>
-    <version>0.0.1</version>
+    <version>8.8</version>
     <namespace>ZimbraDrive</namespace>
     <category>auth</category>
     <category>integration</category>

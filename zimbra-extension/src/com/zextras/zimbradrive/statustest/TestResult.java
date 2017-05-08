@@ -1,5 +1,4 @@
-<?php
-/**
+/*
  * Copyright (C) 2017 ZeXtras S.r.l.
  *
  * This program is free software; you can redistribute it and/or
@@ -16,25 +15,32 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace OCA\ZimbraDrive\Service\Test;
+package com.zextras.zimbradrive.statustest;
 
+public class TestResult {
+  final private boolean mIsPassed;
+  final private String mTestName;
+  final private String mMessage;
 
-class CloudConnectivityTest implements Test
-{
-    /**
-     * @return TestResult
-     */
-    public function run()
-    {
-        $message = "Zimbra Drive app is installed.";
-        return new TestOk($this->getName(), $message);
-    }
+  public TestResult(String testName, boolean isPassed, String message)
+  {
+    mIsPassed = isPassed;
+    mTestName = testName;
+    mMessage = message;
+  }
 
-    /**
-     * @return string
-     */
-    public function getName()
-    {
-        return "Zimbra Drive app installation test";
-    }
+  public boolean isPassed()
+  {
+    return mIsPassed;
+  }
+
+  public String getTestName()
+  {
+    return mTestName;
+  }
+
+  public String getMessage()
+  {
+    return mMessage;
+  }
 }

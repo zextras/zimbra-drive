@@ -45,18 +45,18 @@ class EnabledZimbraUsersTest implements Test
         if($this->isZimbraDriveAuthenticationEnabled())
         {
             $message = "Zimbra's users are enabled.";
-            return new TestOk($this->name(), $message);
+            return new TestOk($this->getName(), $message);
         } else
         {
             $message = "Zimbra's users are disabled.";
-            return new TestKo($this->name(), $message);
+            return new TestKo($this->getName(), $message);
         }
     }
 
     /**
      * @return string
      */
-    public function name()
+    public function getName()
     {
         return "Enabled Zimbra's users test";
     }

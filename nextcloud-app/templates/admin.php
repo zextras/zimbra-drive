@@ -29,19 +29,19 @@ $disableZimbraUsersUrl = $urlGenerator->linkToRoute('zimbradrive.admin_api.disab
 <div class="section" id="zimbradrive">
     <h2>Zimbra Drive</h2>
     <div>
-        <p><?php p($l->t('Version: 1.0')) ?></p>
+        <p><?php p($l->t('Version: 8.8')) ?></p>
     </div>
     <div>
         <input type="checkbox" class="checkbox" name="<?php print(AppSettings::ENABLE_ZIMBRA_USERS);?>" id="<?php print(AppSettings::ENABLE_ZIMBRA_USERS);?>"
                value="1" <?php if ($_[AppSettings::ENABLE_ZIMBRA_USERS]) print_unescaped('checked="checked"'); ?>>
-        <label for="<?php print(AppSettings::ENABLE_ZIMBRA_USERS);?>"><?php p($l->t('Enable Zimbra users')) ?></label>
+        <label for="<?php print(AppSettings::ENABLE_ZIMBRA_USERS);?>"><?php p($l->t('Enable Zimbra authentication back end')) ?></label>
         <input type="hidden" value="<?php p($enableZimbraUsersUrl); ?>" id="url_enable_zimbra_users">
         <input type="hidden" value="<?php p($disableZimbraUsersUrl); ?>" id="url_disable_zimbra_users">
     </div>
     <div>
         <input type="checkbox" class="checkbox" name="<?php print(AppSettings::ALLOW_ZIMBRA_USERS_LOGIN);?>" id="<?php print(AppSettings::ALLOW_ZIMBRA_USERS_LOGIN);?>"
                value="1" <?php if ($_[AppSettings::ALLOW_ZIMBRA_USERS_LOGIN]) print_unescaped('checked="checked"'); ?>>
-        <label for="<?php print(AppSettings::ALLOW_ZIMBRA_USERS_LOGIN);?>"><?php p($l->t('Allow login to Zimbra\'s users')) ?></label>
+        <label for="<?php print(AppSettings::ALLOW_ZIMBRA_USERS_LOGIN);?>"><?php p($l->t('Allow Zimbra\'s users to log in')) ?></label>
     </div>
     <div>
         <label for="<?php print(AppSettings::ZIMBRA_URL);?>"><?php p($l->t('Zimbra Server')) ?></label>
@@ -65,8 +65,8 @@ $disableZimbraUsersUrl = $urlGenerator->linkToRoute('zimbradrive.admin_api.disab
         <label for="<?php print(AppSettings::PREAUTH_KEY);?>"><?php p($l->t('Domain Preauth Key')) ?></label>
         <input type="text" name="<?php print(AppSettings::PREAUTH_KEY);?>" id="<?php print(AppSettings::PREAUTH_KEY);?>" value="<?php p($_[AppSettings::PREAUTH_KEY]) ?>">
     </div>
-    <div>
-        <a href="<?php p($allTestUrl); ?>">Link to test page</a>
-    </div>
+    <form action="<?php p($allTestUrl); ?>">
+        <input type="submit" value="Test page" />
+    </form>
 </div>
 

@@ -24,7 +24,7 @@ interface Test
     /**
      * @return string
      */
-    public function name();
+    public function getName();
 
     /**
      * @return TestResult

@@ -58,17 +58,17 @@ class ZimbraDriveExtensionConnectivityTest implements Test
         if($connectionResult->isIsConnected())
         {
             $message = "Zimbra Drive app can reach Zimbra Drive extension.";
-            return new TestOk($this->name(), $message);
+            return new TestOk($this->getName(), $message);
         }else
         {
-            return new TestKo($this->name(), $connectionResult->getErrorMessage());
+            return new TestKo($this->getName(), $connectionResult->getErrorMessage());
         }
     }
 
     /**
      * @return string
      */
-    public function name()
+    public function getName()
     {
         return "Zimbra Drive extension connection test";
     }
@@ -121,7 +121,6 @@ class ZimbraDriveExtensionConnectivityTest implements Test
         {
             $message = "Impossible to connect to Zimbra Drive extension (response http code: " . $http_code . " )";
         }
-        $message .= $raw_response;
         return new ConnectionTestResult($isConnectionOk, $message);
     }
 }
