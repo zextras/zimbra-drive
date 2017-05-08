@@ -1,17 +1,17 @@
 Zimbra Drive
 ============
 
-Zimbra and NextCloud integration.
+Zimbra and Nextcloud / ownCloud integration.
 
 Features:
-- Use Zimbra credentials in NextCloud / OwnCloud.
-- Navigate NextCloud / OwnCloud files inside Zimbra.
-- Manage NextCloud / OwnCloud files inside Zimbra (Move, Rename).
-- Attach NextCloud / OwnCloud files to email.
+- Use Zimbra credentials in Nextcloud / ownCloud.
+- Navigate Nextcloud / ownCloud files inside Zimbra.
+- Manage Nextcloud / ownCloud files inside Zimbra (Move, Rename).
+- Attach Nextcloud / ownCloud files to email.
 
 Supported Versions:
-- NextCloud: 10+
-- OwnCloud: 9+
+- Nextcloud: 10+
+- ownCloud: 9+
 
 ## Install
 
@@ -59,12 +59,12 @@ Deploy zimlet
 zmzimletctl deploy /tmp/com_zextras_drive_open.zip
 ```
 
-### 4. Install NextCloud ZimbraDrive App
+### 4. Install Nextcloud / ownCloud ZimbraDrive App
 Extract `/tmp/zimbradrive/nextcloud-app/zimbradrive.tar.gz` in the folder `apps` of Own/Next Cloud.  
 Login in Own/Next Cloud as an administrator, in `App` menu, enable `ZimbraDrive`.
 
-### 5. Configure NextCloud ZimbraDrive App
-Configure the Zimbra Server into to the `Zimbra Drive` section in the **Admin Configuration** of Your NextCloud instance.  
+### 5. Configure Nextcloud / ownCloud ZimbraDrive App
+Configure the Zimbra Server into to the `Zimbra Drive` section in the **Admin Configuration** of Your Nextcloud / ownCloud instance.  
 
 `Enable authentication through Zimbra` must be enabled to let Zimbra's users login.  
 To manually enable the authentication through Zimbra add these lines to the Own/Next Cloud configuration:
@@ -89,18 +89,18 @@ zmprov getDomain domain.com zimbraPreAuthKey
 
 ## Uninstall
 
-### Remove all Zimbra Users from NextCloud / OwnCloud
+### Remove all Zimbra Users from Nextcloud / ownCloud
 
-If the administrator remove the NextCloud / OwnCloud App the Zimbra users will not be visible anymore in the
-NextCloud / OwnCloud administration panel.
+If the administrator remove the Nextcloud / ownCloud App the Zimbra users will not be visible anymore in the
+Nextcloud / ownCloud administration panel.
 
-**WARNING:** This process will delete all the Zimbra Users data from NextCloud / OwnCloud and is not reversible.
+**WARNING:** This process will delete all the Zimbra Users data from Nextcloud / ownCloud and is not reversible.
 
-To remove all the Zimbra Users from the NextCloud / OwnCloud installation run this command:
+To remove all the Zimbra Users from the Nextcloud / ownCloud installation run this command:
 ```bash
 cd /var/www/nextcloud # Go to the OCC path
 mysql_pwd='password'  # Set the database password
-occ_db='nextcloud'    # Set the database name for the NextCloud / OwnCloud
+occ_db='nextcloud'    # Set the database name for the Nextcloud / ownCloud
 
 mysql -u root --password="${mysql_pwd}" "${occ_db}" -N -s \
     -e 'SELECT `uid` FROM `oc_zimbradrive_users`' \
