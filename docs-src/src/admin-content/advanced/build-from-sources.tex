@@ -17,14 +17,16 @@ cd ZimbraDrive
 # Checkout the correct branch for the Zimbra release (assuming Zimbra 8.7.6 )
 git checkout release/8.7.6
 
-# Build the whole package or single component (can take some minutes)
+# Build the whole package (can take some minutes)
 make
-# or for example
-make zimbra-extension/
+# or single component (E.g.: following command)
+make build/zimbra-extension/zimbradrive-extension.jar
+
 \end{verbatim}
 
 The final artifacts will be placed in folder \texttt{/tmp/zimbradrive/dist} and \texttt{/tmp/zimbradrive/build}.
-The whole package is located in \texttt{dist} which is made by single components located in \texttt{build}.\\
+The whole package is located in \texttt{dist} which is made by single components located in \texttt{build}.
+
 The \texttt{dist} folder:
     \dirtree{%
     .1 /tmp/zimbradrive/dist.
