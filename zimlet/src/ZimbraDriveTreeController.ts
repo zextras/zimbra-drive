@@ -141,7 +141,7 @@ export class ZimbraDriveTreeController extends ZmFolderTreeController {
   }
 
   public downloadFolderAsZip(folderPath: string) {
-    let url: string = `${ZimbraDriveApp.DOWNLOAD_URL}${folderPath}`;
+    let url: string = `${ZimbraDriveApp.DOWNLOAD_URL}${AjxStringUtil.urlComponentEncode(folderPath)}`;
     ZmZimbraMail.unloadHackCallback();
     location.href = url;
   }
