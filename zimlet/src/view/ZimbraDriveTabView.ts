@@ -103,7 +103,6 @@ export class ZimbraDriveTabView extends DwtComposite {
     // Listview
     let app: ZimbraDriveApp = <ZimbraDriveApp> appCtxt.getApp(ZimbraDriveApp.APP_NAME);
     if (!this._controller ) {
-      if (appCtxt)
       this._controller = app.getZimbraDriveController(ZmApp.MAIN_SESSION);
     }
     if (!this._controller._listView[ZimbraDriveTabView.view]) {
