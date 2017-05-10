@@ -19,7 +19,7 @@
         version="0.0.0"
         label="${msg.zimletLabel}"
         description="${msg.zimletDescription}"
-        target="main">
+        target="main compose-window view-window">
 
     <include>com_zextras_drive_open_hdlr.js</include>
     <include>ZimbraDrive.template.js</include>
