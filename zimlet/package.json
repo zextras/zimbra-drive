@@ -1,6 +1,6 @@
 {
   "name": "com-zextras-zimbra-drive",
-  "version": "8.7.9",
+  "version": "8.7.10",
   "description": "A Zimlet for Zimbra",
   "main": "./src/com_zextras_drive_open_hdlr.ts",
   "scripts": {

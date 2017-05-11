@@ -18,7 +18,7 @@
 # Remember to edit these values also in `zimbra-extension/Makefile`
 ZAL_VERSION=1.11
 ZAL_VERSION_EXTENDED=1.11.8
-ZIMBRA_VERSION=8.7.9
+ZIMBRA_VERSION=8.7.10
 
 all: dist/zimbra_drive.tgz dist/zimbradrive.tar.gz dist/zimbra-drive.md5
 

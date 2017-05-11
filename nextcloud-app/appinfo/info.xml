@@ -25,7 +25,7 @@
         <![CDATA[Add Nextcloud / ownCloud as Briefcase in Zimbra with the full features of both applications.]]></description>
     <licence>GPL-2.0</licence>
     <author>ZeXtras</author>
-    <version>0.8.7.9</version>
+    <version>0.8.7.10</version>
     <namespace>ZimbraDrive</namespace>
     <category>auth</category>
     <category>integration</category>
