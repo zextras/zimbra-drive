@@ -32,9 +32,10 @@ dist/zimbradrive.tar.gz:
 		--exclude=.gitignore \
 		--exclude=dist \
 		--exclude=.git \
+		--exclude=build/ \
 		. build/$(app_name)/
 	cp ../LICENSE build/LICENSE
-	cd build/ && find . -type f -not -name "zimbradrive.md5" -exec md5sum "{}" + > zimbradrive.md5
+	cd "build/$(app_name)" && find . -type f -not -name "$(app_name).md5" -exec md5sum "{}" + > "$(app_name).md5"
 	cd build/ && tar cvzf $(app_name).tar.gz $(app_name) --owner=0 --group=0
 	mv build/$(app_name).tar.gz dist/
 
