@@ -18,19 +18,20 @@
 # Remember to edit these values also in `zimbra-extension/Makefile`
 ZAL_VERSION=1.11
 ZAL_VERSION_EXTENDED=1.11.8
-ZIMBRA_VERSION=8.6.0
+ZIMBRA_VERSION=8.7.9
 
-all: dist/zimbra_drive.tgz dist/zimbra-drive.md5
+all: dist/zimbra_drive.tgz dist/zimbradrive.tar.gz dist/zimbra-drive.md5
 
 clean:
-	rm -rf build/nextcloud-app
-	rm -rf build/zimbra-extension
-	rm -rf build/zimlet
-	rm -f build/LICENSE
-	rm -f build/README.md
-	rm -f build/zimbra-drive.md5
-	rm -f dist/zimbra_drive.tgz
-	rm -f dist/zimbra-drive.md5
+	rm -rf build/nextcloud-app \
+		build/zimbra-extension \
+		build/zimlet
+	rm -f build/LICENSE	\
+		build/README.md \
+		build/zimbra-drive.md5 \
+		dist/zimbra_drive.tgz \
+		dist/zimbra-drive.md5 \
+		dist/zimbradrive.tar.gz
 	cd nextcloud-app && make clean
 	cd zimbra-extension && make clean
 	cd zimlet && make clean
@@ -91,10 +92,16 @@ dist/zimbra_drive.tgz: build/README.md \
 						build/LICENSE \
 						build/nextcloud-app/zimbradrive.tar.gz \
 						build/zimbra-extension/zimbradrive-extension.jar \
-						build/zimlet/com_zextras_drive_open.zip build/zimbra-drive.md5
+						build/zimlet/com_zextras_drive_open.zip \
+						build/zimbra-drive.md5
 	mkdir -p build
 	mkdir -p dist
 	cd build && tar -czvf ../dist/zimbra_drive.tgz nextcloud-app/ zimbra-extension/ zimlet/ README.md LICENSE zimbra-drive.md5 --owner=0 --group=0
+
+dist/zimbradrive.tar.gz: build/nextcloud-app/zimbradrive.tar.gz
+	mkdir -p build
+	mkdir -p dist
+	cp build/nextcloud-app/zimbradrive.tar.gz dist/zimbradrive.tar.gz
 
 dist/zimbra-drive.md5: dist/zimbra_drive.tgz
 	cd dist && md5sum zimbra_drive.tgz > zimbra-drive.md5

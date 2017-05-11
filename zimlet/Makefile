@@ -85,17 +85,17 @@ dist/com_zextras_drive_open.zip: build/com_zextras_drive_open_hdlr.min.js \
 		LICENSE
 
 clean:
-	rm -f build/com_zextras_drive_open.css
-	rm -f build/com_zextras_drive_open_hdlr.js
-	rm -f build/com_zextras_drive_open_hdlr.js.map
-	rm -f build/com_zextras_drive_open_hdlr.min.js
-	rm -f build/com_zextras_drive_open.xml
-	rm -f build/com_zextras_drive_open.properties
-	rm -f build/com_zextras_drive_open*.properties
-	rm -f build/ZimbraDrive.template
+	rm -f build/com_zextras_drive_open.css \
+		build/com_zextras_drive_open_hdlr.js \
+		build/com_zextras_drive_open_hdlr.js.map \
+		build/com_zextras_drive_open_hdlr.min.js \
+		build/com_zextras_drive_open.xml \
+		build/com_zextras_drive_open.properties \
+		build/com_zextras_drive_open*.properties \
+		build/ZimbraDrive.template \
+		build/LICENSE \
+		dist/com_zextras_drive_open.zip
 	rm -rf build/assets/
-	rm -f build/LICENSE
-	rm -f dist/com_zextras_drive_open.zip
 
 install: guard-ZIMLET_DEV_SERVER dist/com_zextras_drive_open.zip
 	scp dist/com_zextras_drive_open.zip root@${ZIMLET_DEV_SERVER}:/tmp/
