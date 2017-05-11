@@ -2,47 +2,26 @@
 
 In this section are provided the steps to install the Zimbra Drive Cloud App to the specific supported cloud.
 \begin{warning}
-The cloud services supported are Nextcloud and ownCloud.
+The cloud services currently supported are Nextcloud and ownCloud with \texttt{zimbradrive.tar.gz} app.
 \end{warning}
 
 \subsection{Nextcloud/ownCloud}\label{subsec:NextcloudownCloudInstallation}
-    Nextcloud and ownCloud requires the same following installation steps.
-    The placeholder \texttt{PATH\textunderscore TO\textunderscore CLOUD} is an absolute path and it can be "/var/www/html":
+    Nextcloud and ownCloud requires the same following installation steps.\\
+    The placeholder \texttt{PATH\textunderscore TO\textunderscore CLOUD} is the path of the Nextcloud/ownCloud service in server:
 
     \begin{enumerate}
-        \item Copy \texttt{zimbradrive.tar.gz} in Nextcloud/ownCloud drive\\ \\
-        \texttt{scp zimbradrive.tar.gz root@cloud:/tmp}\\
-        \item Extract \texttt{zimbradrive.tar.gz} in Nextcloud/ownCloud drive in \texttt{PATH\textunderscore TO\textunderscore CLOUD/apps}\\ \\
-        \texttt{tar -xvzf zimbradrive.tar.gz -C \texttt{PATH\textunderscore TO\textunderscore CLOUD}/apps}\\
-        \item Change permissions of the extracted folder \texttt{PATH\textunderscore TO\textunderscore CLOUD/apps/zimbradrive}\\ \\
-        \texttt{chown -R root:www-data PATH\textunderscore TO\textunderscore CLOUD/apps/zimbradrive/}\\
-        \item Enable Zimbra Drive App from Nextcloud/ownCloud Admin Interface or with command %(replace PATH\textunderscore CLOUD)
-        \\ \\
+        \item Copy \texttt{zimbradrive.tar.gz} in Nextcloud/ownCloud drive:\\
+        \texttt{scp zimbradrive.tar.gz root@cloud:/tmp}
+
+        \item In Nextcloud/ownCloud server, extract \texttt{zimbradrive.tar.gz}  in \texttt{PATH\textunderscore TO\textunderscore CLOUD/apps}:\\
+        \texttt{tar -xvzf zimbradrive.tar.gz -C \texttt{PATH\textunderscore TO\textunderscore CLOUD}/apps}
+        
+        \item Change permissions of the extracted folder \texttt{PATH\textunderscore TO\textunderscore CLOUD/apps/zimbradrive}
+        with the user owner of Nextcloud/ownCloud (E.g.: www-data):\\
+        \texttt{chown -R www-data:www-data PATH\textunderscore TO\textunderscore CLOUD/apps/zimbradrive/}
+        
+        \item Enable Zimbra Drive App from Nextcloud/ownCloud Admin Interface or with command: %(replace PATH\textunderscore CLOUD)
         \texttt{sudo -u www-data php PATH\textunderscore TO\textunderscore CLOUD/occ app:enable zimbradrive}
     \end{enumerate}
 
     At this point the Nextcloud/ownCloud Zimbra Drive App is installed and is required the configuration.
-    In Nextcloud/ownCloud administration panel must appears a new "Zimbra Drive" entry in the left sidebar
-    that redirect to the configuration view. Here will be the following configurations:
-    \begin{itemize}
-        \item (CheckBox) \textbf{Enable Zimbra authentication back end}\\
-        (Mandatory checked) Add configuration that let use Zimbra Drive App class.
-        \item (CheckBox) \textbf{Allow Zimbra's users to log in}\\
-        (Mandatory checked) Allows Zimbra users to use Nextcloud/ownCloud with their Zimbra credentials.
-        \item (InputField) \textbf{Zimbra Server}\\
-        (Mandatory) Zimbra webmail host or ip.
-        \item (InputField) \textbf{Zimbra Port}\\
-        (Mandatory) Zimbra webmail port.
-        \item (CheckBox) \textbf{Use SSL}\\
-        Check if the Zimbra webmail port uses SSL certification.
-        \item (CheckBox) \textbf{Enable certification verification}\\
-        Disable only if Zimbra has an untrusted certificate.
-        \item (InputField) \textbf{Domain Preauth Key}\\
-        The Zimbra users can log in Nextcloud/ownCloud after the first access in Zimbra Drive Zimlet
-        with their Zimbra credentials. The new icon in Apps menu added by Zimbra Drive App let 
-        Zimbra user to open a new Zimbra webmail tab skipping authentication.\\
-        The Domain PreAuth Key is required:\\
-        \texttt{\# As zimbra}\\
-        \texttt{zmprov generateDomainPreAuthKey domainExample.com} (first time)\\
-        \texttt{zmprov getDomain example860.com zimbraPreAuthKey}
-    \end{itemize}

@@ -1,0 +1,36 @@
+\section{Cloud App configuration}
+
+\subsection{Nextcloud/ownCloud}\label{subsec:NextcloudownCloudInstallation}
+    When everything is correcly configured, the Zimbra end user creates a private account in the cloud service
+    that will be paired with the Zimbra user account.
+    This new cloud account inherit the Zimbra user credentials and appears in users list of Nextcloud/ownCloud Admin Interface;
+    however this account is active until the Zimbra Drive app is enabled.
+
+    Nextcloud and ownCloud have the same following configuration entries.
+    In Nextcloud/ownCloud administration panel must appears a new "Zimbra Drive" entry in the left sidebar
+    that redirect to the configuration view. There will be the following configurations:
+    \begin{itemize}
+        \item (CheckBox) \textbf{Enable Zimbra authentication back end}\\
+        (Mandatory checked) On check, add a configuration in config.php that let Nextcloud/ownCloud use Zimbra Drive App class. On uncheck remove this configuration.
+        \item (CheckBox) \textbf{Allow Zimbra's users to log in}\\
+        (Mandatory checked) Allows Zimbra users to use Nextcloud/ownCloud with their Zimbra credentials.
+        \item (InputField) \textbf{Zimbra Server}\\
+        (Mandatory) Zimbra webmail host or ip.
+        \item (InputField) \textbf{Zimbra Port}\\
+        (Mandatory) Zimbra webmail port.
+        \item (CheckBox) \textbf{Use SSL}\\
+        Check if the Zimbra webmail port uses SSL certification.
+        \item (CheckBox) \textbf{Enable certification verification}\\
+        Disable only if Zimbra has an untrusted certificate.
+        \item (InputField) \textbf{Domain Preauth Key}\\
+        After Zimbra end user creates a private account with the first successful access in Zimbra Drive,
+        he can log in Nextcloud/ownCloud web interface with their Zimbra credentials. 
+        In Nextcloud/ownCloud web interface he will find a Zimbra icon in Apps menu
+        that will open new a Zimbra webmail tab without login step.\\
+        This feature works only if the Zimbra Domain PreAuth Key is copied. 
+        In zimbra run the following command in order to show the desired Zimbra Domain PreAuth Key:\\
+        \texttt{\# As zimbra}\\
+        \texttt{zmprov getDomain example.com zimbraPreAuthKey}\\
+        \texttt{\# If response is empty, generate with}\\
+        \texttt{zmprov generateDomainPreAuthKey domainExample.com}\\
+    \end{itemize}

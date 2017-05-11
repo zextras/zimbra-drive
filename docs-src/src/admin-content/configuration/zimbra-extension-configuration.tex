@@ -1,0 +1,22 @@
+\section{Zimbra Extension configuration}
+
+    Zimbra Extension setup requires the url of the cloud service that will be paired.//
+    This url has to be set in the domain attribute zimbraDriveOwnCloudURL and 
+    it is common to all users belonging the same domain.
+    Different domains may have different cloud service urls.\\
+    The command is the following:
+    \begin{verbatim}
+# As zimbra
+zmprov md domainExample.com zimbraDriveOwnCloudURL CLOUD_URL
+    \end{verbatim}
+
+    The cloud service url (\texttt{CLOUD\_URL}) has to be in the form: \texttt{protocol://cloudHost/path}.
+
+    \begin{itemize}
+        \item{\texttt{protocol}: can be \texttt{http} or \texttt{https}}
+        \item{\texttt{cloudHost}: hostname of the server where the cloud service lies}
+        \item{\texttt{path}: path in server of the targeted cloud service}
+    \end{itemize}
+
+    Moreover each cloud service have its entry point.\\
+    In Nextcloud/ownCloud, the url has to target at \texttt{index.php}\: protocol://cloudHost/path/index.php

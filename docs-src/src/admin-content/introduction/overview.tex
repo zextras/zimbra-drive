@@ -4,20 +4,16 @@
     any Zimbra domain can be paired to a cloud service, then each Zimbra end user, belonging to this domain,
     will benefit to the same cloud service platform.
 
-    At the first access to Drive tab, the Zimbra end user automatically creates a private account in the cloud service
-    that will be paired with the Zimbra user account.
-    This new cloud account inherit the Zimbra user credentials and appears in users list of Nextcloud/ownCloud Admin Interface;
-    however this account is active until the Zimbra Drive app is enabled.
-
-%    Zimbra Drive integrate an external storage services in the Zimbra Web Interface as well as authentication mechanism.
-%    Each Zimbra account will be linked to the external storage service account allowing the user back-and-forth.
+    Zimbra Drive is a three parts software (Zimbra Extension, Zimlet and Cloud App),
+    that integrate an external storage services in the Zimbra Web Interface as well as authentication mechanism.
+    Each Zimbra account will be linked to the external storage service account allowing the user back-and-forth.
 %
 
 \subsection{Components}
-    Zimbra Drive elements are the following:
+    Zimbra Drive components are the following:
     \begin{enumerate}
-        \item Zimlet
         \item Zimbra Extension
+        \item Zimlet
         \item Cloud App
     \end{enumerate}
     \begin{warning}
@@ -25,19 +21,23 @@
         However any error in installation and configuration won't affect Zimbra usability.
     \end{warning}
 
-        \subsubsection{Extension}
+        \subsection{Extension}
         The Zimbra Drive extension is installed in the mailboxd component, it acts in the middle between the Zimbra
         Drive zimlet and Cloud App providing services like authentication and item actions to the zimlet.
         %TODO talk about files/names?
 
-        \subsubsection{Zimlet}
+        \subsection{Zimlet}
         The Zimbra Drive zimlet improves the user Zimbra interface adding a new tab before Preferences tab,
         this tab is titled "Drive". Furthermore the zimlet let user perform search in linked cloud.\\
         The zimlet component is contained in package com\_zextras\_drive\_open.zip and the zimlet name is precisely
         "com\_zextras\_drive\_open".
 
-        \subsubsection{Cloud App}
-        The Cloud App is a specific application for Nextcloud and ownCloud, it provide transparent authentication in
+        \subsection{Cloud App}\label{subsec:supportedClouds}
+        The external services of cloud storage need specific app with dedicated API to communicate with Zimbra Drive Extension;
+        Zimbra Drive provides an app to each service supported.
+
+        \subsubsection{Nextcloud/ownCloud}
+        The Nextcloud/ownCloud App is a specific application for Nextcloud and ownCloud, it provide transparent authentication in
         ownCloud and Nextcloud using Zimbra credentials and a layer of compatibility which abstracts the version of
         ownCloud and Nextcloud for the extension.
         %TODO talk about files/names?
