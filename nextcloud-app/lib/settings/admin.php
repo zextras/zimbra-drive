@@ -18,13 +18,15 @@
 
 namespace OCA\ZimbraDrive\Settings;
 
-use OCA\ZimbraDrive\AppInfo\Application;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\IConfig;
 use OCP\Settings\ISettings;
+use OCP\Template;
 
 class Admin implements ISettings
 {
+    const SECTION_PRIORITY = 75;
+    const SECTION_ID = 'zimbradrive';
     /** @var IConfig */
     private $config;
 
@@ -52,7 +54,7 @@ class Admin implements ISettings
      */
     public function getSection()
     {
-        return 'zimbradrive';
+        return self::SECTION_ID;
     }
 
     /**
@@ -64,6 +66,26 @@ class Admin implements ISettings
      */
     public function getPriority()
     {
-        return 0;
+        return self::SECTION_PRIORITY;
+    }
+
+    /**
+     * The panel controller method that returns a template to the UI
+     * @since ownCloud 10.0
+     * @return TemplateResponse | Template
+     */
+    public function getPanel()
+    {
+        return $this->getForm();
+    }
+
+    /**
+     * A string to identify the section in the UI / HTML and URL
+     * @since ownCloud 10.0
+     * @return string
+     */
+    public function getSectionID()
+    {
+        return $this->getSection();
     }
 }

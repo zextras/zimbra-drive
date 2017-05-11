@@ -18,6 +18,7 @@
 
 use OCA\ZimbraDrive\AppInfo\Application;
 use \OCA\ZimbraDrive\Settings\AppSettings;
+use \phpseclib\Crypt\Random;
 
 class OC_User_Zimbra extends \OC_User_Backend
 {
@@ -120,11 +121,8 @@ class OC_User_Zimbra extends \OC_User_Backend
 
             if(!$this->userExists($userId))
             {
-                $this->initializeUser($userId, $userDisplayName);
+                $this->initializeUser($userId, $userDisplayName, $userEmail);
             }
-
-            $user = $this->userManager->get($userId);
-            $user->setEMailAddress($userEmail);
 
             return $userId;
         } else {
@@ -135,15 +133,17 @@ class OC_User_Zimbra extends \OC_User_Backend
     /**
      * @param $userId
      * @param $userDisplayName
+     * @param $userEmail
      */
-    private function initializeUser($userId, $userDisplayName)
+    private function initializeUser($userId, $userDisplayName, $userEmail)
     {
         $this->logger->debug('Initialize user ' . $userId . '.', ['app' => Application::APP_NAME]);
-        $this->storeUser(
-            $userId,
-            $userDisplayName
-        );
 
+        $this->storeUser($userId, $userDisplayName);
+        $user = $this->userManager->createUser($userId, Random::string(255));
+
+        $user->setDisplayName($userDisplayName);
+        $user->setEMailAddress($userEmail);
         $this->insertUserInGroup($userId, self::ZIMBRA_GROUP);
         $this->insertUserInGroup($userId, $this->zimbra_url);
     }

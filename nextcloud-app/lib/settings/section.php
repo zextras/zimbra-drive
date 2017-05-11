@@ -18,7 +18,6 @@
 
 namespace OCA\ZimbraDrive\Settings;
 
-use OCA\ZimbraDrive\AppInfo\Application;
 use OCP\Settings\ISection;
 
 class Section implements ISection
@@ -33,7 +32,7 @@ class Section implements ISection
      */
     public function getID()
     {
-        return 'zimbradrive';
+        return Admin::SECTION_ID;
     }
 
     /**
@@ -49,7 +48,15 @@ class Section implements ISection
      */
     public function getPriority()
     {
-        return 75;
+        return Admin::SECTION_PRIORITY;
     }
 
+    /**
+     * @since ownCloud 10.0
+     * @return string
+     */
+    public function getIconName()
+    {
+        return 'config';
+    }
 }
