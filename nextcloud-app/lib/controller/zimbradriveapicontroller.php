@@ -92,6 +92,10 @@ class ZimbraDriveApiController extends ApiController
         }
 
         $types = json_decode($types, false);
+        if($types === array('document'))
+        {
+            $types = array('file');
+        }
         $caseSensitive = $caseSensitive === "true";
 
         try {
@@ -105,24 +109,24 @@ class ZimbraDriveApiController extends ApiController
             return new EmptyResponse(Http::STATUS_METHOD_NOT_ALLOWED);
         }
 
-        $results = $this->filterTypes($wantedFiles, $types);
+        $results = $this->filterNodesByType($wantedFiles, $types);
         $resultsNoShares = $this->filterShareNodes($results);
         return new JSONResponse($resultsNoShares);
     }
 
     /**
-     * @param $mapsToBeFilter array
-     * @param $types array of string
+     * @param $nodes array
+     * @param $allowedTypes array of string
      * @return array
      */
-    private function filterTypes($mapsToBeFilter, $types)
+    private function filterNodesByType($nodes, $allowedTypes)
     {
         $results = array();
-        foreach($mapsToBeFilter as $mapToBeFilter)
+        foreach($nodes as $node)
         {
-            if($this->isAValidType($mapToBeFilter, $types))
+            if($this->nodeHasAValidType($node, $allowedTypes))
             {
-                $results[] = $mapToBeFilter;
+                $results[] = $node;
             }
         }
         return $results;
@@ -130,13 +134,13 @@ class ZimbraDriveApiController extends ApiController
     }
 
     /**
-     * @param $mapToBeFilter string
-     * @param $types array
+     * @param $node string
+     * @param $validTypes array
      * @return bool
      */
-    private function isAValidType($mapToBeFilter, $types)
+    private function nodeHasAValidType($node, $validTypes)
     {
-        return in_array($mapToBeFilter[ResponseVarName::NODE_TYPE_VAR_NAME], $types, true);
+        return in_array($node[ResponseVarName::NODE_TYPE_VAR_NAME], $validTypes, true);
     }
 
     /**
