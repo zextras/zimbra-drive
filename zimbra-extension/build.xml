@@ -41,6 +41,7 @@
 
     <target name="compile"
             depends="clean">
+        <exec executable="./gen_buildinfo.sh" failonerror="true" />
         <javac srcdir="${src}"
                destdir="${build}"
                includeantruntime="false"
