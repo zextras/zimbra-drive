@@ -1,21 +1,11 @@
 \section{Zimbra Extension and Zimlet upgrade}
-\begin{warning}
-Zimbra Drive Extension and Zimbra Drive Zimlet are upgraded automatically during the Zimbra Upgrade.
-\end{warning}
 
-    
-The Zimbra Drive Extension can be upgraded replacing the zimbra-extension.jar and zal.jar files in \texttt{/opt/zimbra/lib/ext/zimbradrive/} and performing a mailbox restart.
-\begin{verbatim}
-# As root
-cp zimbradrive-extension.jar /opt/zimbra/lib/ext/zimbradrive/
-cp zal.jar /opt/zimbra/lib/ext/zimbradrive/
-# As zimbra
-mailboxdctl restart
-\end{verbatim}
+When Zimbra is upgraded to a more recent version, Zimbra Drive can be installed right from the installation.
+Anyway Zimbra Drive can be kept upgraded in the same Zimbra major.minor versions with apt-get or yum:
 
-The Zimbra Drive Zimlet can be upgraded deploying the newest version and then flushing cache:
 \begin{verbatim}
-# As zimbra
-zmzimletctl deploy /tmp/openchat/com_zextras_drive_open.zip
-zmprov fc zimlet
+# As root, when apt-get is available
+apt-get update; apt-get install zimbra-drive
+# As root, when yum is available
+yum update; yum install zimbra-drive
 \end{verbatim}

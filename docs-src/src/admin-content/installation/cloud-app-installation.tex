@@ -1,8 +1,8 @@
 \section{Cloud app installation}
 
-In this section are provided the steps to install the Zimbra Drive Cloud App to the specific supported cloud.
+Here are provided the steps to install the Zimbra Drive Cloud App to the specific supported cloud.
 \begin{warning}
-The cloud services currently supported are Nextcloud and ownCloud with \texttt{zimbradrive.tar.gz} app.
+The cloud services currently supported are Nextcloud and ownCloud with the archive \texttt{zimbradrive.tar.gz}.
 \end{warning}
 
 \subsection{Nextcloud/ownCloud}\label{subsec:NextcloudownCloudInstallation}
@@ -25,3 +25,11 @@ The cloud services currently supported are Nextcloud and ownCloud with \texttt{z
     \end{enumerate}
 
     At this point the Nextcloud/ownCloud Zimbra Drive App is installed and is required the configuration.
+\begin{warning}
+On Apache Web Server, Zimbra Drive doesn't work if the server is not correctly configured.
+The instructions about \textit{Apache Web Server Configuration} in manual
+\href{https://docs.nextcloud.com/server/11/admin_manual/installation/source_installation.html#apache-web-server-configuration}{Nextcloud installation}
+or in manual
+\href{https://doc.owncloud.org/server/10.0/admin_manual/installation/source_installation.html#apache-web-server-configuration}{ownCloud installation}
+are required.
+\end{warning}

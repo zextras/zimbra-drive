@@ -19,6 +19,8 @@
 \newenvironment{warning}
 {
     \par
+    \begin{mdframed}[backgroundcolor=red!10,linewidth=0.4pt,linecolor=red]%
+    \bfseries
     \begin{list}{}{
         \leftmargin=5ex
         \labelwidth=
@@ -30,6 +32,7 @@
 }
 {
     \end{list}
+    \end{mdframed}
     \par
 }
 
