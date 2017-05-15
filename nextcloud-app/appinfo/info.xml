@@ -30,7 +30,7 @@
     <category>auth</category>
     <category>integration</category>
     <dependencies>
-        <owncloud min-version="9.0"/>
+        <owncloud min-version="9" max-version="10"/>
         <nextcloud min-version="9" max-version="11"/>
     </dependencies>
     <types>
@@ -39,6 +39,5 @@
     </types>
     <settings>
         <admin>OCA\ZimbraDrive\Settings\Admin</admin>
-        <admin-section>OCA\ZimbraDrive\Settings\Section</admin-section>
     </settings>
 </info>

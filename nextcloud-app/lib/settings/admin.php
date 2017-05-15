@@ -26,7 +26,7 @@ use OCP\Template;
 class Admin implements ISettings
 {
     const SECTION_PRIORITY = 75;
-    const SECTION_ID = 'zimbradrive';
+    const SECTION_ID = 'additional';
     /** @var IConfig */
     private $config;
 
