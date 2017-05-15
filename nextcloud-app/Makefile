@@ -34,7 +34,7 @@ dist/zimbradrive.tar.gz:
 		--exclude=.git \
 		--exclude=build/ \
 		. build/$(app_name)/
-	cp ../LICENSE build/LICENSE
+	cp LICENSE build/LICENSE
 	cd "build/$(app_name)" && find . -type f -not -name "$(app_name).md5" -exec md5sum "{}" + > "$(app_name).md5"
 	cd build/ && tar cvzf $(app_name).tar.gz $(app_name) --owner=0 --group=0
 	mv build/$(app_name).tar.gz dist/
