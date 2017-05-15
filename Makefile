@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2017 ZeXtras S.r.l.
+# Copyright (C) 2017 ZeXtras SRL
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -20,7 +20,7 @@ ZAL_VERSION=1.11
 ZAL_VERSION_EXTENDED=1.11.8
 ZIMBRA_VERSION=8.7.10
 
-all: dist/zimbra_drive.tgz dist/zimbradrive.tar.gz dist/zimbra-drive.md5
+all: dist/zimbra_drive.tgz dist/zimbradrive.tar.gz dist/zimbra_drive.md5
 
 clean:
 	rm -rf build/nextcloud-app \
@@ -28,9 +28,9 @@ clean:
 		build/zimlet
 	rm -f build/LICENSE	\
 		build/README.md \
-		build/zimbra-drive.md5 \
+		build/zimbra_drive.md5 \
 		dist/zimbra_drive.tgz \
-		dist/zimbra-drive.md5 \
+		dist/zimbra_drive.md5 \
 		dist/zimbradrive.tar.gz
 	cd nextcloud-app && make clean
 	cd zimbra-extension && make clean
@@ -80,28 +80,32 @@ build/LICENSE:
 	mkdir -p build
 	cp LICENSE build/
 
-build/zimbra-drive.md5: build/README.md \
+build/zimbra_drive.md5: build/README.md \
 						build/LICENSE \
-						build/nextcloud-app/zimbradrive.tar.gz \
 						build/zimbra-extension/zimbradrive-extension.jar \
 						build/zimlet/com_zextras_drive_open.zip
 	mkdir -p build
-	cd build && find . -type f -not -name "zimbra-drive.md5" -exec md5sum "{}" + > zimbra-drive.md5
+	cd build && find . -type f -not -name "zimbra_drive.md5" -exec md5sum "{}" + > zimbra_drive.md5
 
 dist/zimbra_drive.tgz: build/README.md \
 						build/LICENSE \
-						build/nextcloud-app/zimbradrive.tar.gz \
 						build/zimbra-extension/zimbradrive-extension.jar \
 						build/zimlet/com_zextras_drive_open.zip \
-						build/zimbra-drive.md5
+						build/zimbra_drive.md5
 	mkdir -p build
 	mkdir -p dist
-	cd build && tar -czvf ../dist/zimbra_drive.tgz nextcloud-app/ zimbra-extension/ zimlet/ README.md LICENSE zimbra-drive.md5 --owner=0 --group=0
+	cd build && tar -czvf ../dist/zimbra_drive.tgz \
+		zimbra-extension/ \
+		zimlet/ \
+		README.md \
+		LICENSE \
+		zimbra_drive.md5 \
+		--owner=0 --group=0
 
 dist/zimbradrive.tar.gz: build/nextcloud-app/zimbradrive.tar.gz
 	mkdir -p build
 	mkdir -p dist
 	cp build/nextcloud-app/zimbradrive.tar.gz dist/zimbradrive.tar.gz
 
-dist/zimbra-drive.md5: dist/zimbra_drive.tgz
-	cd dist && md5sum zimbra_drive.tgz > zimbra-drive.md5
+dist/zimbra_drive.md5: dist/zimbra_drive.tgz
+	cd dist && md5sum zimbra_drive.tgz > zimbra_drive.md5
