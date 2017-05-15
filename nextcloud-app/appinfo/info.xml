@@ -1,19 +1,8 @@
 <?xml version="1.0"?>
 <!--
-  ~ Copyright (C) 2017 ZeXtras S.r.l.
+  ~ MIT License (MIT)
   ~
-  ~ This program is free software; you can redistribute it and/or
-  ~ modify it under the terms of the GNU General Public License
-  ~ as published by the Free Software Foundation, version 2 of
-  ~ the License.
-  ~
-  ~ This program is distributed in the hope that it will be useful,
-  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
-  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  ~ GNU General Public License for more details.
-  ~
-  ~ You should have received a copy of the GNU General Public License.
-  ~ If not, see <http://www.gnu.org/licenses/>.
+  ~ Copyright (c) 2017 Zextras SRL
   -->
 
 <info xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -22,10 +11,10 @@
     <name>Zimbra Drive</name>
     <summary>Integration with Zimbra</summary>
     <description>
-        <![CDATA[Add (Next|Own)Cloud as Briefcase in Zimbra with the full features of both applications.]]></description>
-    <licence>GPL-2.0</licence>
+        <![CDATA[Add Nextcloud / ownCloud as Briefcase in Zimbra with the full features of both applications.]]></description>
+    <licence>mit</licence>
     <author>ZeXtras</author>
-    <version>8.8</version>
+    <version>0.8.10</version>
     <namespace>ZimbraDrive</namespace>
     <category>auth</category>
     <category>integration</category>
