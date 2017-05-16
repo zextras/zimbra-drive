@@ -15,6 +15,10 @@ Perform the steps as installation(\ref{subsec:NextcloudownCloudInstallation}):
         \texttt{chown -R www-data:www-data PATH\textunderscore TO\textunderscore CLOUD/apps/zimbradrive/}
     \end{enumerate}
 
+\begin{warning}
+    On ugrade from version 0.0.1 remove the table oc\_zimbradrive\_users that is not more used. In mysql execute the following command:\\
+    \texttt{DROP TABLE oc\_zimbradrive\_users;}
+\end{warning}
 %\subsection{Cloud platform change}
 %The cloud platform can be set with the domain attribute zimbraDriveOwnCloudURL.\\
 %Zimbra Drive Cloud App must be installed in the new cloud platform.
