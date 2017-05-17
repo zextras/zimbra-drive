@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 ZeXtras S.r.l.
+ * Copyright (C) 2017 ZeXtras SRL
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -133,7 +133,7 @@ export class PreviewView extends DwtComposite {
     this._setHeader(item);
 
     // let url: string = `${ZimbraDriveApp.DOWNLOAD_URL}${ZimbraDriveController.getCurrentFolderPath()}${item.getName()}`;
-    let url: string = `${ZimbraDriveApp.DOWNLOAD_URL}${item.getPath()}`;
+    let url: string = `${ZimbraDriveApp.DOWNLOAD_URL}${item.getPath(true)}`;
     url = PreviewView._addRequestParam(url, "errorcallback", "ZmZimbraDrivePreviewView._errorCallback");
     this._frameUrl = url;
     ZmZimbraMail.unloadHackCallback();

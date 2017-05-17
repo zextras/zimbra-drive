@@ -1,19 +1,8 @@
 <?php
 /**
- * Copyright (C) 2017 ZeXtras S.r.l.
+ * MIT License (MIT)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation, version 2 of
- * the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License.
- * If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (c) 2017 Zextras SRL
  */
 
 /**
@@ -35,6 +24,9 @@ return [
         ['name' => 'zimbra_drive_api#move', 'url' => '/api/1.0/Move', 'verb' => 'POST'],
         ['name' => 'zimbra_drive_api#newDirectory', 'url' => '/api/1.0/NewDirectory', 'verb' => 'POST'],
         ['name' => 'zimbra_drive_api#uploadFile', 'url' => '/api/1.0/UploadFile', 'verb' => 'POST'],
-        ['name' => 'connectivity_test#connectivityTest', 'url' => '/api/1.0/ConnectivityTest', 'verb' => 'GET']
+        ['name' => 'admin_api#enableZimbraAuthentication', 'url' => '/admin/EnableZimbraAuthentication', 'verb' => 'POST'],
+        ['name' => 'admin_api#disableZimbraAuthentication', 'url' => '/admin/DisableZimbraAuthentication', 'verb' => 'POST'],
+        ['name' => 'test#all', 'url' => '/test/All', 'verb' => 'GET'],
+        ['name' => 'test#connectivityTest', 'url' => '/test/ConnectivityTest', 'verb' => 'GET'],
     ]
 ];

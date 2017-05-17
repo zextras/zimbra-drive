@@ -1,31 +1,24 @@
 <?php
 /**
- * Copyright (C) 2017 ZeXtras S.r.l.
+ * MIT License (MIT)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation, version 2 of
- * the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License.
- * If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (c) 2017 Zextras SRL
  */
 
-OC::$CLASSPATH['OC_User_Zimbra'] = 'zimbradrive/lib/Auth/OC_User_Zimbra.php';
+namespace OCA\ZimbraDrive\AppInfo;
 
-use OCA\ZimbraDrive\Service\StorageService;
 use OCA\ZimbraDrive\Service\LogService;
 use OCP\AppFramework\App;
+use OC;
+use OCP\IURLGenerator;
+use OCP\Settings\ISettings;
+
 
 class Application extends App {
+    const APP_NAME = 'zimbradrive';
 
     public function __construct(array $urlParams=array()){
-        parent::__construct('zimbradrive', $urlParams);
+        parent::__construct(self::APP_NAME, $urlParams);
 
         $container = $this->getContainer();
 
@@ -39,27 +32,38 @@ class Application extends App {
 
         $container->registerService('LogService', function($c) {
             $logger = $c->query('ILogger');
-            $appName = $c->query('AppName');
 
-            return new LogService($logger, $appName);
+            return new LogService($logger, self::APP_NAME);
         });
 
         $container->registerService('IServerContainer', function($c) {
             return $c->query('ServerContainer');
         });
+
+        $container->registerService('IConfig', function($c) {
+            return $c->query('ServerContainer')->getConfig();
+        });
     }
 }
 
+OC::$CLASSPATH['OC_User_Zimbra'] = 'zimbradrive/lib/auth/oc_user_zimbra.php';
+
 $app = new Application();
+
+if(!interface_exists(ISettings::class))  // ISettings not supported in OwnCloud 9.1.4
+{
+    \OCP\App::registerAdmin(Application::APP_NAME, 'admin');
+}
 
 $container = $app->getContainer();
 
 $container->query('OCP\INavigationManager')->add(function () use ($container) {
+    /** @var IURLGenerator $urlGenerator */
     $urlGenerator = $container->query('OCP\IURLGenerator');
     $l10n = $container->query('OCP\IL10N');
     return [
         // the string under which your app will be referenced in *Cloud
-        'id' => 'zimbradrive',
+        'id' => Application::APP_NAME,
 
         // sorting weight for the navigation. The higher the number, the higher
         // will it be listed in the navigation
@@ -70,7 +74,7 @@ $container->query('OCP\INavigationManager')->add(function () use ($container) {
 
         // the icon that will be shown in the navigation
         // this file needs to exist in img/
-        'icon' => $urlGenerator->imagePath('zimbradrive', 'app.svg'), // TODO: Put the Zimbra icon here!
+        'icon' => $urlGenerator->imagePath(Application::APP_NAME, 'app.svg'),
 
         // the title of your application. This will be used in the
         // navigation or on the settings page of your app

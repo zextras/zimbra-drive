@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 ZeXtras S.r.l.
+ * Copyright (C) 2017 ZeXtras SRL
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -90,7 +90,9 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
 
   constructor(zimlet: ZimbraDriveZimlet, container: DwtControl) {
     super(ZimbraDriveApp.APP_NAME, zimlet, container);
-    this._defaultNewButtonMenu = (<ZmZimbraMail> appCtxt.getAppController()).getNewButton().getMenu(true);
+    if (!appCtxt.isChildWindow) {
+      this._defaultNewButtonMenu = (<ZmZimbraMail> appCtxt.getAppController()).getNewButton().getMenu(true);
+    }
   }
 
   public launch(params?: ZmZimletAppLaunchParams, callback?: AjxCallback): void {
@@ -353,7 +355,7 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
       sessionId: sessionId || ZmApp.MAIN_SESSION,
       searchResultsController: searchResultsController
     });
-    if (!this.dropDownMenuItemsLoaded) {
+    if (!this.dropDownMenuItemsLoaded && !appCtxt.isChildWindow) {
       let dropDownMenu: ZmPopupMenu = this.getZDNewButtonMenu();
       dropDownMenu.addSelectionListener(ZDId.ZD_NEW_FILE, zimbraDriveController._listeners[ZDId.ZD_NEW_FILE]);
       dropDownMenu.addSelectionListener(ZDId.ZD_NEW_FOLDER, zimbraDriveController._listeners[ZDId.ZD_NEW_FOLDER]);
@@ -469,16 +471,18 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
   // Here change menu of new Button
   public activate(active: boolean, viewId: string): void {
     super.activate(active, viewId);
-    let toolbarButton = (<ZmZimbraMail> appCtxt.getAppController()).getNewButton();
-    if (active) {
-      toolbarButton.setMenu(this.getZDNewButtonMenu());
-    }
-    else {
-      toolbarButton.setMenu(this._defaultNewButtonMenu);
-    }
-    if (this._promisedGoToFolder) {
-      ZimbraDriveController.goToFolder(this._promisedGoToFolder, false);
-      this._promisedGoToFolder = "";
+    if (!appCtxt.isChildWindow) {
+      let toolbarButton = (<ZmZimbraMail> appCtxt.getAppController()).getNewButton();
+      if (active) {
+        toolbarButton.setMenu(this.getZDNewButtonMenu());
+      }
+      else {
+        toolbarButton.setMenu(this._defaultNewButtonMenu);
+      }
+      if (this._promisedGoToFolder) {
+        ZimbraDriveController.goToFolder(this._promisedGoToFolder, false);
+        this._promisedGoToFolder = "";
+      }
     }
   }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 ZeXtras S.r.l.
+ * Copyright (C) 2017 ZeXtras SRL
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -20,7 +20,7 @@ var BannerPlugin = webpack.BannerPlugin;
 var path = require("path");
 
 var license = [];
-license.push("Copyright (C) " + ((new Date()).getFullYear()) + " ZeXtras S.r.l.");
+license.push("Copyright (C) " + ((new Date()).getFullYear()) + " ZeXtras SRL");
 license.push("");
 license.push("This program is free software; you can redistribute it and/or");
 license.push("modify it under the terms of the GNU General Public License");

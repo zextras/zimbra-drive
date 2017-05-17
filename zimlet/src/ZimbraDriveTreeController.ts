@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 ZeXtras S.r.l.
+ * Copyright (C) 2017 ZeXtras SRL
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -141,7 +141,7 @@ export class ZimbraDriveTreeController extends ZmFolderTreeController {
   }
 
   public downloadFolderAsZip(folderPath: string) {
-    let url: string = `${ZimbraDriveApp.DOWNLOAD_URL}${folderPath}`;
+    let url: string = `${ZimbraDriveApp.DOWNLOAD_URL}${AjxStringUtil.urlComponentEncode(folderPath)}`;
     ZmZimbraMail.unloadHackCallback();
     location.href = url;
   }

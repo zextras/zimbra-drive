@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="MIT Code" pattern="file[nextcloud-app]:*/" />
+</component>

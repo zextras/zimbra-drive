@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (C) 2017 ZeXtras S.r.l.
+  ~ Copyright (C) 2017 ZeXtras SRL
   ~
   ~ This program is free software; you can redistribute it and/or
   ~ modify it under the terms of the GNU General Public License
@@ -19,7 +19,7 @@
         version="0.0.0"
         label="${msg.zimletLabel}"
         description="${msg.zimletDescription}"
-        target="main">
+        target="main compose-window view-window">
 
     <include>com_zextras_drive_open_hdlr.js</include>
     <include>ZimbraDrive.template.js</include>

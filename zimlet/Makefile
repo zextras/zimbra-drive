@@ -15,6 +15,9 @@
 # If not, see <http://www.gnu.org/licenses/>.
 #
 
+COMMIT_ID_LONG = $(shell git rev-parse HEAD)
+VERSION = $(shell fgrep "\"version\":" package.json | sed -e 's/\s*"version":\s*"\(.*\)",/\1/')
+
 all: dist/com_zextras_drive_open.zip
 
 .PHONY: clean
@@ -64,11 +67,18 @@ build/com_zextras_drive_open_hdlr.js: node_modules
 	./node_modules/.bin/tslint -c tslint.json --project tsconfig.json
 	./node_modules/.bin/webpack
 
+build/VERSION:
+	mkdir -p build
+	echo "$(VERSION)" >> build/VERSION
+	echo "$(COMMIT_ID_LONG)" >> build/VERSION
+
 dist/com_zextras_drive_open.zip: build/com_zextras_drive_open_hdlr.min.js \
 								build/com_zextras_drive_open.css \
 								build/com_zextras_drive_open_hdlr.js \
 								build/com_zextras_drive_open.xml \
-								build/ZimbraDrive.template build/LICENSE \
+								build/ZimbraDrive.template \
+								build/LICENSE \
+								build/VERSION \
 								build/com_zextras_drive_open.properties
 	mkdir -p build
 	mkdir -p dist
@@ -82,20 +92,22 @@ dist/com_zextras_drive_open.zip: build/com_zextras_drive_open_hdlr.min.js \
 		com_zextras_drive_open.properties \
 		com_zextras_drive_open*.properties \
 		ZimbraDrive.template \
+		VERSION \
 		LICENSE
 
 clean:
-	rm -f build/com_zextras_drive_open.css
-	rm -f build/com_zextras_drive_open_hdlr.js
-	rm -f build/com_zextras_drive_open_hdlr.js.map
-	rm -f build/com_zextras_drive_open_hdlr.min.js
-	rm -f build/com_zextras_drive_open.xml
-	rm -f build/com_zextras_drive_open.properties
-	rm -f build/com_zextras_drive_open*.properties
-	rm -f build/ZimbraDrive.template
+	rm -f build/com_zextras_drive_open.css \
+		build/com_zextras_drive_open_hdlr.js \
+		build/com_zextras_drive_open_hdlr.js.map \
+		build/com_zextras_drive_open_hdlr.min.js \
+		build/com_zextras_drive_open.xml \
+		build/com_zextras_drive_open.properties \
+		build/com_zextras_drive_open*.properties \
+		build/ZimbraDrive.template \
+		build/LICENSE \
+		build/VERSION \
+		dist/com_zextras_drive_open.zip
 	rm -rf build/assets/
-	rm -f build/LICENSE
-	rm -f dist/com_zextras_drive_open.zip
 
 install: guard-ZIMLET_DEV_SERVER dist/com_zextras_drive_open.zip
 	scp dist/com_zextras_drive_open.zip root@${ZIMLET_DEV_SERVER}:/tmp/

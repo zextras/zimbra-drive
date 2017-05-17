@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 ZeXtras S.r.l.
+ * Copyright (C) 2017 ZeXtras SRL
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -21,6 +21,7 @@ import {ZDId} from "./ZDId";
 import {ZimbraDriveFolder} from "./ZimbraDriveFolder";
 import {appCtxt} from "./zimbra/zimbraMail/appCtxt";
 import {ZimbraDriveApp} from "./ZimbraDriveApp";
+import {AjxStringUtil} from "./zimbra/ajax/util/AjxStringUtil";
 
 export class ZimbraDriveItem extends ZmItem {
 
@@ -133,8 +134,12 @@ export class ZimbraDriveItem extends ZmItem {
     return this.author;
   }
 
-  public getPath(): string {
-    return this.path + (this.isFolder() ? "/" : "");
+  public getPath(urlEncode?: boolean): string {
+    let path: string = this.path + (this.isFolder() ? "/" : "");
+    if (urlEncode) {
+      path = AjxStringUtil.urlComponentEncode(path);
+    }
+    return path;
   }
 
   public setPath(path: string) {

@@ -1,7 +1,8 @@
 <component name="CopyrightManager">
-  <settings default="ZeXtras">
+  <settings>
     <module2copyright>
-      <element module="All" copyright="ZeXtras" />
+      <element module="GPL2 Code" copyright="ZeXtras GPL2" />
+      <element module="MIT Code" copyright="ZeXtras MIT" />
     </module2copyright>
   </settings>
 </component>
