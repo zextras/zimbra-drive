@@ -21,7 +21,6 @@ import {ZDId} from "./ZDId";
 import {ZimbraDriveFolder} from "./ZimbraDriveFolder";
 import {appCtxt} from "./zimbra/zimbraMail/appCtxt";
 import {ZimbraDriveApp} from "./ZimbraDriveApp";
-import {AjxStringUtil} from "./zimbra/ajax/util/AjxStringUtil";
 
 export class ZimbraDriveItem extends ZmItem {
 
@@ -134,12 +133,8 @@ export class ZimbraDriveItem extends ZmItem {
     return this.author;
   }
 
-  public getPath(urlEncode?: boolean): string {
-    let path: string = this.path + (this.isFolder() ? "/" : "");
-    if (urlEncode) {
-      path = AjxStringUtil.urlComponentEncode(path);
-    }
-    return path;
+  public getPath(): string {
+    return this.path + (this.isFolder() ? "/" : "");
   }
 
   public setPath(path: string) {

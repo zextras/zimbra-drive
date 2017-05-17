@@ -35,6 +35,7 @@ class NodeResponse  extends Response  implements ICallbackResponse
      * @param string $nodePath
      * @param int $statusCode
      * @param array $headers
+     * @since 11.0.0
      */
     public function __construct($nodePath, $statusCode=Http::STATUS_OK,
                                 $headers=[]) {

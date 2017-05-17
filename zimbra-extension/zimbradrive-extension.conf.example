@@ -1,5 +1,5 @@
 {
   "domains": {
-    "example.com": "https://mycloud.example.com/index.php"
+    "example.com": "https://mycloud.example.com"
   }
 }

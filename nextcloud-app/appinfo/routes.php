@@ -35,9 +35,6 @@ return [
         ['name' => 'zimbra_drive_api#move', 'url' => '/api/1.0/Move', 'verb' => 'POST'],
         ['name' => 'zimbra_drive_api#newDirectory', 'url' => '/api/1.0/NewDirectory', 'verb' => 'POST'],
         ['name' => 'zimbra_drive_api#uploadFile', 'url' => '/api/1.0/UploadFile', 'verb' => 'POST'],
-        ['name' => 'admin_api#enableZimbraAuthentication', 'url' => '/admin/EnableZimbraAuthentication', 'verb' => 'POST'],
-        ['name' => 'admin_api#disableZimbraAuthentication', 'url' => '/admin/DisableZimbraAuthentication', 'verb' => 'POST'],
-        ['name' => 'test#all', 'url' => '/test/All', 'verb' => 'GET'],
-        ['name' => 'test#connectivityTest', 'url' => '/test/ConnectivityTest', 'verb' => 'GET'],
+        ['name' => 'connectivity_test#connectivityTest', 'url' => '/api/1.0/ConnectivityTest', 'verb' => 'GET']
     ]
 ];

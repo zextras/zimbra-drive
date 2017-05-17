@@ -18,11 +18,12 @@
 
 namespace OCA\ZimbraDrive\Controller;
 
-use OCA\ZimbraDrive\Settings\AppSettings;
 use OCP\AppFramework\Http\RedirectResponse;
 use OCP\AppFramework\Controller;
+use OCP;
 
 use OCP\IRequest;
+use OCP\IConfig;
 
 class PageController extends Controller
 {
@@ -32,27 +33,20 @@ class PageController extends Controller
     private $use_ssl;
     private $zimbra_preauth_key;
 
-    /**
-     * PageController constructor.
-     * @param string $AppName
-     * @param IRequest $request
-     * @param $UserId
-     * @param AppSettings $appSettings
-     */
     public function __construct(
         $AppName,
         IRequest $request,
         $UserId,
-        AppSettings $appSettings
+        IConfig $config
     )
     {
         parent::__construct($AppName, $request);
         $this->userId = $UserId;
 
-        $this->zimbra_url = $appSettings->getServerUrl();
-        $this->zimbra_port = $appSettings->getServerPort();
-        $this->zimbra_preauth_key = $appSettings->getZimbraPreauthKey();
-        $this->use_ssl = $appSettings->useSSLDuringZimbraAuthentication();
+        $this->zimbra_url = $config->getAppValue("zimbradrive", "zimbra_url");
+        $this->zimbra_port = $config->getAppValue("zimbradrive", "zimbra_port");
+        $this->zimbra_preauth_key = $config->getAppValue("zimbradrive", "preauth_key");
+        $this->use_ssl = $config->getAppValue("zimbradrive", "use_ssl", "true") == "true";
     }
 
     /**
@@ -67,24 +61,17 @@ class PageController extends Controller
      */
     public function index()
     {
-        $baseUrl = sprintf(
-            "http%s://%s:%s",
-            ($this->use_ssl ? "s" : ""),
+        $timestamp = time()*1000;
+        $preauthToken = hash_hmac("sha1", $this->userId."|id|0|".$timestamp, $this->zimbra_preauth_key);
+        $url = sprintf(
+            "%s://%s:%s/service/preauth?account=%s&by=id&timestamp=%s&expires=0&preauth=%s",
+            "http" . ($this->use_ssl ? "s" : ""),
             $this->zimbra_url,
-            $this->zimbra_port);
-        $loginUrlPart = "";
-
-        if($this->zimbra_preauth_key !== '')
-        {
-            $timestamp = time()*1000;
-            $preauthToken = hash_hmac("sha1", $this->userId."|id|0|".$timestamp, $this->zimbra_preauth_key);
-            $loginUrlPart = sprintf(
-                "/service/preauth?account=%s&by=id&timestamp=%s&expires=0&preauth=%s",
-                $this->userId,
-                $timestamp,
-                $preauthToken
-            );
-        }
-        return new RedirectResponse($baseUrl . $loginUrlPart);
+            $this->zimbra_port,
+            $this->userId,
+            $timestamp,
+            $preauthToken
+        );
+        return new RedirectResponse($url);
     }
 }

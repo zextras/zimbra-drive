@@ -83,10 +83,18 @@ public class CreateTempAttachmentFileHttpHandler implements HttpHandler {
         HttpPost post = new HttpPost(
             mBackendUtils.getServerServiceUrl("/service/upload?fmt=extended,raw")
         );
-        post.setHeader(
-            CONTENT_DISPOSITION_HTTP_HEADER,
-            "attachment; filename=\" " + convertToUnicode(path.substring(path.lastIndexOf("/") + 1)) + " \""
-        );
+        Header[] headers = fileRequestResponse.getAllHeaders();
+        for (Header header : headers) {
+          String headerName = header.getName();
+          switch (headerName) {
+            case CONTENT_DISPOSITION_HTTP_HEADER:
+              post.setHeader(CONTENT_DISPOSITION_HTTP_HEADER, java.net.URLDecoder.decode(header.getValue(), "UTF-8"));
+              break;
+            case HttpHeaders.CONTENT_TYPE:
+            case HttpHeaders.CONTENT_LENGTH:
+              break;
+          }
+        }
         post.setHeader("Cache-Control", "no-cache");
         post.setHeader("Cookie", httpServletRequest.getHeader("Cookie"));
         post.setHeader("X-Zimbra-Csrf-Token", httpServletRequest.getHeader("X-Zimbra-Csrf-Token"));
@@ -133,22 +141,4 @@ public class CreateTempAttachmentFileHttpHandler implements HttpHandler {
     return "ZimbraDrive_CreateTempFiles";
   }
 
-  private String convertToUnicode(String source) {
-    String result = "";
-    if (source.length() == 0) return source;
-    for (int i = 0; i < source.length(); i++) {
-      int charCode = (int) source.charAt(i);
-      // Encode non-ascii or double quotes
-      if ((charCode > 127) || (charCode == 34)) {
-        String temp = Integer.toString(charCode);
-        while (temp.length() < 4) {
-          temp = "0" + temp;
-        }
-        result += "&#" + temp + ";";
-      } else {
-        result += source.charAt(i);
-      }
-    }
-    return result;
-  }
 }

@@ -16,40 +16,40 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace OCA\ZimbraDrive\Settings;
+namespace OCA\ZimbraDrive\Controller;
 
-use OCA\ZimbraDrive\AppInfo\Application;
-use OCP\Settings\ISection;
 
-class Section implements ISection
+use OCP\AppFramework\ApiController;
+use OCP\IRequest;
+use OCA\ZimbraDrive\Service\LogService;
+use OCP\AppFramework\Http\DataDisplayResponse;
+
+class ConnectivityTestController extends ApiController
 {
+    private $logger;
 
-    public function __construct()
+    public function __construct(
+        $appName,
+        IRequest $request,
+        LogService $logger
+    )
     {
+        parent::__construct(
+            $appName,
+            $request
+        );
+
+        $this->logger = $logger;
     }
 
     /**
-     * {@inheritdoc}
+     * @CORS
+     * @NoCSRFRequired
+     * @PublicPage
      */
-    public function getID()
+    public function connectivityTest()
     {
-        return 'zimbradrive';
+        $this->logger->info('connectivityTest');
+        return new DataDisplayResponse("OK");
     }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getName()
-    {
-        return 'Zimbra Drive';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getPriority()
-    {
-        return 75;
-    }
-
 }

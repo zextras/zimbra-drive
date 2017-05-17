@@ -133,7 +133,7 @@ export class PreviewView extends DwtComposite {
     this._setHeader(item);
 
     // let url: string = `${ZimbraDriveApp.DOWNLOAD_URL}${ZimbraDriveController.getCurrentFolderPath()}${item.getName()}`;
-    let url: string = `${ZimbraDriveApp.DOWNLOAD_URL}${item.getPath(true)}`;
+    let url: string = `${ZimbraDriveApp.DOWNLOAD_URL}${item.getPath()}`;
     url = PreviewView._addRequestParam(url, "errorcallback", "ZmZimbraDrivePreviewView._errorCallback");
     this._frameUrl = url;
     ZmZimbraMail.unloadHackCallback();

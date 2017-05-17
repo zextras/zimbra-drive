@@ -501,24 +501,24 @@ export class ZimbraDriveController extends ZmListController {
     else if (items.length === 1) {
       const item: ZimbraDriveItem = items[0];
       if (!item.isFolder()) {
-        let url: string = `${ZimbraDriveApp.DOWNLOAD_URL}${item.getPath(true)}`;
-        this._downloadFile(url);
+        let url: string = `${ZimbraDriveApp.DOWNLOAD_URL}${item.getPath()}`;
+        this._downloadFile(AjxStringUtil.urlComponentEncode(url));
       }
       else {
         let itemFolder: ZimbraDriveFolderItem = <ZimbraDriveFolderItem> item;
         let treeController: ZimbraDriveTreeController = <ZimbraDriveTreeController> appCtxt.getOverviewController().getTreeController(ZimbraDriveApp.TREE_ID);
-        treeController.downloadFolderAsZip(itemFolder.getPath(true));
+        treeController.downloadFolderAsZip(itemFolder.getPath());
       }
     }
     else {
       let urlArray: string[] = [];
       for (let item of items) {
         if (!item.isFolder()) {
-          urlArray.push(`${ZimbraDriveApp.DOWNLOAD_URL}${item.getPath(true)}`);
+          urlArray.push(`${ZimbraDriveApp.DOWNLOAD_URL}${item.getPath()}`);
         }
         else {
           let itemFolder: ZimbraDriveFolderItem = <ZimbraDriveFolderItem> item;
-          urlArray.push(`${ZimbraDriveApp.DOWNLOAD_URL}${itemFolder.getPath(true)}`);
+          urlArray.push(`${ZimbraDriveApp.DOWNLOAD_URL}${itemFolder.getPath()}`);
         }
       }
       ZmZimbraMail.unloadHackCallback();
@@ -564,7 +564,7 @@ export class ZimbraDriveController extends ZmListController {
       message = ZmMsg.confirmPermanentDeleteItemList;
     } else {
       let delMsgFormatter = new AjxMessageFormat(ZmMsg.confirmPermanentDeleteItem);
-      message = delMsgFormatter.format(items[0].getName());
+      message = delMsgFormatter.format(AjxStringUtil.htmlEncode(items[0].getName()));
     }
     let dialog = appCtxt.getConfirmationDialog();
     dialog.popup(message, new AjxCallback(this, this._doDeleteItems, [items]));
@@ -674,6 +674,7 @@ export class ZimbraDriveController extends ZmListController {
   public _mouseDownAction(): void {
     if (this._renameField && this._renameField.getVisibility() && this._fileItem) {
       this._doRename(this._fileItem);
+      this.resetRenameFile();
     }
   }
 

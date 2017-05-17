@@ -18,66 +18,35 @@
 /*global OC, OCP, $, t */
 
 var documentsSettings = {
-  appName: 'zimbradrive',
-
-  saveUseSslValueFromCheckbox: function (event) {
-    var element = $(event.srcElement);
-    var elementValue = (element.attr('checked') === 'checked');
-    documentsSettings.setValue('use_ssl', elementValue);
-  },
-
-  saveCheckCertsFromCheckbox: function (event) {
-    var element = $(event.srcElement);
-    var elementValue = (element.attr('checked') !== 'checked');
-    documentsSettings.setValue('trust_invalid_certs', elementValue);
-  },
-
-  setAppValueFromInputTextElement: function (event) {
+  save: function (event) {
     var element = $(event.srcElement);
     var elementName = element.attr('name');
-    var elementValue = element.val();
-    documentsSettings.setValue(elementName, elementValue);
-  },
+    var elementValue;
 
-  setAppValueFromInputNumber: function (event) {
-    var element = $(event.srcElement);
-    var elementName = element.attr('name');
-    var elementValue = parseInt(element.val(), 10);
-    documentsSettings.setValue(elementName, elementValue);
-  },
-
-  saveEnableZimbraUsersValueFromCheckbox: function (event) {
-    var element = $(event.srcElement);
-    var requestUrl;
-    if((element.attr('checked') === 'checked'))
-    {
-      requestUrl = $('#url_enable_zimbra_users').attr('value');
-    } else
-    {
-      requestUrl = $('#url_disable_zimbra_users').attr('value');
+    switch (elementName) {
+      case 'zimbra_url':
+        elementValue = element.val();
+        break;
+      case 'preauth_key':
+        elementValue = element.val();
+        break;
+      case 'zimbra_port':
+        elementValue = parseInt(element.val(), 10);
+        break;
+      case 'use_ssl':
+      case 'trust_invalid_certs':
+        elementValue = (element.attr('checked') === 'checked');
+        break;
+      default:
+        elementValue = null;
     }
-    $.post(requestUrl,function(){
-      documentsSettings.afterSave()
-    },'json');
-  },
 
-  setValue: function (name, value){
-    documentsSettings.beforeSave();
-    if (typeof OCP === 'undefined') {
-      OC.AppConfig.setValue( //Deprecated in NextCloud 11 but OCP.AppConfig is not supported on OwnCloud 9.1.4
-        documentsSettings.appName,
-        name,
-        value,
-        {
-          success: documentsSettings.afterSave,
-          error: documentsSettings.afterSave
-        }
-      );
-    } else {
+    if (elementValue !== null) {
+      OC.msg.startAction('#zimbradrive-admin-msg', t('zimbradrive', 'Saving...'));
       OCP.AppConfig.setValue(
-        documentsSettings.appName,
-        name,
-        value,
+        'zimbradrive',
+        elementName,
+        elementValue,
         {
           success: documentsSettings.afterSave,
           error: documentsSettings.afterSave
@@ -86,46 +55,16 @@ var documentsSettings = {
     }
   },
 
-  beforeSave: function () {
-    OC.msg.startAction('#zimbradrive-admin-msg', t(documentsSettings.appName, 'Saving...'));
-  },
-
-  afterSave: function () {
-    OC.msg.finishedSuccess('#zimbradrive-admin-msg', t(documentsSettings.appName, 'Settings saved'));
-  },
-
-  updateCheckCertsCheckbox: function () {
-    var use_ssl_element = $('#use_ssl');
-    var check_certs_checkbox = $('#check_certs');
-    if((use_ssl_element.attr('checked') === 'checked'))
-    {
-      check_certs_checkbox.removeAttr('disabled');
-    } else
-    {
-      check_certs_checkbox.attr('disabled', 'disabled');
-    }
-  },
-
-  saveAllowZimbraUsersLoginValueFromCheckbox: function () {
-    var element = $(event.srcElement);
-    var elementValue = (element.attr('checked') === 'checked');
-    documentsSettings.setValue('allow_zimbra_users_login', elementValue);
+  afterSave: function (response) {
+    OC.msg.finishedSuccess('#zimbradrive-admin-msg', t('zimbradrive', 'Settings saved'));
   },
 
   initialize: function () {
-    $('#zimbra_url').on('focusout', documentsSettings.setAppValueFromInputTextElement);
-    $('#zimbra_port').on('focusout', documentsSettings.setAppValueFromInputNumber);
-
-    var use_ssl_checkbox = $('#use_ssl');
-    use_ssl_checkbox.on('click', documentsSettings.saveUseSslValueFromCheckbox);
-    use_ssl_checkbox.on('click', documentsSettings.updateCheckCertsCheckbox);
-
-    $('#check_certs').on('click', documentsSettings.saveCheckCertsFromCheckbox);
-    $('#preauth_key').on('focusout', documentsSettings.setAppValueFromInputTextElement);
-    $('#enable_zimbra_users').on('click', documentsSettings.saveEnableZimbraUsersValueFromCheckbox);
-    $('#allow_zimbra_users_login').on('click', documentsSettings.saveAllowZimbraUsersLoginValueFromCheckbox);
-
-    documentsSettings.updateCheckCertsCheckbox();
+    $('#zimbra_url').on('focusout', documentsSettings.save);
+    $('#zimbra_port').on('focusout', documentsSettings.save);
+    $('#use_ssl').on('click', documentsSettings.save);
+    $('#trust_invalid_certs').on('click', documentsSettings.save);
+    $('#preauth_key').on('focusout', documentsSettings.save);
   }
 };
 
