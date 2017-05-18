@@ -20,7 +20,7 @@
         Build file for the Zimbra Drive Extension.
     </description>
 
-    <property name="zal-version-extended" value="1.11.8"/>
+    <property name="required-zal-version" value="1.11.8"/>
 
     <property name="lib"   value="lib/"/>
     <property name="build" value="build/"/>
@@ -63,7 +63,7 @@
             <manifest>
                 <attribute name="ZAL-Extension-Class" value="com.zextras.zimbradrive.ZimbraDriveExtension" />
                 <attribute name="ZAL-Extension-Name" value="ZimbraDrive" />
-                <attribute name="ZAL-Required-Version" value="${zal-version-extended}" />
+                <attribute name="ZAL-Required-Version" value="${required-zal-version}" />
             </manifest>
             <fileset dir="${build}" />
         </jar>
@@ -77,7 +77,7 @@
             <manifest>
                 <attribute name="ZAL-Extension-Class" value="com.zextras.zimbradrive.ZimbraDriveExtension" />
                 <attribute name="ZAL-Extension-Name" value="ZimbraDrive" />
-                <attribute name="ZAL-Required-Version" value="${zal-version-extended}" />
+                <attribute name="ZAL-Required-Version" value="${required-zal-version}" />
             </manifest>
             <fileset dir="${build}" />
             <zipgroupfileset dir="${lib}" includes="json-20160810.jar" />

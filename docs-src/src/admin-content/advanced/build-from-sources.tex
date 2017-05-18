@@ -17,8 +17,8 @@ cd ZimbraDrive
 # Checkout the correct branch for the Zimbra release (assuming Zimbra 8.8.0 )
 git checkout release/8.8.0
 
-# Build the whole package (can take some minutes)
-make
+# Build the whole package setting the target Zimbra (can take some minutes)
+make clean && make ZAL_ZIMBRA_VERSION=8.8.0
 \end{verbatim}
 
 The final artifact \texttt{zimbra\_drive.tgz} will be placed in folder \texttt{/tmp/zimbradrive/dist}.
