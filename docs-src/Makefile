@@ -17,7 +17,7 @@
 
 DOCUMENT_DRAFT?=true
 
-all: dist/admin-guide.pdf dist/user-guide.pdf
+all: dist/admin-guide.pdf
 
 .PHONY: clean
 
@@ -57,14 +57,14 @@ dist/admin-guide.pdf: build/admin-guide.pdf
 	mkdir -p dist
 	cp build/admin-guide.pdf dist/admin-guide.pdf
 
-build/user-guide.pdf:
-	mkdir -p build
-	pdflatex -output-directory=build user-guide.tex
-	pdflatex -output-directory=build user-guide.tex
+#build/user-guide.pdf:
+#	mkdir -p build
+#	pdflatex -output-directory=build user-guide.tex
+#	pdflatex -output-directory=build user-guide.tex
 
-dist/user-guide.pdf: build/user-guide.pdf
-	mkdir -p dist
-	cp build/user-guide.pdf dist/user-guide.pdf
+#dist/user-guide.pdf: build/user-guide.pdf
+#	mkdir -p dist
+#	cp build/user-guide.pdf dist/user-guide.pdf
 
 clean:
 	rm -f build/variables.tex \
