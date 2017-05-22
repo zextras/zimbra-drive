@@ -1,0 +1,46 @@
+\pagestyle{fancy}
+\renewcommand{\familydefault}{\sfdefault}
+\setlength{\parskip}{\baselineskip} % Paragraph padding
+\setlength\parindent{0pt} % Paragraph indent
+\fancyhf{} % Rewrite chapter page
+\fancyfoot[LE]{
+    \textbf{
+        \thepage\ |\ \leftmark
+        \ifdefined\ISDRAFT
+           \ - DRAFT
+        \fi
+    }
+}
+\fancyfoot[RO]{
+    \textbf{
+        \ifdefined\ISDRAFT
+            DRAFT -\
+        \fi
+        \rightmark\ |\ \thepage
+    }
+}
+\renewcommand{\sectionmark}[1]{\markright{#1}}
+\renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter: #1}{}}
+\renewcommand{\footrulewidth}{0.4pt} % add footer line
+\renewcommand{\headrulewidth}{0pt} % Remove header line
+\fancypagestyle{plain}{
+    \fancyhf{}
+    \fancyfoot[RO]{
+        \textbf{
+            \thepage
+        }
+    }
+}
+\newcommand{\justifyheading}{\raggedleft}
+\titleformat{\chapter}[display]{\normalfont\huge\bfseries\justifyheading}{
+    \ifdefined\ISDRAFT
+        DRAFT of 
+    \fi
+    \chaptertitlename\ \thechapter
+}{10pt}{{\titlerule[0.4pt]}\vspace{1pc}\Huge}
+\titlespacing{\chapter}{0pt}{0pt}{100pt}
+
+\ifdefined\ISDRAFT
+    \newwatermark[allpages,color=gray!10,angle=45,scale=3,xpos=0,ypos=0]{DRAFT}
+\fi
+\renewcommand{\_}{{\fontfamily{ptm}\selectfont\textunderscore}}

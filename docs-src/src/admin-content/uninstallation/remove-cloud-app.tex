@@ -1,0 +1,49 @@
+\section{Remove Cloud App}
+\subsection{Nextcloud/ownCloud}\label{subsec:NextcloudownCloudUninstallation}
+
+    The removal of Nextcloud/ownCloud App consists in the separate steps: Clean up and App uninstall.
+
+\begin{warning}
+    The Clean up step will delete all the Zimbra users data from Nextcloud/ownCloud and is not reversible.
+    It \textbf{requires} that the Zimbra Drive is installed and enabled.\\
+    Indeed, the Zimbra Drive App can be uninstalled without the removal of Zimbra users storages
+    (Clean up step can be skipped).
+\end{warning}
+
+    \textbf{Clean up}
+
+\begin{info}
+    Before starting the clean up, it's recommended to disallow Zimbra users access:
+    the configuration \textbf{Allow Zimbra's users to log in} should be unchecked.
+\end{info}
+    The following commands delete the users created by Zimbra Drive App and clean the table containing
+    references to Zimbra users (replace correctly \texttt{mysql\_pwd} and \texttt{occ\_db}):
+
+\begin{verbatim}
+cd /var/www/cloud           # Go to the OCC path
+mysql_pwd='password'        # database password
+occ_db='cloud'              # database name for the Nextcloud / ownCloud
+
+# In ownCloud
+user_id_column='user_id'    # column name in table oc_accounts of ownCloud
+# In Nextcloud
+user_id_column='uid'        # column name in table oc_accounts of Nextcloud
+
+mysql -u root --password="${mysql_pwd}" "${occ_db}" -N -s \
+    -e 'SELECT uid FROM oc_group_user WHERE gid = "zimbra"' \
+    | while read uid; do \
+        sudo -u www-data php ./occ user:delete "${uid}"; \
+        mysql -u root --password="${mysql_pwd}" "${occ_db}" \
+            -e "DELETE FROM oc_accounts WHERE ${user_id_column} = '${uid}' LIMIT 1"; \
+      done
+\end{verbatim}
+
+    \textbf{App uninstall}
+
+    In Nextcloud/ownCloud platform, the Zimbra Drive App can be removed from the Nextcloud/ownCloud Admin Interface:
+    the configuration should be restored unchecking \textbf{Enable Zimbra authentication back end},
+    then Zimbra Drive App must be disabled from the "Enabled Apps" tab and uninstalled from the "Disabled Apps".
+
+    With the previous steps, the Zimbra Drive App folder (\texttt{PATH\textunderscore TO\textunderscore CLOUD/apps/zimbradrive})
+    is deleted but all the users files still remains in the cloud service drive:
+    any configuration or file that was not previously cleaned up, is retrieved on the reinstallation of Zimbra Drive App.

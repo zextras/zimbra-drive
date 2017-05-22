@@ -1,0 +1,36 @@
+\section{Zimbra packages installation}
+
+In this section is described how to install the Zimbra Drive Extension and the Zimbra Drive Zimlet.
+
+Both Extension and Zimlet are installed through the official Zimbra installer,
+indeed Zimbra installation inquires for Zimbra Drive installation.
+Zimbra Drive Extension and Zimbra Drive Zimlet will be installed Answering
+"Yes" to the following questions in Zimbra installation:
+
+\begin{verbatim}
+Use Zimbra's package repository [Y] Yes
+...
+Install zimbra-drive [Y] Yes
+\end{verbatim}
+
+\subsection{Zimbra already installed}
+
+The Zimbra installation adds the Zimbra repositories to apt sources list,
+so Zimbra Drive can be installed through the following command:
+
+\begin{verbatim}
+# As root, when apt-get is available
+apt-get update
+apt-get install zimbra-drive
+# As root, when yum is available
+yum update
+yum install zimbra-drive
+\end{verbatim}
+
+Hereafter Zimbra Drive Extension will be enable with the zimlet deploy and a mailbox restart:
+
+\begin{verbatim}
+# As zimbra
+zmzimletctl deploy /opt/zimbra/zimlets/com_zextras_drive_open.zip
+zmmailboxd  restart
+\end{verbatim}

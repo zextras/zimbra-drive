@@ -1,0 +1,35 @@
+\section{Cloud app installation}
+
+Here are provided the steps to install the Zimbra Drive Cloud App to the specific supported cloud.
+\begin{warning}
+The cloud services currently supported are Nextcloud and ownCloud with the archive \texttt{zimbradrive.tar.gz}.
+\end{warning}
+
+\subsection{Nextcloud/ownCloud}\label{subsec:NextcloudownCloudInstallation}
+    Nextcloud and ownCloud requires the same following installation steps.\\
+    The placeholder \texttt{PATH\textunderscore TO\textunderscore CLOUD} is the path of the Nextcloud/ownCloud service in server:
+
+    \begin{enumerate}
+        \item Copy \texttt{zimbradrive.tar.gz} in Nextcloud/ownCloud drive:\\
+        \texttt{scp zimbradrive.tar.gz root@cloud:/tmp}
+
+        \item In Nextcloud/ownCloud server, extract \texttt{zimbradrive.tar.gz}  in \texttt{PATH\textunderscore TO\textunderscore CLOUD/apps}:\\
+        \texttt{tar -xvzf zimbradrive.tar.gz -C \texttt{PATH\textunderscore TO\textunderscore CLOUD}/apps}
+        
+        \item Change permissions of the extracted folder \texttt{PATH\textunderscore TO\textunderscore CLOUD/apps/zimbradrive}
+        with the user owner of Nextcloud/ownCloud (E.g.: www-data):\\
+        \texttt{chown -R www-data:www-data PATH\textunderscore TO\textunderscore CLOUD/apps/zimbradrive/}
+        
+        \item Enable Zimbra Drive App from Nextcloud/ownCloud Admin Interface or with command: %(replace PATH\textunderscore CLOUD)
+        \texttt{sudo -u www-data php PATH\textunderscore TO\textunderscore CLOUD/occ app:enable zimbradrive}
+    \end{enumerate}
+
+    At this point the Nextcloud/ownCloud Zimbra Drive App is installed and is required the configuration.
+\begin{warning}
+On Apache Web Server, Zimbra Drive doesn't work if the server is not correctly configured.
+The instructions about \textit{Apache Web Server Configuration} in manual
+\href{https://docs.nextcloud.com/server/11/admin_manual/installation/source_installation.html#apache-web-server-configuration}{Nextcloud installation}
+or in manual
+\href{https://doc.owncloud.org/server/10.0/admin_manual/installation/source_installation.html#apache-web-server-configuration}{ownCloud installation}
+are required.
+\end{warning}

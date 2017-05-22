@@ -1,0 +1,26 @@
+\section{Manual uninstall}
+
+\begin{warning}
+    Manual uninstallation is not supported.
+
+    Please consider to disable the Zimbra Drive (see: \ref{sec:disablePackages}) instead of uninstalling it.
+    Any modification to the installed zimbra packages may lead to a fail during the Zimbra upgrade.
+\end{warning}
+
+The manual uninstallation process of Zimbra Drive Zimlet and Zimbra Drive Extension requires to undeploy zimlet and clean extension folder from zimbra.
+
+Remove Zimbra Drive zimlet:
+\begin{verbatim}
+# As zimbra
+zmzimletctl undeploy com_zextras_drive_open
+\end{verbatim}
+Remove Zimbra Drive Extension:
+\begin{verbatim}
+# As root
+rm -rf /opt/zimbra/lib/ext/zimbradrive/
+
+# As zimbra
+zmmailboxdctl restart
+\end{verbatim}
+The last but not necessary step is to clean the domain attribute with the command\\
+\texttt{zmprov md domainExample.com zimbraDriveOwnCloudURL ""}

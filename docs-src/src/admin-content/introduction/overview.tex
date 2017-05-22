@@ -1,0 +1,41 @@
+\section{Overview}
+\subsection{General architecture}\label{subsec:general architecture}
+    The purpouse of Zimbra Drive is to connect the Zimbra end user to a cloud service, external to Zimbra;
+    any Zimbra domain can be paired to a cloud service, then each Zimbra end user, belonging to this domain,
+    will benefit to the same cloud service platform.
+
+    Zimbra Drive is a three parts software (Zimbra Extension, Zimlet and Cloud App),
+    that integrate an external storage services in the Zimbra Web Interface as well as authentication mechanism.
+    Each Zimbra account will be linked to the external storage service account allowing the user back-and-forth.
+%
+
+\subsection{Components}
+    Zimbra Drive components are the following:
+    \begin{enumerate}
+        \item Zimbra Extension
+        \item Zimlet
+        \item Cloud App
+    \end{enumerate}
+    \begin{warning}
+        Each component is mandatory and requires a careful configuration.
+        However any error in installation or configuration won't affect Zimbra usability.
+    \end{warning}
+
+        \subsection{Extension}
+        The Zimbra Drive extension is installed in the mailboxd component, it acts in the middle between the Zimbra
+        Drive zimlet and Cloud App providing services like authentication and item actions to the zimlet.
+
+        \subsection{Zimlet}
+        The Zimbra Drive zimlet improves the user Zimbra interface adding a new tab before Preferences tab,
+        this tab is titled "Drive". Furthermore the zimlet let user perform search in linked cloud.\\
+        The zimlet component is contained in package com\_zextras\_drive\_open.zip and the zimlet name is precisely
+        "com\_zextras\_drive\_open".
+
+        \subsection{Cloud App}\label{subsec:supportedClouds}
+        The external services of cloud storage need specific app with dedicated API to communicate with Zimbra Drive Extension;
+        Zimbra Drive provides an app to each service supported.
+
+        \subsubsection{Nextcloud/ownCloud}
+        The Nextcloud/ownCloud App is a specific application for Nextcloud and ownCloud, it provide transparent authentication in
+        ownCloud and Nextcloud using Zimbra credentials and a layer of compatibility which abstracts the version of
+        ownCloud and Nextcloud for the extension.
