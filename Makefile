@@ -15,10 +15,9 @@
 # If not, see <http://www.gnu.org/licenses/>.
 #
 
-# Remember to edit these values also in `zimbra-extension/Makefile`
-ZAL_VERSION=1.11
-ZAL_VERSION_EXTENDED=1.11.8
-ZIMBRA_VERSION=8.7.10
+ZAL_ZIMBRA_VERSION?=dev-last
+
+.PHONY: sign-app clean
 
 all: dist/zimbra_drive.tgz dist/zimbradrive.tar.gz dist/zimbra_drive.md5
 
@@ -31,7 +30,8 @@ clean:
 		build/zimbra_drive.md5 \
 		dist/zimbra_drive.tgz \
 		dist/zimbra_drive.md5 \
-		dist/zimbradrive.tar.gz
+		dist/zimbradrive.tar.gz \
+		dist/zimbradrive.tar.gz.sign
 	cd nextcloud-app && make clean
 	cd zimbra-extension && make clean
 	cd zimlet && make clean
@@ -49,16 +49,16 @@ build/zimbra-extension/zimbradrive-extension.conf.example:
 	mkdir -p build/zimbra-extension
 	cp zimbra-extension/zimbradrive-extension.conf.example build/zimbra-extension/
 
-build/zimbra-extension/zal-${ZAL_VERSION_EXTENDED}-${ZIMBRA_VERSION}.jar:
+build/zimbra-extension/zal.jar:
 	mkdir -p build/zimbra-extension
-	cd zimbra-extension && make lib/zal-${ZAL_VERSION_EXTENDED}-${ZIMBRA_VERSION}.jar
-	cp zimbra-extension/lib/zal-${ZAL_VERSION_EXTENDED}-${ZIMBRA_VERSION}.jar build/zimbra-extension/
+	cd zimbra-extension && make lib/zal.jar ZAL_ZIMBRA_VERSION=${ZAL_ZIMBRA_VERSION}
+	cp zimbra-extension/lib/zal.jar build/zimbra-extension/
 
 zimbra-extension/dist/zimbradrive-extension.jar:
-	cd zimbra-extension && make dist/zimbradrive-extension.jar
+	cd zimbra-extension && make dist/zimbradrive-extension.jar ZAL_ZIMBRA_VERSION=${ZAL_ZIMBRA_VERSION}
 
 build/zimbra-extension/zimbradrive-extension.jar: build/zimbra-extension/zimbradrive-extension.conf.example \
-													build/zimbra-extension/zal-${ZAL_VERSION_EXTENDED}-${ZIMBRA_VERSION}.jar \
+													build/zimbra-extension/zal.jar \
 													zimbra-extension/dist/zimbradrive-extension.jar
 	mkdir -p build/zimbra-extension
 	cp zimbra-extension/dist/zimbradrive-extension.jar build/zimbra-extension/
@@ -109,3 +109,6 @@ dist/zimbradrive.tar.gz: build/nextcloud-app/zimbradrive.tar.gz
 
 dist/zimbra_drive.md5: dist/zimbra_drive.tgz
 	cd dist && md5sum zimbra_drive.tgz > zimbra_drive.md5
+
+sign-app:
+	openssl dgst -sha512 -sign ~/.nextcloud/certificates/zimbradrive.key dist/zimbradrive.tar.gz | openssl base64 > dist/zimbradrive.tar.gz.sign
