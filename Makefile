@@ -17,6 +17,8 @@
 
 ZAL_ZIMBRA_VERSION?=dev-last
 
+.PHONY: sign-app clean
+
 all: dist/zimbra_drive.tgz dist/zimbradrive.tar.gz dist/zimbra_drive.md5
 
 clean:
@@ -28,7 +30,8 @@ clean:
 		build/zimbra_drive.md5 \
 		dist/zimbra_drive.tgz \
 		dist/zimbra_drive.md5 \
-		dist/zimbradrive.tar.gz
+		dist/zimbradrive.tar.gz \
+		dist/zimbradrive.tar.gz.sign
 	cd nextcloud-app && make clean
 	cd zimbra-extension && make clean
 	cd zimlet && make clean
@@ -106,3 +109,6 @@ dist/zimbradrive.tar.gz: build/nextcloud-app/zimbradrive.tar.gz
 
 dist/zimbra_drive.md5: dist/zimbra_drive.tgz
 	cd dist && md5sum zimbra_drive.tgz > zimbra_drive.md5
+
+sign-app:
+	openssl dgst -sha512 -sign ~/.nextcloud/certificates/zimbradrive.key dist/zimbradrive.tar.gz | openssl base64 > dist/zimbradrive.tar.gz.sign
