@@ -19,14 +19,12 @@ namespace OCA\ZimbraDrive\Settings;
 
 use OCA\ZimbraDrive\AppInfo\Application;
 use OCP\Settings\ISection;
+use OCP\Settings\IIconSection;
+use OCP\IURLGenerator;
+use OCP\IL10N;
 
-class Section implements ISection
+class SectionBase
 {
-
-    public function __construct()
-    {
-    }
-
     /**
      * {@inheritdoc}
      */
@@ -50,5 +48,32 @@ class Section implements ISection
     {
         return 75;
     }
-
 }
+
+if (interface_exists('OCP\\Settings\\IIconSection'))
+{
+    class Section extends SectionBase implements IIconSection
+    {
+        private $url;
+
+        public function __construct(IURLGenerator $url, IL10N $l)
+        {
+            $this->url = $url;
+        }
+
+        public function getIcon()
+        {
+            return $this->url->imagePath('zimbradrive', 'app-dark.svg');
+        }
+    }
+}
+else
+{
+    class Section extends SectionBase implements ISection
+    {
+        public function __construct()
+        {
+        }
+   }
+}
+
