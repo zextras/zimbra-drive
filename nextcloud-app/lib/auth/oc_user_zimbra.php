@@ -119,11 +119,8 @@ class OC_User_Zimbra extends \OC_User_Backend
 
             if(!$this->userExists($userId))
             {
-                $this->initializeUser($userId, $userDisplayName);
+                $this->initializeUser($userId, $userDisplayName, $userEmail);
             }
-
-            $user = $this->userManager->get($userId);
-            $user->setEMailAddress($userEmail);
 
             return $userId;
         } else {
@@ -135,13 +132,15 @@ class OC_User_Zimbra extends \OC_User_Backend
      * @param $userId
      * @param $userDisplayName
      */
-    private function initializeUser($userId, $userDisplayName)
+    private function initializeUser($userId, $userDisplayName, $userEmail)
     {
         $this->logger->debug('Initialize user ' . $userId . '.', ['app' => Application::APP_NAME]);
         $this->storeUser(
             $userId,
             $userDisplayName
         );
+
+        $this->userManager->get($userId)->setEMailAddress($userEmail);
 
         $this->insertUserInGroup($userId, self::ZIMBRA_GROUP);
         $this->insertUserInGroup($userId, $this->zimbra_url);
