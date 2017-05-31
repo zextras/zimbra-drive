@@ -20,14 +20,17 @@
     <id>zimbradrive</id>
     <name>Zimbra Drive</name>
     <summary>Integration with Zimbra</summary>
-    <description>
+    <description lang="en">
         <![CDATA[Add Nextcloud / ownCloud as Briefcase in Zimbra with the full features of both applications.]]></description>
+    <version>0.8.10</version>
     <licence>apache</licence>
     <author>ZeXtras</author>
     <version>0.8.11</version>
     <namespace>ZimbraDrive</namespace>
     <category>auth</category>
     <category>integration</category>
+    <bugs>https://github.com/ZeXtras/zimbra-drive/issues</bugs>
+    <repository type="git">https://github.com/ZeXtras/zimbra-drive.git</repository>
     <dependencies>
         <owncloud min-version="9" max-version="9"/>
         <nextcloud min-version="9" max-version="11"/>
