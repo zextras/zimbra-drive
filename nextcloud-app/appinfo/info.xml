@@ -32,7 +32,7 @@
     <repository type="git">https://github.com/ZeXtras/zimbra-drive.git</repository>
     <dependencies>
         <owncloud min-version="9" max-version="9"/>
-        <nextcloud min-version="9" max-version="11"/>
+        <nextcloud min-version="9" max-version="12"/>
     </dependencies>
     <types>
         <authentication/>
