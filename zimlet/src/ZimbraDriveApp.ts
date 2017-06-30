@@ -386,6 +386,7 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
     for (let childtoRemove of childrenToRemove) {
       folderTree.root.children.remove(childtoRemove);
     }
+    rootToAdd.parent = folderTree.root;
     folderTree.root.children.add(rootToAdd);
     // TODO save and apply axpand/collapsed folders
     // appCtxt.getOverviewController().getTreeView("main_" + ZimbraDriveApp.APP_NAME, ZimbraDriveApp.APP_NAME);
