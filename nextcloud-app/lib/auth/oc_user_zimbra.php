@@ -1,8 +1,18 @@
 <?php
 /**
- * MIT License (MIT)
+ * Copyright 2017 Zextras Srl
  *
- * Copyright (c) 2017 Zextras SRL
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 use OCA\ZimbraDrive\AppInfo\Application;
@@ -107,10 +117,12 @@ class OC_User_Zimbra extends \OC_User_Backend
             $userId = $response->{'accountId'};
             $userDisplayName = $response->{'displayName'};
             $userEmail = $response->{'email'};
-
-            if(!$this->isUserInitialized($userId))
+            if(!$this->userManager->userExists($userId))
             {
-                $this->initializeUser($userId, $userDisplayName, $userEmail);
+                $this->createUser($userId, $userDisplayName, $userEmail);
+            } else
+            {
+                $this->restoreUserEmailIfChanged($userId, $userEmail);
             }
 
             return $userId;
@@ -119,24 +131,12 @@ class OC_User_Zimbra extends \OC_User_Backend
         }
     }
 
-    private function isUserInitialized($userId)
-    {
-        $user = $this->userManager->get($userId);
-        if(is_null($user))
-        {
-            return false;
-        } else
-        {
-            return true;
-        }
-    }
-
     /**
      * @param $userId
      * @param $userDisplayName
      * @param $userEmail
      */
-    private function initializeUser($userId, $userDisplayName, $userEmail)
+    private function createUser($userId, $userDisplayName, $userEmail)
     {
         $this->logger->debug('Initialize user ' . $userId . '.', ['app' => Application::APP_NAME]);
 
@@ -146,6 +146,19 @@ class OC_User_Zimbra extends \OC_User_Backend
         $user->setEMailAddress($userEmail);
         $this->insertUserInGroup($userId, self::ZIMBRA_GROUP);
         $this->insertUserInGroup($userId, $this->zimbra_url);
+    }
+
+    /**
+     * @param $userId
+     * @param $userEmail
+     */
+    private function restoreUserEmailIfChanged($userId, $userEmail)
+    {
+        $user = $this->userManager->get($userId);
+        if( $user->getEMailAddress() !== $userEmail)
+        {
+            $user->setEMailAddress($userEmail);
+        }
     }
 
     /**
@@ -226,19 +239,6 @@ class OC_User_Zimbra extends \OC_User_Backend
     public function hasUserListings()
     {
         return true;
-    }
-
-    /**
-     * Change the display name of a user
-     *
-     * @param string $uid The username
-     * @param string $display_name The new display name
-     *
-     * @return true/false
-     */
-    public function setDisplayName($uid, $display_name)
-    {
-        return false;
     }
 
     /**

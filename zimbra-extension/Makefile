@@ -16,10 +16,9 @@
 #
 
 ZAL_VERSION=1.11
-ZAL_VERSION_EXTENDED=1.11.8
-ZIMBRA_VERSION=8.7.10
+ZAL_ZIMBRA_VERSION?=dev-last
 
-all: dist/zimbradrive-extension.jar lib/zal-${ZAL_VERSION_EXTENDED}-${ZIMBRA_VERSION}.jar
+all: dist/zimbradrive-extension.jar
 
 lib/commons-io-1.4.jar:
 	mkdir -p lib
@@ -46,27 +45,28 @@ lib/httpclient-4.5.2.jar:
 	wget http://central.maven.org/maven2/org/apache/httpcomponents/httpclient/4.5.2/httpclient-4.5.2.jar \
 		-O lib/httpclient-4.5.2.jar
 
-lib/zal-${ZAL_VERSION_EXTENDED}-${ZIMBRA_VERSION}.jar:
+lib/zal.jar:
 	mkdir -p lib
-	wget https://openzal.org/${ZAL_VERSION}/zal-${ZAL_VERSION_EXTENDED}-${ZIMBRA_VERSION}.jar \
-		-O lib/zal-${ZAL_VERSION_EXTENDED}-${ZIMBRA_VERSION}.jar
+	wget https://openzal.org/${ZAL_VERSION}/zal-${ZAL_VERSION}-${ZAL_ZIMBRA_VERSION}.jar \
+		-O lib/zal.jar
 
 dist/zimbradrive-extension.jar: lib/commons-io-1.4.jar \
 								lib/javax.servlet-api-3.1.0.jar \
 								lib/json-20160810.jar \
 								lib/httpcore-4.4.6.jar \
 								lib/httpclient-4.5.2.jar \
-								lib/zal-${ZAL_VERSION_EXTENDED}-${ZIMBRA_VERSION}.jar
+								lib/zal.jar
 	ant jar-bundle
 
 clean:
 	rm -rf build/*
 	rm -f dist/zimbradrive-extension.jar
+	rm -rf lib/zal.jar
 
-install: guard-ZIMLET_DEV_SERVER dist/zimbradrive-extension.jar lib/zal-${ZAL_VERSION_EXTENDED}-${ZIMBRA_VERSION}.jar
+install: guard-ZIMLET_DEV_SERVER dist/zimbradrive-extension.jar lib/zal.jar
 	ssh root@${ZIMLET_DEV_SERVER} "mkdir -p /opt/zimbra/lib/ext/zimbradrive"
 	scp dist/zimbradrive-extension.jar root@${ZIMLET_DEV_SERVER}:/opt/zimbra/lib/ext/zimbradrive/
-	scp lib/zal-${ZAL_VERSION_EXTENDED}-${ZIMBRA_VERSION}.jar root@${ZIMLET_DEV_SERVER}:/opt/zimbra/lib/ext/zimbradrive/ # TODO replace with 2prev row
+	scp lib/zal.jar root@${ZIMLET_DEV_SERVER}:/opt/zimbra/lib/ext/zimbradrive/ # TODO replace with 2prev row
 	ssh root@${ZIMLET_DEV_SERVER} "su - zimbra -c '/opt/zimbra/bin/zmmailboxdctl restart'"
 
 guard-%:

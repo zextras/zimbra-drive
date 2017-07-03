@@ -2,7 +2,7 @@
   <settings>
     <module2copyright>
       <element module="GPL2 Code" copyright="ZeXtras GPL2" />
-      <element module="MIT Code" copyright="ZeXtras MIT" />
+      <element module="Apache Code" copyright="ZeXtras Apache2" />
     </module2copyright>
   </settings>
 </component>
