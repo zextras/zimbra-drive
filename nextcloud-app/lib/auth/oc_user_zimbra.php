@@ -17,6 +17,7 @@
 
 use OCA\ZimbraDrive\AppInfo\Application;
 use \OCA\ZimbraDrive\Settings\AppSettings;
+use \phpseclib\Crypt\Random;
 
 class OC_User_Zimbra extends \OC_User_Backend
 {
@@ -116,14 +117,13 @@ class OC_User_Zimbra extends \OC_User_Backend
             $userId = $response->{'accountId'};
             $userDisplayName = $response->{'displayName'};
             $userEmail = $response->{'email'};
-
-            if(!$this->userExists($userId))
+            if(!$this->userManager->userExists($userId))
             {
-                $this->initializeUser($userId, $userDisplayName);
+                $this->createUser($userId, $userDisplayName, $userEmail);
+            } else
+            {
+                $this->restoreUserEmailIfChanged($userId, $userEmail);
             }
-
-            $user = $this->userManager->get($userId);
-            $user->setEMailAddress($userEmail);
 
             return $userId;
         } else {
@@ -134,17 +134,31 @@ class OC_User_Zimbra extends \OC_User_Backend
     /**
      * @param $userId
      * @param $userDisplayName
+     * @param $userEmail
      */
-    private function initializeUser($userId, $userDisplayName)
+    private function createUser($userId, $userDisplayName, $userEmail)
     {
         $this->logger->debug('Initialize user ' . $userId . '.', ['app' => Application::APP_NAME]);
-        $this->storeUser(
-            $userId,
-            $userDisplayName
-        );
 
+        $user = $this->userManager->createUser($userId, Random::string(255));
+
+        $user->setDisplayName($userDisplayName);
+        $user->setEMailAddress($userEmail);
         $this->insertUserInGroup($userId, self::ZIMBRA_GROUP);
         $this->insertUserInGroup($userId, $this->zimbra_url);
+    }
+
+    /**
+     * @param $userId
+     * @param $userEmail
+     */
+    private function restoreUserEmailIfChanged($userId, $userEmail)
+    {
+        $user = $this->userManager->get($userId);
+        if( $user->getEMailAddress() !== $userEmail)
+        {
+            $user->setEMailAddress($userEmail);
+        }
     }
 
     /**
@@ -176,11 +190,6 @@ class OC_User_Zimbra extends \OC_User_Backend
      */
     public function deleteUser($uid)
     {
-        OC_DB::executeAudited(
-            'DELETE FROM `*PREFIX*zimbradrive_users`'
-            . ' WHERE `uid` = ?',
-            array($uid)
-        );
         return true;
     }
 
@@ -193,17 +202,7 @@ class OC_User_Zimbra extends \OC_User_Backend
      */
     public function getDisplayName($uid)
     {
-        $user = OC_DB::executeAudited(
-            'SELECT `display_name` FROM `*PREFIX*zimbradrive_users`'
-            . ' WHERE `uid` = ?',
-            array($uid)
-        )->fetchRow();
-        $display_name = trim($user['display_name'], ' ');
-        if (!empty($display_name)) {
-            return $display_name;
-        } else {
-            return $uid;
-        }
+        return $uid;
     }
 
     /**
@@ -216,23 +215,7 @@ class OC_User_Zimbra extends \OC_User_Backend
      */
     public function getDisplayNames($search = '', $limit = null, $offset = null)
     {
-        $result = OC_DB::executeAudited(
-            array(
-                'sql' => 'SELECT `uid`, `display_name` FROM `*PREFIX*zimbradrive_users`'
-                    . ' WHERE (LOWER(`display_name`) LIKE LOWER(?) '
-                    . ' OR LOWER(`uid`) LIKE LOWER(?))',
-                'limit' => $limit,
-                'offset' => $offset
-            ),
-            array('%' . $search . '%', '%' . $search . '%')
-        );
-
-        $display_names = array();
-        while ($row = $result->fetchRow()) {
-            $display_names[$row['uid']] = $row['display_name'];
-        }
-
-        return $display_names;
+        return array();
     }
 
     /**
@@ -245,20 +228,7 @@ class OC_User_Zimbra extends \OC_User_Backend
      */
     public function getUsers($search = '', $limit = null, $offset = null)
     {
-        $result = OC_DB::executeAudited(
-            array(
-                'sql' => 'SELECT `uid` FROM `*PREFIX*zimbradrive_users`'
-                    . ' WHERE LOWER(`uid`) LIKE LOWER(?)',
-                'limit' => $limit,
-                'offset' => $offset
-            ),
-            array($search . '%')
-        );
-        $users = array();
-        while ($row = $result->fetchRow()) {
-            $users[] = $row['uid'];
-        }
-        return $users;
+        return array();
     }
 
     /**
@@ -272,53 +242,12 @@ class OC_User_Zimbra extends \OC_User_Backend
     }
 
     /**
-     * Change the display name of a user
-     *
-     * @param string $uid The username
-     * @param string $display_name The new display name
-     *
-     * @return true/false
-     */
-    public function setDisplayName($uid, $display_name)
-    {
-        if (!$this->userExists($uid)) {
-            return false;
-        }
-        OC_DB::executeAudited(
-            'UPDATE `*PREFIX*zimbradrive_users` SET `display_name` = ?'
-            . ' WHERE LOWER(`uid`) = ?',
-            array($display_name, $uid)
-        );
-        return true;
-    }
-
-    /**
-     * @param $uid
-     * @param $display_name
-     */
-    private function storeUser($uid, $display_name)
-    {
-        if (!$this->userExists($uid)) {
-            OC_DB::executeAudited(
-                'INSERT INTO `*PREFIX*zimbradrive_users` ( `uid`, `display_name` )'
-                . ' VALUES( ?, ? )',
-                array($uid, $display_name)
-            );
-        }
-    }
-
-    /**
      * @param string $uid
      * @return bool
      */
     public function userExists($uid)
     {
-        $result = OC_DB::executeAudited(
-            'SELECT COUNT(*) FROM `*PREFIX*zimbradrive_users`'
-            . ' WHERE LOWER(`uid`) = LOWER(?)',
-            array($uid)
-        );
-        return $result->fetchOne() > 0;
+        return false;
     }
 }
 
