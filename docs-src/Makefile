@@ -57,6 +57,21 @@ dist/admin-guide.pdf: build/admin-guide.pdf
 	mkdir -p dist
 	cp build/admin-guide.pdf dist/admin-guide.pdf
 
+build/admin-guide.adoc: build/variables.tex
+	mkdir -p build
+	pandoc -f latex -t asciidoc admin-guide.tex -o build/admin-guide.adoc
+
+dist/admin-guide.adoc: build/admin-guide.adoc
+	mkdir -p dist/asciidoc
+	cp build/admin-guide.adoc dist/asciidoc/admin-guide.adoc
+	sed -i "s/\[\[==/\[\[/g" dist/asciidoc/admin-guide.adoc
+	sed -i "s/==\]\]/\]\]/g" dist/asciidoc/admin-guide.adoc
+	sed -i "s/\[==/<</g" dist/asciidoc/admin-guide.adoc
+	sed -i "s/==\]/>>/g" dist/asciidoc/admin-guide.adoc
+
+	mkdir -p dist/asciidoc/template
+	cp template/cc-by-nc-sa.png dist/asciidoc/template
+
 #build/user-guide.pdf:
 #	mkdir -p build
 #	pdflatex -output-directory=build user-guide.tex
@@ -85,3 +100,4 @@ clean:
 		build/excuses.txt \
 		excuses.txt
 	rm -rf build/html
+	rm -rf dist/asciidoc
