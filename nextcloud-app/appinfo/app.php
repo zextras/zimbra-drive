@@ -60,7 +60,7 @@ OC::$CLASSPATH['OC_User_Zimbra'] = 'zimbradrive/lib/auth/oc_user_zimbra.php';
 
 $app = new Application();
 
-if(!interface_exists(ISettings::class))  // ISettings not supported in OwnCloud 9.1.4
+if(!interface_exists('OCP\Settings\ISettings'))  // ISettings not supported in OwnCloud 9.1.4
 {
     \OCP\App::registerAdmin(Application::APP_NAME, 'admin');
 }

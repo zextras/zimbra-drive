@@ -15,47 +15,32 @@
  * limitations under the License.
  */
 
-use OCP\IConfig;
+namespace OCA\ZimbraDrive\Auth;
 
-class OC_User_Zimbra extends \OC_User_Backend
+class ZimbraUsersBackend extends \OC_User_Backend
 {
-    const USER_BACKEND_VAR_NAME = 'user_backends';
-    const ZIMBRA_LEGACY_USER_BACKEND_CLASS_VALUE = 'OC_User_Zimbra';
+    const ZIMBRA_GROUP = "zimbra";
 
-    /** @var OCA\ZimbraDrive\Auth\ZimbraUsersBackend */
-    private $ocUserZimbra;
+    /** @var AbstractZimbraUsersBackend */
+    private $oc_user_zimbra_backend;
 
-    /**
-     * @var IConfig
-     */
-    private $config;
+    /** @var \OCP\ILogger  */
+    private $logger;
 
-
-    public function __construct(IConfig $config)
+    public function __construct()
     {
-        $this->ocUserZimbra = new \OCA\ZimbraDrive\Auth\ZimbraUsersBackend();
-        $this->config = $config;
-        $this->removeZimbraLegacyAuthentication();
+        $server = \OC::$server;
+        $this->logger = $server->getLogger();
+
+        $this->initializeOcUserZimbraBackend();
     }
 
-    private function removeZimbraLegacyAuthentication()
+    private function initializeOcUserZimbraBackend()
     {
-        $userBackends = $this->config->getSystemValue(self::USER_BACKEND_VAR_NAME, array());
-
-        $userBackendsWithoutZimbra = array();
-        foreach($userBackends as $userBackend)
-        {
-            if($userBackend['class'] !== self::ZIMBRA_LEGACY_USER_BACKEND_CLASS_VALUE)
-            {
-                $userBackendsWithoutZimbra[] = $userBackend;
-            }
-        }
-        if(count($userBackendsWithoutZimbra) === 0)
-        {
-            $this->config->deleteSystemValue(self::USER_BACKEND_VAR_NAME);
-        }else
-        {
-            $this->config->setSystemValue(self::USER_BACKEND_VAR_NAME, $userBackendsWithoutZimbra);
+        if (class_exists('OC\\User\\Account')) { //ownCloud 10 all user backend will be 'degraded' to authentication backend
+            $this->oc_user_zimbra_backend = new ZimbraUsersBackendPassword();
+        } else {
+            $this->oc_user_zimbra_backend = new ZimbraUsersBackendInDb();
         }
     }
 
@@ -70,7 +55,7 @@ class OC_User_Zimbra extends \OC_User_Backend
      */
     public function checkPassword($uid, $password)
     {
-        return $this->ocUserZimbra->checkPassword($uid, $password);
+        return $this->oc_user_zimbra_backend->checkPassword($uid, $password);
     }
 
     /**
@@ -82,7 +67,7 @@ class OC_User_Zimbra extends \OC_User_Backend
      */
     public function deleteUser($uid)
     {
-        return $this->ocUserZimbra->deleteUser($uid);
+        return $this->oc_user_zimbra_backend->deleteUser($uid);
     }
 
     /**
@@ -94,7 +79,7 @@ class OC_User_Zimbra extends \OC_User_Backend
      */
     public function getDisplayName($uid)
     {
-        return $this->ocUserZimbra->getDisplayName($uid);
+        return $this->oc_user_zimbra_backend->getDisplayName($uid);
     }
 
     /**
@@ -107,7 +92,7 @@ class OC_User_Zimbra extends \OC_User_Backend
      */
     public function getDisplayNames($search = '', $limit = null, $offset = null)
     {
-        return $this->ocUserZimbra->getDisplayNames($search, $limit, $offset);
+        return $this->oc_user_zimbra_backend->getDisplayNames($search, $limit, $offset);
     }
 
     /**
@@ -120,7 +105,7 @@ class OC_User_Zimbra extends \OC_User_Backend
      */
     public function getUsers($search = '', $limit = null, $offset = null)
     {
-        return $this->ocUserZimbra->getUsers($search, $limit, $offset);
+        return $this->oc_user_zimbra_backend->getUsers($search, $limit, $offset);
     }
 
     /**
@@ -130,7 +115,7 @@ class OC_User_Zimbra extends \OC_User_Backend
      */
     public function hasUserListings()
     {
-        return $this->ocUserZimbra->hasUserListings();
+        return $this->oc_user_zimbra_backend->hasUserListings();
     }
 
     /**
@@ -143,7 +128,7 @@ class OC_User_Zimbra extends \OC_User_Backend
      */
     public function setDisplayName($uid, $display_name)
     {
-        return $this->ocUserZimbra->setDisplayName($uid, $display_name);
+        return $this->oc_user_zimbra_backend->setDisplayName($uid, $display_name);
     }
 
     /**
@@ -152,7 +137,7 @@ class OC_User_Zimbra extends \OC_User_Backend
      */
     public function userExists($uid)
     {
-        return $this->ocUserZimbra->userExists($uid);
+        return $this->oc_user_zimbra_backend->userExists($uid);
     }
 }
 
