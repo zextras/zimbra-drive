@@ -16,11 +16,15 @@
  */
 
 use OCP\IConfig;
+use OCA\ZimbraDrive\Controller\AdminApiController;
 
 class OC_User_Zimbra extends \OC_User_Backend
 {
     const USER_BACKEND_VAR_NAME = 'user_backends';
     const ZIMBRA_LEGACY_USER_BACKEND_CLASS_VALUE = 'OC_User_Zimbra';
+
+    /** @var AdminApiController $adminApiController */
+    private $adminApiController;
 
     /** @var OCA\ZimbraDrive\Auth\ZimbraUsersBackend */
     private $ocUserZimbra;
@@ -31,11 +35,15 @@ class OC_User_Zimbra extends \OC_User_Backend
     private $config;
 
 
-    public function __construct(IConfig $config)
+    public function __construct()
     {
+        $server = \OC::$server;
+        $this->config = $server->getConfig();
+        $this->adminApiController = $server->query('OCA\ZimbraDrive\Controller\AdminApiController');
+
         $this->ocUserZimbra = new \OCA\ZimbraDrive\Auth\ZimbraUsersBackend();
-        $this->config = $config;
-        $this->removeZimbraLegacyAuthentication();
+
+        $this->updateBackendClass();
     }
 
     private function removeZimbraLegacyAuthentication()
@@ -153,6 +161,12 @@ class OC_User_Zimbra extends \OC_User_Backend
     public function userExists($uid)
     {
         return $this->ocUserZimbra->userExists($uid);
+    }
+
+    private function updateBackendClass()
+    {
+        $this->removeZimbraLegacyAuthentication();
+        $this->adminApiController->enableZimbraAuthentication();
     }
 }
 

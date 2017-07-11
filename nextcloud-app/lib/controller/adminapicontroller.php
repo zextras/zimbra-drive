@@ -27,7 +27,7 @@ use OCP\AppFramework\Http\Response;
 class AdminApiController extends ApiController
 {
     const USER_BACKEND_VAR_NAME = 'user_backends';
-    const ZIMBRA_USER_BACKEND_CLASS_VALUE = 'OC_User_Zimbra';
+    const ZIMBRA_USER_BACKEND_CLASS_VALUE = 'OCA\ZimbraDrive\Auth\ZimbraUsersBackend';
     private $logger;
     /**
      * @var IConfig
