@@ -507,7 +507,7 @@ export class ZimbraDriveController extends ZmListController {
       else {
         let itemFolder: ZimbraDriveFolderItem = <ZimbraDriveFolderItem> item;
         let treeController: ZimbraDriveTreeController = <ZimbraDriveTreeController> appCtxt.getOverviewController().getTreeController(ZimbraDriveApp.TREE_ID);
-        treeController.downloadFolderAsZip(itemFolder.getPath(true));
+        treeController.downloadFolderAsZip(itemFolder.getPath(false));
       }
     }
     else {
