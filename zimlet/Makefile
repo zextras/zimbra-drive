@@ -110,9 +110,9 @@ clean:
 	rm -rf build/assets/
 
 install: guard-ZIMLET_DEV_SERVER dist/com_zextras_drive_open.zip
-	scp dist/com_zextras_drive_open.zip root@${ZIMLET_DEV_SERVER}:/tmp/
-	ssh root@${ZIMLET_DEV_SERVER} "chown zimbra:zimbra /tmp/com_zextras_drive_open.zip"
-	ssh root@${ZIMLET_DEV_SERVER} "su - zimbra -c '/opt/zimbra/bin/zmzimletctl deploy /tmp/com_zextras_drive_open.zip'"
+	scp -P 8022 dist/com_zextras_drive_open.zip root@${ZIMLET_DEV_SERVER}:/tmp/
+	ssh -p 8022 root@${ZIMLET_DEV_SERVER} "chown zimbra:zimbra /tmp/com_zextras_drive_open.zip"
+	ssh -p 8022 root@${ZIMLET_DEV_SERVER} "su - zimbra -c '/opt/zimbra/bin/zmzimletctl deploy /tmp/com_zextras_drive_open.zip'"
 
 push-translations:
 	zanata-cli push

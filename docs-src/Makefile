@@ -64,10 +64,12 @@ build/admin-guide.adoc: build/variables.tex
 dist/admin-guide.adoc: build/admin-guide.adoc
 	mkdir -p dist/asciidoc
 	cp build/admin-guide.adoc dist/asciidoc/admin-guide.adoc
-	sed -i "s/\[\[==/\[\[/g" dist/asciidoc/admin-guide.adoc
-	sed -i "s/==\]\]/\]\]/g" dist/asciidoc/admin-guide.adoc
-	sed -i "s/\[==/<</g" dist/asciidoc/admin-guide.adoc
-	sed -i "s/==\]/>>/g" dist/asciidoc/admin-guide.adoc
+	sed -i 's/\[\[==/\[\[/g' dist/asciidoc/admin-guide.adoc
+	sed -i 's/==\]\]/\]\]/g' dist/asciidoc/admin-guide.adoc
+	sed -i 's/\[==/<</g' dist/asciidoc/admin-guide.adoc
+	sed -i 's/==\]/>>/g' dist/asciidoc/admin-guide.adoc
+	sed -i ':a;N;$$!ba;s/TIP:\n\n/TIP\: /g' dist/asciidoc/admin-guide.adoc
+	sed -i ':a;N;$$!ba;s/WARNING:\n\n/WARNING\: /g' dist/asciidoc/admin-guide.adoc
 
 	mkdir -p dist/asciidoc/template
 	cp template/cc-by-nc-sa.png dist/asciidoc/template
