@@ -71,6 +71,7 @@ export class ZimbraDriveTreeController extends ZmFolderTreeController {
     super(type || ZDId.ZIMBRADRIVE_ITEM);
     this._listeners[ZDId.ZD_NEW_FILE]   = new AjxListener(this, this._uploadListener);
     this._listeners[ZDId.ZD_SAVE_FOLDER]   = new AjxListener(this, this._downloadListener);
+    this._listeners[ZDId.ZD_DELETE]   = new AjxListener(this, this._deleteListener);
     this._listeners[ZDId.ZD_NEW_FOLDER] = new AjxListener(this, this._newListener);
     this._listeners[ZmOperation.RENAME_FOLDER] = new AjxListener(this, this._renameListener);
   }
@@ -91,7 +92,11 @@ export class ZimbraDriveTreeController extends ZmFolderTreeController {
     treeView._controller = this;
     this._initDragAndDrop(treeView);
     if (headerItem.getChildren().length > 0) {
-      headerItem.getChildren()[0].setExpanded(true);
+      for (let child of headerItem.getChildren()) {
+        if (child.isDwtTreeItem) {
+          child.setExpanded(true);
+        }
+      }
     }
     headerItem.enableSelection(false);
     headerItem.enableAction(false);
@@ -119,7 +124,7 @@ export class ZimbraDriveTreeController extends ZmFolderTreeController {
       ZmOperation.SEP,
       ZDId.ZD_SAVE_FOLDER,
       ZmOperation.SEP,
-      ZmOperation.DELETE_WITHOUT_SHORTCUT,
+      ZDId.ZD_DELETE,
       ZmOperation.MOVE,
       ZmOperation.RENAME_FOLDER
     ];
@@ -286,7 +291,7 @@ export class ZimbraDriveTreeController extends ZmFolderTreeController {
       menu.setData(Dwt.KEY_OBJECT, folder);
       if (!folder.parent) {
         menu.getItemById("menuItemId", ZDId.ZD_SAVE_FOLDER).setEnabled(false);
-        menu.getItemById("menuItemId", ZmOperation.DELETE_WITHOUT_SHORTCUT).setEnabled(false);
+        menu.getItemById("menuItemId", ZDId.ZD_DELETE).setEnabled(false);
         menu.getItemById("menuItemId", ZmOperation.MOVE).setEnabled(false);
         menu.getItemById("menuItemId", ZmOperation.RENAME_FOLDER).setEnabled(false);
       }

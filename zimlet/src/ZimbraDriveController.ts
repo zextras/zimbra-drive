@@ -241,6 +241,7 @@ export class ZimbraDriveController extends ZmListController {
 
     let elements = this.getViewElements(this._currentViewId, this._parentView[this._currentViewId]);
 
+    this.resetRenameFile();
     this._setView({
       view: this._currentViewId,
       viewType: this._currentViewType,
@@ -507,7 +508,7 @@ export class ZimbraDriveController extends ZmListController {
       else {
         let itemFolder: ZimbraDriveFolderItem = <ZimbraDriveFolderItem> item;
         let treeController: ZimbraDriveTreeController = <ZimbraDriveTreeController> appCtxt.getOverviewController().getTreeController(ZimbraDriveApp.TREE_ID);
-        treeController.downloadFolderAsZip(itemFolder.getPath(true));
+        treeController.downloadFolderAsZip(itemFolder.getPath(false));
       }
     }
     else {
@@ -692,7 +693,7 @@ export class ZimbraDriveController extends ZmListController {
         this._sendRenameRequest(fileName, item);
       }
     } else {
-      this._listView[this._currentViewId].redrawItem(item);
+      this._redrawItem(item);
     }
   }
 
@@ -747,6 +748,11 @@ export class ZimbraDriveController extends ZmListController {
     this.resetRenameFile();
     this._listView[this._currentViewId].redrawItem(item);
   }
+
+  public _preHideCallback(): void {
+    this.resetRenameFile();
+    return ZmController.prototype._preHideCallback.call(this);
+  };
 
   public _checkDuplicate(name: string): boolean {
     name = name.toLowerCase();

@@ -58,7 +58,7 @@ export class ZimbraDriveZimlet extends ZmZimletBase implements CreateAppZimlet {
     if (appCount < 0) appCount = 0;
 
     this.createApp(
-      `${this.getMessage("tabName")}<sup>beta</sup>`,
+      `${this.getMessage("tabName")}`,
       "ZimbraDrive-icon",
       this.getMessage("zimletDescription"),
       appCount
