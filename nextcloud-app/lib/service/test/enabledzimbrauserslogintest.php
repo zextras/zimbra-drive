@@ -17,11 +17,8 @@
 
 namespace OCA\ZimbraDrive\Service\Test;
 
-
-use OCA\ZimbraDrive\Controller\AdminApiController;
 use OCA\ZimbraDrive\Service\LogService;
 use OCA\ZimbraDrive\Settings\AppSettings;
-use OCP\IConfig;
 
 class EnabledZimbraUsersLoginTest implements Test
 {

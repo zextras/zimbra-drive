@@ -88,24 +88,6 @@ class StorageService
     }
 
     /**
-     * @param Node $nodeToDelete
-     * @throws MethodNotAllowedException
-     */
-    public function safeDelete(Node $nodeToDelete)
-    {
-        $userRootNode = $this->getNode(self::ROOT);
-        if($nodeToDelete != $userRootNode)
-        {
-            $nodeToDelete->delete();
-        }
-        else
-        {
-            $errorMessage = 'Cannot delete the user root folder';
-            throw new MethodNotAllowedException($errorMessage);
-        }
-    }
-
-    /**
      * @param Folder $folder
      * @return array
      */
@@ -241,8 +223,8 @@ class StorageService
     }
 
     /**
-     * @param $sourcePath
-     * @param $targetPath
+     * @param $sourcePath string
+     * @param $targetPath string
      * @throws MethodNotAllowedException
      */
     public function move($sourcePath, $targetPath)
@@ -250,7 +232,7 @@ class StorageService
         //if the $targetPath is a directory, it use the $filePath file name
         $nodeToMove = $this->getNode($sourcePath);
         $lastCharTargetPath = $targetPath[strlen($targetPath)-1];
-        if($lastCharTargetPath == "/")
+        if($lastCharTargetPath === "/")
         {
             $targetPath = $targetPath . "/" . $nodeToMove->getName();
         }

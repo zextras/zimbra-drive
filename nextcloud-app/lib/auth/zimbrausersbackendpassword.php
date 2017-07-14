@@ -17,7 +17,6 @@
 
 namespace OCA\ZimbraDrive\Auth;
 
-use OCA\ZimbraDrive\AppInfo\Application;
 use \phpseclib\Crypt\Random;
 
 class ZimbraUsersBackendPassword extends AbstractZimbraUsersBackend
@@ -29,7 +28,7 @@ class ZimbraUsersBackendPassword extends AbstractZimbraUsersBackend
      */
     protected function createUser($userId, $userDisplayName)
     {
-        $this->logger->debug('Initialize user ' . $userId . '.', ['app' => Application::APP_NAME]);
+        parent::__construct();
 
         $user = $this->userManager->createUser($userId, Random::string(255));
         $user->setDisplayName($userDisplayName);

@@ -105,7 +105,7 @@ class ZimbraDriveExtensionConnectivityTest implements Test
         }
 
         //execute post
-        $raw_response = curl_exec($ch);
+        curl_exec($ch);
         $response_info = curl_getinfo($ch);
         $http_code = $response_info["http_code"];
 

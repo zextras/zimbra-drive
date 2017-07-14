@@ -19,6 +19,19 @@ namespace OCA\ZimbraDrive\Auth;
 
 class ZimbraUsersBackendInDb extends AbstractZimbraUsersBackend
 {
+    /** @var \OCP\IDBConnection */
+    private $databaseConnection;
+
+    /**
+     * ZimbraUsersBackendInDb constructor.
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        $server = \OC::$server;
+        $this->databaseConnection = $server->getDatabaseConnection();
+    }
+
 
     /**
      * Delete a user
@@ -29,11 +42,14 @@ class ZimbraUsersBackendInDb extends AbstractZimbraUsersBackend
      */
     public function deleteUser($uid)
     {
-        \OC_DB::executeAudited(
-            'DELETE FROM `*PREFIX*zimbradrive_users`'
-            . ' WHERE `uid` = ?',
-            array($uid)
-        );
+        $sql='DELETE FROM `*PREFIX*zimbradrive_users`'
+            . ' WHERE `uid` = ?';
+
+        $statement = $this->databaseConnection->prepare($sql);
+        $statement->bindParam(1, $uid, \PDO::PARAM_STR);
+        $statement->execute();
+
+        $statement->closeCursor();
         return true;
     }
 
@@ -46,12 +62,17 @@ class ZimbraUsersBackendInDb extends AbstractZimbraUsersBackend
      */
     public function getDisplayName($uid)
     {
-        $user = \OC_DB::executeAudited(
-            'SELECT `display_name` FROM `*PREFIX*zimbradrive_users`'
-            . ' WHERE `uid` = ?',
-            array($uid)
-        )->fetchRow();
-        $display_name = trim($user['display_name'], ' ');
+        $sql='SELECT `display_name` FROM `*PREFIX*zimbradrive_users`'
+            . ' WHERE `uid` = ?';
+
+        $statement = $this->databaseConnection->prepare($sql);
+        $statement->bindParam(1, $uid, \PDO::PARAM_STR);
+        $statement->execute();
+
+        $row = $statement->fetch();
+        $statement->closeCursor();
+
+        $display_name = trim($row['display_name'], ' ');
         if (!empty($display_name)) {
             return $display_name;
         } else {
@@ -69,21 +90,22 @@ class ZimbraUsersBackendInDb extends AbstractZimbraUsersBackend
      */
     public function getDisplayNames($search = '', $limit = null, $offset = null)
     {
-        $result = \OC_DB::executeAudited(
-            array(
-                'sql' => 'SELECT `uid`, `display_name` FROM `*PREFIX*zimbradrive_users`'
-                    . ' WHERE (LOWER(`display_name`) LIKE LOWER(?) '
-                    . ' OR LOWER(`uid`) LIKE LOWER(?))',
-                'limit' => $limit,
-                'offset' => $offset
-            ),
-            array('%' . $search . '%', '%' . $search . '%')
-        );
+        $sql='SELECT `uid`, `display_name` FROM `*PREFIX*zimbradrive_users`'
+            . ' WHERE (LOWER(`display_name`) LIKE LOWER(?) '
+            . ' OR LOWER(`uid`) LIKE LOWER(?))';
+
+        $statement = $this->databaseConnection->prepare($sql, $limit, $offset);
+        $statement->bindParam(1, $search, \PDO::PARAM_STR);
+        $statement->bindParam(2, $search, \PDO::PARAM_STR);
+
+        $statement->execute();
 
         $display_names = array();
-        while ($row = $result->fetchRow()) {
+        while ($row = $statement->fetch()) {
             $display_names[$row['uid']] = $row['display_name'];
         }
+
+        $statement->closeCursor();
 
         return $display_names;
     }
@@ -98,19 +120,20 @@ class ZimbraUsersBackendInDb extends AbstractZimbraUsersBackend
      */
     public function getUsers($search = '', $limit = null, $offset = null)
     {
-        $result = \OC_DB::executeAudited(
-            array(
-                'sql' => 'SELECT `uid` FROM `*PREFIX*zimbradrive_users`'
-                    . ' WHERE LOWER(`uid`) LIKE LOWER(?)',
-                'limit' => $limit,
-                'offset' => $offset
-            ),
-            array($search . '%')
-        );
+        $sql='SELECT `uid` FROM `*PREFIX*zimbradrive_users`'
+            . ' WHERE LOWER(`uid`) LIKE LOWER(?)';
+
+        $statement = $this->databaseConnection->prepare($sql, $limit, $offset);
+        $statement->bindParam(1, $search, \PDO::PARAM_STR);
+
+        $statement->execute();
+
         $users = array();
-        while ($row = $result->fetchRow()) {
+        while ($row = $statement->fetch()) {
             $users[] = $row['uid'];
         }
+
+        $statement->closeCursor();
         return $users;
     }
 
@@ -137,11 +160,16 @@ class ZimbraUsersBackendInDb extends AbstractZimbraUsersBackend
         if (!$this->userExists($uid)) {
             return false;
         }
-        \OC_DB::executeAudited(
-            'UPDATE `*PREFIX*zimbradrive_users` SET `display_name` = ?'
-            . ' WHERE LOWER(`uid`) = ?',
-            array($display_name, $uid)
-        );
+
+        $sql='UPDATE `*PREFIX*zimbradrive_users` SET `display_name` = ?'
+            . ' WHERE LOWER(`uid`) = ?';
+
+        $statement = $this->databaseConnection->prepare($sql);
+        $statement->bindParam(1, $display_name, \PDO::PARAM_STR);
+        $statement->bindParam(2, $uid, \PDO::PARAM_STR);
+        $statement->execute();
+
+        $statement->closeCursor();
         return true;
     }
 
@@ -152,11 +180,17 @@ class ZimbraUsersBackendInDb extends AbstractZimbraUsersBackend
     protected function createUser($uid, $display_name)
     {
         if (!$this->userExists($uid)) {
-            \OC_DB::executeAudited(
-                'INSERT INTO `*PREFIX*zimbradrive_users` ( `uid`, `display_name` )'
-                . ' VALUES( ?, ? )',
-                array($uid, $display_name)
-            );
+
+
+            $sql='INSERT INTO `*PREFIX*zimbradrive_users` ( `uid`, `display_name` )'
+                . ' VALUES( ?, ? )';
+
+            $statement = $this->databaseConnection->prepare($sql);
+            $statement->bindParam(1, $uid, \PDO::PARAM_STR);
+            $statement->bindParam(2, $display_name, \PDO::PARAM_STR);
+            $statement->execute();
+
+            $statement->closeCursor();
         }
     }
 
@@ -166,12 +200,17 @@ class ZimbraUsersBackendInDb extends AbstractZimbraUsersBackend
      */
     public function userExists($uid)
     {
-        $result = \OC_DB::executeAudited(
-            'SELECT COUNT(*) FROM `*PREFIX*zimbradrive_users`'
-            . ' WHERE LOWER(`uid`) = LOWER(?)',
-            array($uid)
-        );
-        return $result->fetchOne() > 0;
+        $sql='SELECT COUNT(*) FROM `*PREFIX*zimbradrive_users`'
+            . ' WHERE LOWER(`uid`) = LOWER(?)';
+
+        $statement = $this->databaseConnection->prepare($sql);
+        $statement->bindParam(1, $uid, \PDO::PARAM_STR);
+        $statement->execute();
+
+        $row = $statement->fetch();
+        $statement->closeCursor();
+
+        return $row['COUNT(*)'] !== "0";
     }
 }
 

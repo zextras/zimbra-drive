@@ -18,6 +18,8 @@
 namespace OCA\ZimbraDrive\Controller;
 
 
+use OCA\ZimbraDrive\Response\DownloadFileResponse;
+use OCA\ZimbraDrive\Response\DownloadNodeResponse;
 use OCA\ZimbraDrive\Response\EmptyResponse;
 use OCA\ZimbraDrive\Service\ResponseVarName;
 use OCA\ZimbraDrive\Service\SearchService;
@@ -25,6 +27,7 @@ use OCA\ZimbraDrive\Service\StorageService;
 use OCA\ZimbraDrive\Service\LogService;
 use OCA\ZimbraDrive\Service\BadRequestException;
 use OCP\AppFramework\ApiController;
+use OCP\Files\Node;
 use OCP\IRequest;
 use OCP\AppFramework\Http\JSONResponse;
 use OCA\ZimbraDrive\Service\LoginService;
@@ -133,7 +136,7 @@ class ZimbraDriveApiController extends ApiController
     }
 
     /**
-     * @param $node string
+     * @param $node Node
      * @param $validTypes array
      * @return bool
      */
@@ -178,7 +181,7 @@ class ZimbraDriveApiController extends ApiController
      * @param $username
      * @param $token
      * @param $path
-     * @return \OCP\AppFramework\Http\Response
+     * @return Response
      */
     public function getFile($username, $token, $path)
 
@@ -191,7 +194,7 @@ class ZimbraDriveApiController extends ApiController
             return new EmptyResponse(Http::STATUS_UNAUTHORIZED);
         }
 
-        return new NodeResponse($path);
+        return new DownloadNodeResponse($path);
     }
 
     /**
@@ -226,12 +229,7 @@ class ZimbraDriveApiController extends ApiController
 
         try
         {
-            $this->storageService->safeDelete($nodeToDelete);
-        }
-        catch (MethodNotAllowedException $exception)
-        {
-            $this->logger->info($exception->getMessage());
-            return new EmptyResponse(Http::STATUS_METHOD_NOT_ALLOWED);
+            $nodeToDelete->delete();
         }
         catch (NotPermittedException $exception)
         {
@@ -249,8 +247,8 @@ class ZimbraDriveApiController extends ApiController
      * @PublicPage
      * @param $username
      * @param $token
-     * @param $source_path
-     * @param $target_path
+     * @param $source_path string
+     * @param $target_path string
      * @return \OCP\AppFramework\Http\Response
      */
     public function move($username, $token, $source_path, $target_path)
@@ -350,7 +348,7 @@ class ZimbraDriveApiController extends ApiController
             $tempFilePath = $fileFieldValue['tmp_name'];
             $fileName = basename($fileFieldValue['name']);
 
-            if($tempFilePath == "" or $fileName == "")
+            if($tempFilePath === "" or $fileName === "")
             {
                 $resultResponse[$fileFieldName] = $this->createFileStatusResponse(self::NO_FILE_IN_THE_REQUEST);
             }
