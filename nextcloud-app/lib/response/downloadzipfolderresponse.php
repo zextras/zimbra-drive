@@ -19,6 +19,7 @@ namespace OCA\ZimbraDrive\Response;
 
 use OC\Streamer;
 use OCA\ZimbraDrive\Service\BadRequestException;
+use OCA\ZimbraDrive\Service\StorageService;
 use OCP\AppFramework\Http\ICallbackResponse;
 use OCP\AppFramework\Http\IOutput;
 use OCP\AppFramework\Http\Response;
@@ -39,6 +40,9 @@ class DownloadZipFolderResponse extends Response  implements ICallbackResponse
     /** @var NodeLocker  */
     private $nodeLocker;
 
+    /** @var  StorageService */
+    private $storageService;
+
     /**
      * Creates a response that prompts the user to download the file
      * @param Folder $folder
@@ -58,6 +62,9 @@ class DownloadZipFolderResponse extends Response  implements ICallbackResponse
         $this->folder = $folder;
 
         $this->nodeLocker = new NodeLocker($this->folder);
+
+        $server = \OC::$server;
+        $this->storageService = $server->query('OCA\ZimbraDrive\Service\StorageService');
     }
 
     /**
@@ -80,18 +87,8 @@ class DownloadZipFolderResponse extends Response  implements ICallbackResponse
 
         $streamer->sendHeaders($this->folder->getName());
 
-        $userRelativePath = $this->getRelativePath();
-        $streamer->addDirRecursive($userRelativePath);
+        $streamer->addDirRecursive($this->storageService->getRelativePath($this->folder));
 
         $streamer->finalize();
-    }
-
-    /**
-     * @return string
-     */
-    private function getRelativePath()
-    {
-        $userRelativePath = substr($this->folder->getInternalPath(), 5); //5 = length("files")
-        return $userRelativePath;
     }
 }

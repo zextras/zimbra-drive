@@ -443,4 +443,14 @@ class StorageService
         }
         return $nodeDescendants;
     }
+
+
+    /**
+     * @param Node $node
+     * @return string
+     */
+    public function getRelativePath(Node $node)
+    {
+        return substr($node->getInternalPath(), 5); //5 = length("files")
+    }
 }

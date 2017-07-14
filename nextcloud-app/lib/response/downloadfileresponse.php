@@ -18,7 +18,9 @@
 namespace OCA\ZimbraDrive\Response;
 
 use OC\Files\Filesystem;
+use OC_Response;
 use OCA\ZimbraDrive\Service\BadRequestException;
+use OCA\ZimbraDrive\Service\StorageService;
 use OCP\AppFramework\Http\ICallbackResponse;
 use OCP\AppFramework\Http\IOutput;
 use OCP\AppFramework\Http\Response;
@@ -36,6 +38,9 @@ class DownloadFileResponse extends Response  implements ICallbackResponse
     /** @var View  */
     private $view;
 
+    /** @var  StorageService */
+    private $storageService;
+
     /**
      * Creates a response that prompts the user to download the file
      * @param File $file
@@ -48,6 +53,9 @@ class DownloadFileResponse extends Response  implements ICallbackResponse
         $this->nodeLocker = new NodeLocker($this->file);
 
         $this->view = Filesystem::getView();
+
+        $server = \OC::$server;
+        $this->storageService = $server->query('OCA\ZimbraDrive\Service\StorageService');
     }
 
     /**
@@ -66,17 +74,20 @@ class DownloadFileResponse extends Response  implements ICallbackResponse
 
     private function streamFileTo(IOutput $output)
     {
+        $this->setHeader();
+
+        OC_Response::disableCaching();
+
+        $this->view->readfile($this->storageService->getRelativePath($this->file));
+    }
+
+    private function setHeader()
+    {
         $filename = $this->file->getName();
-        $contentType = \OC::$server->getMimeTypeDetector()->getSecureMimeType(Filesystem::getMimeType($this->file->getPath()));
-
-        $output->setHeader('Content-Disposition: attachment; filename="' . $filename . '"');
-        $output->setHeader('Content-Type: ' . $contentType);
-
-        $fileHandler = $this->file->fopen('rb');
-
-        fpassthru($fileHandler);
-
-        fclose($fileHandler);
+        OC_Response::setContentDispositionHeader($filename, 'attachment');
+        $contentType = \OC::$server->getMimeTypeDetector()->getSecureMimeType($this->file->getMimeType());
+        header('Content-Type: ' . $contentType);
+        header('Content-Transfer-Encoding: binary');
     }
 
 }
