@@ -22,16 +22,20 @@ ZAL_ZIMBRA_VERSION?=dev-last
 all: dist/zimbra_drive.tgz dist/zimbradrive.tar.gz dist/zimbra_drive.md5
 
 clean:
-	rm -rf build/nextcloud-app \
+	rm -rf \
+		build/nextcloud-app \
 		build/zimbra-extension \
-		build/zimlet
-	rm -f build/LICENSE	\
+		build/zimlet \
+		build/LICENSE \
 		build/README.md \
 		build/zimbra_drive.md5 \
+		dist/asciidoc \
 		dist/zimbra_drive.tgz \
 		dist/zimbra_drive.md5 \
 		dist/zimbradrive.tar.gz \
-		dist/zimbradrive.tar.gz.sign
+		dist/zimbradrive.tar.gz.sign \
+		dist/admin-guide.pdf
+	cd docs-src && make clean
 	cd nextcloud-app && make clean
 	cd zimbra-extension && make clean
 	cd zimlet && make clean
@@ -109,6 +113,20 @@ dist/zimbradrive.tar.gz: build/nextcloud-app/zimbradrive.tar.gz
 
 dist/zimbra_drive.md5: dist/zimbra_drive.tgz
 	cd dist && md5sum zimbra_drive.tgz > zimbra_drive.md5
+
+docs-src/dist/asciidoc/admin-guide.adoc:
+	cd docs-src && make dist/asciidoc/admin-guide.adoc
+
+dist/asciidoc/admin-guide.adoc: docs-src/dist/asciidoc/admin-guide.adoc
+	mkdir -p dist
+	cp -r docs-src/dist/asciidoc dist/
+
+docs-src/dist/admin-guide.pdf:
+	cd docs-src && make dist/admin-guide.pdf
+
+dist/admin-guide.pdf: docs-src/dist/admin-guide.pdf
+	mkdir -p dist
+	cp docs-src/dist/admin-guide.pdf dist/admin-guide.pdf
 
 sign-app:
 	openssl dgst -sha512 -sign ~/.nextcloud/certificates/zimbradrive.key dist/zimbradrive.tar.gz | openssl base64 > dist/zimbradrive.tar.gz.sign

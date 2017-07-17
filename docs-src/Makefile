@@ -61,16 +61,17 @@ build/admin-guide.adoc: build/variables.tex
 	mkdir -p build
 	pandoc -f latex -t asciidoc admin-guide.tex -o build/admin-guide.adoc
 
-dist/admin-guide.adoc: build/admin-guide.adoc
+dist/asciidoc/admin-guide.adoc: build/admin-guide.adoc
 	mkdir -p dist/asciidoc
 	cp build/admin-guide.adoc dist/asciidoc/admin-guide.adoc
-	sed -i 's/\[\[==/\[\[/g' dist/asciidoc/admin-guide.adoc
-	sed -i 's/==\]\]/\]\]/g' dist/asciidoc/admin-guide.adoc
-	sed -i 's/\[==/<</g' dist/asciidoc/admin-guide.adoc
-	sed -i 's/==\]/>>/g' dist/asciidoc/admin-guide.adoc
-	sed -i ':a;N;$$!ba;s/TIP:\n\n/TIP\: /g' dist/asciidoc/admin-guide.adoc
-	sed -i ':a;N;$$!ba;s/WARNING:\n\n/WARNING\: /g' dist/asciidoc/admin-guide.adoc
-
+	sed -i \
+		-e 's/\[\[==/\[\[/g' \
+		-e 's/==\]\]/\]\]/g' \
+		-e 's/\[==/<</g' \
+		-e 's/==\]/>>/g' \
+		-e ':a;N;$$!ba;s/TIP:\n\n/TIP\: /g' \
+		-e ':a;N;$$!ba;s/WARNING:\n\n/WARNING\: /g' \
+		dist/asciidoc/admin-guide.adoc
 	mkdir -p dist/asciidoc/template
 	cp template/cc-by-nc-sa.png dist/asciidoc/template
 
@@ -84,7 +85,9 @@ dist/admin-guide.adoc: build/admin-guide.adoc
 #	cp build/user-guide.pdf dist/user-guide.pdf
 
 clean:
-	rm -f build/variables.tex \
+	rm -f -r \
+		build/variables.tex \
+		build/admin-guide.adoc \
 		build/admin-guide.aux \
 		build/admin-guide.log \
 		build/admin-guide.out \
@@ -100,6 +103,6 @@ clean:
 		build/user-guide.toc \
 		dist/user-guide.pdf \
 		build/excuses.txt \
-		excuses.txt
-	rm -rf build/html
-	rm -rf dist/asciidoc
+		excuses.txt\
+		build/html\
+		dist/asciidoc
