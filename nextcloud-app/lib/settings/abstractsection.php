@@ -17,7 +17,6 @@
 
 namespace OCA\ZimbraDrive\Settings;
 
-
 class AbstractSection
 {
     /**
@@ -25,7 +24,7 @@ class AbstractSection
      */
     public function getID()
     {
-        return 'zimbradrive';
+        return Admin::SECTION_ID;
     }
 
     /**
@@ -41,6 +40,6 @@ class AbstractSection
      */
     public function getPriority()
     {
-        return 75;
+        return Admin::SECTION_PRIORITY;
     }
 }

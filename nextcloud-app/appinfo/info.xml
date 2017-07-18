@@ -24,7 +24,7 @@
         <![CDATA[Add Nextcloud / ownCloud as Briefcase in Zimbra with the full features of both applications.]]></description>
     <licence>apache</licence>
     <author>ZeXtras</author>
-    <version>0.8.11</version>
+    <version>0.8.12</version>
     <namespace>ZimbraDrive</namespace>
     <category>auth</category>
     <category>integration</category>
@@ -42,4 +42,7 @@
         <admin>OCA\ZimbraDrive\Settings\Admin</admin>
         <admin-section>OCA\ZimbraDrive\Settings\Section</admin-section>
     </settings>
+    <settings-sections>
+        <admin>OCA\ZimbraDrive\Settings\Section</admin>
+    </settings-sections>
 </info>

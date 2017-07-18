@@ -17,9 +17,7 @@
 
 namespace OCA\ZimbraDrive\Controller;
 
-
-use OCA\ZimbraDrive\Response\DownloadFileResponse;
-use OCA\ZimbraDrive\Response\DownloadNodeResponse;
+use OCA\ZimbraDrive\Response\DownloadNodeResponseFactory;
 use OCA\ZimbraDrive\Response\EmptyResponse;
 use OCA\ZimbraDrive\Service\ResponseVarName;
 use OCA\ZimbraDrive\Service\SearchService;
@@ -36,7 +34,6 @@ use OCP\AppFramework\Http;
 use OCA\ZimbraDrive\Service\MethodNotAllowedException;
 use \Exception;
 use OCP\Files\NotPermittedException;
-use OCA\ZimbraDrive\Response\NodeResponse;
 use OCP\AppFramework\Http\Response;
 
 class ZimbraDriveApiController extends ApiController
@@ -50,6 +47,7 @@ class ZimbraDriveApiController extends ApiController
     private $loginService;
     private $storageService;
     private $searchService;
+    private $downloadNodeResponseFactory;
 
     public function __construct(
         $appName,
@@ -57,6 +55,7 @@ class ZimbraDriveApiController extends ApiController
         LoginService $loginService,
         StorageService $storageService,
         SearchService $searchService,
+        DownloadNodeResponseFactory $downloadNodeResponseFactory,
         LogService $logger
     )
     {
@@ -70,6 +69,7 @@ class ZimbraDriveApiController extends ApiController
         $this->loginService = $loginService;
         $this->storageService = $storageService;
         $this->searchService = $searchService;
+        $this->downloadNodeResponseFactory = $downloadNodeResponseFactory;
     }
 
     /**
@@ -194,7 +194,8 @@ class ZimbraDriveApiController extends ApiController
             return new EmptyResponse(Http::STATUS_UNAUTHORIZED);
         }
 
-        return new DownloadNodeResponse($path);
+        $node = $this->storageService->getNode($path);
+        return $this->downloadNodeResponseFactory->makeDownloadNodeResponse($node);
     }
 
     /**

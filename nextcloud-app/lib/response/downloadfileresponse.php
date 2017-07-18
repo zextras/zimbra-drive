@@ -17,15 +17,11 @@
 
 namespace OCA\ZimbraDrive\Response;
 
-use OC\Files\Filesystem;
-use OC_Response;
-use OCA\ZimbraDrive\Service\BadRequestException;
 use OCA\ZimbraDrive\Service\StorageService;
 use OCP\AppFramework\Http\ICallbackResponse;
 use OCP\AppFramework\Http\IOutput;
 use OCP\AppFramework\Http\Response;
 use OCP\Files\File;
-use \OC\Files\View;
 
 class DownloadFileResponse extends Response  implements ICallbackResponse
 {
@@ -35,56 +31,46 @@ class DownloadFileResponse extends Response  implements ICallbackResponse
     /** @var NodeLocker  */
     private $nodeLocker;
 
-    /** @var View  */
-    private $view;
-
     /** @var  StorageService */
     private $storageService;
 
     /**
      * Creates a response that prompts the user to download the file
+     * @param StorageService $storageService
+     * @param NodeLockerFactory $nodeLockerFactory
      * @param File $file
-     * @throws BadRequestException
      */
-    public function __construct(File $file)
+    public function __construct(StorageService $storageService, NodeLockerFactory $nodeLockerFactory, File $file)
     {
+        $this->storageService = $storageService;
         $this->file = $file;
 
-        $this->nodeLocker = new NodeLocker($this->file);
-
-        $this->view = Filesystem::getView();
-
-        $server = \OC::$server;
-        $this->storageService = $server->query('OCA\ZimbraDrive\Service\StorageService');
+        $this->nodeLocker = $nodeLockerFactory->makeNodeLocker($this->file);
     }
 
-    /**
-     *
-     * @param IOutput $output a small wrapper that handles output
-     * @since 8.1.0
-     */
-    public function callback (IOutput $output)
+    public function callback (/** @noinspection PhpUnusedParameterInspection */ IOutput $output)
     {
-        $this->nodeLocker->lock();
+        $this->nodeLocker->sharedLock();
 
-        $this->streamFileTo($output);
-
-        $this->nodeLocker->unlock();
-    }
-
-    private function streamFileTo(IOutput $output)
-    {
         $this->setHeader();
 
-        OC_Response::disableCaching();
+        $this->sendFile();
 
-        $this->view->readfile($this->storageService->getRelativePath($this->file));
+        $this->nodeLocker->sharedUnlock();
+    }
+
+    private function sendFile()
+    {
+        $fileHandler = $this->file->fopen('rb');
+        fpassthru($fileHandler);
     }
 
     private function setHeader()
     {
         $filename = $this->file->getName();
-        OC_Response::setContentDispositionHeader($filename, 'attachment');
+        header('Content-Disposition: ' . 'attachment; filename*=UTF-8\'\'' . rawurlencode( $filename )
+            . '; filename="' . rawurlencode( $filename ) . '"');
+        header('Content-Length: '. $this->file->getSize());
         $contentType = \OC::$server->getMimeTypeDetector()->getSecureMimeType($this->file->getMimeType());
         header('Content-Type: ' . $contentType);
         header('Content-Transfer-Encoding: binary');

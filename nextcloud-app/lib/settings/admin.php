@@ -49,7 +49,7 @@ class Admin implements ISettings
     }
 
     /**
-     * @return string the section ID, e.g. 'sharing'
+     * @return string
      */
     public function getSection()
     {
@@ -57,11 +57,7 @@ class Admin implements ISettings
     }
 
     /**
-     * @return int whether the form should be rather on the top or bottom of
-     * the admin section. The forms are arranged in ascending order of the
-     * priority values. It is required to return a value between 0 and 100.
-     *
-     * keep the server setting at the top, right after "server settings"
+     * @return int
      */
     public function getPriority()
     {
@@ -69,7 +65,6 @@ class Admin implements ISettings
     }
 
     /**
-     * The panel controller method that returns a template to the UI
      * @since ownCloud 10.0
      * @return TemplateResponse | Template
      */
@@ -79,7 +74,6 @@ class Admin implements ISettings
     }
 
     /**
-     * A string to identify the section in the UI / HTML and URL
      * @since ownCloud 10.0
      * @return string
      */

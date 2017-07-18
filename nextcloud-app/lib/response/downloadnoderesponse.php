@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-
 namespace OCA\ZimbraDrive\Response;
 
 use OCA\ZimbraDrive\Service\BadRequestException;
@@ -24,33 +23,25 @@ use OCP\AppFramework\Http\IOutput;
 use OCP\AppFramework\Http\Response;
 use OCP\Files\File;
 use OCP\Files\Folder;
+use OCP\Files\Node;
 
 class DownloadNodeResponse extends Response  implements ICallbackResponse
 {
-    /** @var  Response */
+    /** @var  ICallbackResponse */
     private $downloadResponseInstance;
-    /** @var \OCP\ILogger */
-    private $logger;
 
-    public function __construct($filePath) {
-        $server = \OC::$server;
-        $userRootFolder = $server->getUserFolder();
-
-        $this->logger = $server->getLogger();
-
-        $node = $userRootFolder->get($filePath);
-
+    public function __construct(DownloadItemResponseFactory $downloadResponseFactory, Node $node) {
         if( $node instanceof Folder )
         {
             /** @var Folder $node */
-            $this->downloadResponseInstance = new DownloadZipFolderResponse($node);
+            $this->downloadResponseInstance = $downloadResponseFactory->makeDownloadZipFolderResponseFactory($node);
         } elseif ($node instanceof File)
         {
             /** @var File $node */
-            $this->downloadResponseInstance = new DownloadFileResponse($node);
+            $this->downloadResponseInstance = $downloadResponseFactory->makeDownloadFileResponse($node);
         } else
         {
-            throw new BadRequestException("$filePath is not a file or a folder.");
+            throw new BadRequestException($node->getPath() . " is not a file or a folder.");
         }
     }
 

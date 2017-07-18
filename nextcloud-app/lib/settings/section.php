@@ -17,6 +17,7 @@
 
 namespace OCA\ZimbraDrive\Settings;
 
+use OCA\ZimbraDrive\AppInfo\Application;
 use OCP\Settings\ISection;
 use OCP\Settings\IIconSection;
 use OCP\IURLGenerator;
@@ -43,6 +44,16 @@ else
 {
     class Section extends AbstractSection implements ISection
     {
+        public function __construct()
+        {
+            require_once __DIR__ . '/../../../../lib/private/legacy/template/functions.php';
+            style(Application::APP_NAME, 'style');
+        }
+
+        public function getIconName()
+        {
+            return 'zimbradrive';
+        }
    }
 }
 
