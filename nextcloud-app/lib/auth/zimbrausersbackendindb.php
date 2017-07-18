@@ -90,13 +90,19 @@ class ZimbraUsersBackendInDb extends AbstractZimbraUsersBackend
      */
     public function getDisplayNames($search = '', $limit = null, $offset = null)
     {
-        $sql='SELECT `uid`, `display_name` FROM `*PREFIX*zimbradrive_users`'
-            . ' WHERE (LOWER(`display_name`) LIKE LOWER(?) '
-            . ' OR LOWER(`uid`) LIKE LOWER(?))';
-
-        $statement = $this->databaseConnection->prepare($sql, $limit, $offset);
-        $statement->bindParam(1, $search, \PDO::PARAM_STR);
-        $statement->bindParam(2, $search, \PDO::PARAM_STR);
+        if($search === '')
+        {
+            $sql = 'SELECT `uid`, `display_name` FROM `*PREFIX*zimbradrive_users`';
+            $statement = $this->databaseConnection->prepare($sql, $limit, $offset);
+        } else
+        {
+            $sql='SELECT `uid`, `display_name` FROM `*PREFIX*zimbradrive_users`'
+                . ' WHERE (LOWER(`display_name`) LIKE LOWER(?) '
+                . ' OR LOWER(`uid`) LIKE LOWER(?))';
+            $statement = $this->databaseConnection->prepare($sql, $limit, $offset);
+            $statement->bindParam(1, $search, \PDO::PARAM_STR);
+            $statement->bindParam(2, $search, \PDO::PARAM_STR);
+        }
 
         $statement->execute();
 
@@ -120,11 +126,17 @@ class ZimbraUsersBackendInDb extends AbstractZimbraUsersBackend
      */
     public function getUsers($search = '', $limit = null, $offset = null)
     {
-        $sql='SELECT `uid` FROM `*PREFIX*zimbradrive_users`'
-            . ' WHERE LOWER(`uid`) LIKE LOWER(?)';
-
-        $statement = $this->databaseConnection->prepare($sql, $limit, $offset);
-        $statement->bindParam(1, $search, \PDO::PARAM_STR);
+        if($search === '')
+        {
+            $sql='SELECT `uid` FROM `*PREFIX*zimbradrive_users`';
+            $statement = $this->databaseConnection->prepare($sql, $limit, $offset);
+        } else
+        {
+            $sql='SELECT `uid` FROM `*PREFIX*zimbradrive_users`'
+                . ' WHERE LOWER(`uid`) LIKE LOWER(?)';
+            $statement = $this->databaseConnection->prepare($sql, $limit, $offset);
+            $statement->bindParam(1, $search, \PDO::PARAM_STR);
+        }
 
         $statement->execute();
 
