@@ -1,4 +1,5 @@
-/*
+<?php
+/**
  * Copyright 2017 Zextras Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-li > a.icon-zimbradrive {
-    background-image: url(../../../apps/zimbradrive/img/app-dark.svg);
+
+namespace OCA\ZimbraDrive\Settings;
+
+class AbstractSection
+{
+    /**
+     * {@inheritdoc}
+     */
+    public function getID()
+    {
+        return Admin::SECTION_ID;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getName()
+    {
+        return 'Zimbra Drive';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getPriority()
+    {
+        return Admin::SECTION_PRIORITY;
+    }
 }

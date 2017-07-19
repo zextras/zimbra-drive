@@ -23,36 +23,9 @@ use OCP\Settings\IIconSection;
 use OCP\IURLGenerator;
 use OCP\IL10N;
 
-class SectionBase
-{
-    /**
-     * {@inheritdoc}
-     */
-    public function getID()
-    {
-        return 'zimbradrive';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getName()
-    {
-        return 'Zimbra Drive';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getPriority()
-    {
-        return 75;
-    }
-}
-
 if (interface_exists('OCP\\Settings\\IIconSection'))
 {
-    class Section extends SectionBase implements IIconSection
+    class Section extends AbstractSection implements IIconSection
     {
         private $url;
 
@@ -69,10 +42,17 @@ if (interface_exists('OCP\\Settings\\IIconSection'))
 }
 else
 {
-    class Section extends SectionBase implements ISection
+    class Section extends AbstractSection implements ISection
     {
         public function __construct()
         {
+            require_once __DIR__ . '/../../../../lib/private/legacy/template/functions.php';
+            style(Application::APP_NAME, 'style');
+        }
+
+        public function getIconName()
+        {
+            return 'zimbradrive';
         }
    }
 }

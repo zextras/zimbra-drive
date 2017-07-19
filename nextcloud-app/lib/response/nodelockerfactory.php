@@ -1,4 +1,5 @@
-/*
+<?php
+/**
  * Copyright 2017 Zextras Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-li > a.icon-zimbradrive {
-    background-image: url(../../../apps/zimbradrive/img/app-dark.svg);
+
+namespace OCA\ZimbraDrive\Response;
+
+use OCA\ZimbraDrive\Service\StorageService;
+use OCP\Files\Node;
+
+class NodeLockerFactory
+{
+    /** @var  StorageService */
+    private $storageService;
+
+    public function __construct(StorageService $storageService)
+    {
+        $this->storageService = $storageService;
+    }
+
+    public function makeNodeLocker(Node $node)
+    {
+        return new NodeLocker($this->storageService, $node);
+    }
 }

@@ -17,13 +17,15 @@
 
 namespace OCA\ZimbraDrive\Settings;
 
-use OCA\ZimbraDrive\AppInfo\Application;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\IConfig;
 use OCP\Settings\ISettings;
+use OCP\Template;
 
 class Admin implements ISettings
 {
+    const SECTION_PRIORITY = 0;
+    const SECTION_ID = 'zimbradrive';
     /** @var IConfig */
     private $config;
 
@@ -47,22 +49,36 @@ class Admin implements ISettings
     }
 
     /**
-     * @return string the section ID, e.g. 'sharing'
+     * @return string
      */
     public function getSection()
     {
-        return 'zimbradrive';
+        return self::SECTION_ID;
     }
 
     /**
-     * @return int whether the form should be rather on the top or bottom of
-     * the admin section. The forms are arranged in ascending order of the
-     * priority values. It is required to return a value between 0 and 100.
-     *
-     * keep the server setting at the top, right after "server settings"
+     * @return int
      */
     public function getPriority()
     {
-        return 0;
+        return self::SECTION_PRIORITY;
+    }
+
+    /**
+     * @since ownCloud 10.0
+     * @return TemplateResponse | Template
+     */
+    public function getPanel()
+    {
+        return $this->getForm();
+    }
+
+    /**
+     * @since ownCloud 10.0
+     * @return string
+     */
+    public function getSectionID()
+    {
+        return $this->getSection();
     }
 }

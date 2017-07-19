@@ -35,7 +35,7 @@ class FilterUtils
     {
         //is a valid 'in:' query, and extract the path
         $find = preg_match(self::REX_PATH_IN_QUERY, $token, $matches);
-        if ($find == false)
+        if ($find === false || $find === 0)
         {
             $message = 'Not valid query \'' . $token . '\'';
             throw new BadRequestException($message);
@@ -51,7 +51,7 @@ class FilterUtils
     public function queryIsFoldersContentsRequest($query)
     {
         $find = preg_match(self::REX_PATH_IN_QUERY, $query, $matches);
-        if ($find == false)
+        if ($find === false || $find === 0)
         {
             return false;
         }
@@ -74,7 +74,7 @@ class FilterUtils
     public function isValidSearchOperator($tokens)
     {
         $find = preg_match('/^([^ :]+:"[^"]*")$/', $tokens, $matches);
-        if ($find == false)
+        if ($find === false || $find === 0)
         {
             return false;
         }
