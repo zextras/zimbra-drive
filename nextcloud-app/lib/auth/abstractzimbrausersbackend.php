@@ -17,7 +17,9 @@
 
 namespace OCA\ZimbraDrive\Auth;
 
-use \OCA\ZimbraDrive\Settings\AppSettings;
+use OC\Accounts\AccountManager;
+use OCA\ZimbraDrive\Settings\AppSettings;
+use OC\User\User;
 
 abstract class AbstractZimbraUsersBackend extends \OC_User_Backend
 {
@@ -32,6 +34,8 @@ abstract class AbstractZimbraUsersBackend extends \OC_User_Backend
     protected $userManager;
     protected $groupManager;
     protected $allow_zimbra_users_login;
+    /** @var AccountManager */
+    private $accountManager;
 
     public function __construct()
     {
@@ -41,6 +45,11 @@ abstract class AbstractZimbraUsersBackend extends \OC_User_Backend
         $this->config = $server->getConfig();
         $this->userManager = $server->getUserManager();
         $this->groupManager = $server->getGroupManager();
+
+        if(class_exists('OC\Accounts\AccountManager')) //Nextcloud 11
+        {
+            $this->accountManager = $server->query('OC\Accounts\AccountManager');
+        }
 
         $appSettings = new AppSettings($this->config);
 
@@ -81,15 +90,12 @@ abstract class AbstractZimbraUsersBackend extends \OC_User_Backend
             $userId = $response->{'accountId'};
             $userDisplayName = $response->{'displayName'};
             $userEmail = $response->{'email'};
+
             if(!$this->userManager->userExists($userId))
             {
                 $this->createUser($userId, $userDisplayName);
-                $this->setDefaultUserAttributes($userId, $userEmail);
-            } else
-            {
-                $this->restoreUserAttributes($userId, $userEmail);
-                $this->restoreUserEmailIfChanged($userId, $userEmail);
             }
+            $this->setDefaultUserAttributes($userId, $userEmail, $userDisplayName);
 
             return $userId;
         } else {
@@ -100,25 +106,17 @@ abstract class AbstractZimbraUsersBackend extends \OC_User_Backend
     /**
      * @param $userId string
      * @param $userEmail string
+     * @param $userDisplayName string
      */
-    private function restoreUserAttributes($userId, $userEmail){
+    private function setDefaultUserAttributes($userId, $userEmail, $userDisplayName){
         $user = $this->userManager->get($userId);
-        $this->restoreUserEmailIfChanged($userId, $userEmail);
+        $this->restoreUserEmailIfChanged($user, $userEmail);
+        $this->restoreUserDisplayNameIfChanged($user, $userDisplayName);
         $this->setDefaultGroups($user);
     }
 
     /**
-     * @param $userId string
-     * @param $userEmail string
-     */
-    private function setDefaultUserAttributes($userId, $userEmail){
-        $user = $this->userManager->get($userId);
-        $user->setEMailAddress($userEmail);
-        $this->setDefaultGroups($user);
-    }
-
-    /**
-     * @param $user \OC\User\User
+     * @param $user User
      */
     private function setDefaultGroups($user)
     {
@@ -133,35 +131,64 @@ abstract class AbstractZimbraUsersBackend extends \OC_User_Backend
     protected abstract function createUser($userId, $userDisplayName);
 
     /**
-     * @param $userId string
+     * @param $user User
      * @param $userEmail string
      */
-    private function restoreUserEmailIfChanged($userId, $userEmail)
+    private function restoreUserEmailIfChanged(User $user, $userEmail)
     {
-        $user = $this->userManager->get($userId);
         if( $user->getEMailAddress() !== $userEmail)
         {
-            $user->setEMailAddress($userEmail);
+            if(!is_null($this->accountManager)) //Nextcloud 11
+            {
+                $userData = $this->accountManager->getUser($user);
+                $userData[AccountManager::PROPERTY_EMAIL]['value'] = $userEmail;
+                $this->accountManager->updateUser($user, $userData);
+            } else
+            {
+                $user->setEMailAddress($userEmail);
+            }
         }
     }
 
+    private function restoreUserDisplayNameIfChanged(User $user, $userDisplayName)
+    {
+        if($user->getDisplayName() !== $userDisplayName)
+        {
+            if(!is_null($this->accountManager)) //Nextcloud 11
+            {
+                $userData = $this->accountManager->getUser($user);
+                $userData[AccountManager::PROPERTY_DISPLAYNAME]['value'] = $userDisplayName;
+                $this->accountManager->updateUser($user, $userData);
+            } else
+            {
+                $user->setDisplayName($userDisplayName);
+            }
+        }
+    }
+
+
     /**
-     * @param $user \OC\User\User
-     * @param $group
+     * @param User $user
+     * @param string $groupName
      */
-    protected function insertUserInGroup($user, $group)
+    protected function insertUserInGroup(User $user, $groupName)
     {
         if(isset($user))
         {
-            if(!$this->groupManager->groupExists($group))
+            if(!$this->groupManager->groupExists($groupName))
             {
-                $this->groupManager->createGroup($group);
+                $this->groupManager->createGroup($groupName);
             }
 
-            $zimbraGroup = $this->groupManager->get($group);
-            $zimbraGroup->addUser($user);
+            $targetGroup = $this->groupManager->get($groupName);
+            if(!$targetGroup->inGroup($user))
+            {
+                $targetGroup->addUser($user);
+            }
         }
     }
+
+
 
     /**
      * Change the display name of a user
@@ -169,13 +196,13 @@ abstract class AbstractZimbraUsersBackend extends \OC_User_Backend
      * @param string $uid The username
      * @param string $display_name The new display name
      *
-     * @return true/false
+     * @return bool
      */
     public abstract function setDisplayName($uid, $display_name);
 
     /**
-     * @param $uid
-     * @param $password
+     * @param $uid string
+     * @param $password string
      * @return string
      */
     private function buildPostField($uid, $password)
@@ -195,8 +222,8 @@ abstract class AbstractZimbraUsersBackend extends \OC_User_Backend
     }
 
     /**
-     * @param $uid
-     * @param $password
+     * @param $uid string
+     * @param $password string
      * @return HttpRequestResponse
      */
     private function doZimbraAuthenticationRequest($uid, $password)
