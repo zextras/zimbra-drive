@@ -60,6 +60,7 @@ public class NcUserZimbraBackendHttpHandler implements HttpHandler
     }
     try
     {
+      httpServletResponse.setContentType("application/json; charset=UTF-8");
       httpServletResponse.getOutputStream().println(returnObj.toString());
     } catch (IOException e)
     {
