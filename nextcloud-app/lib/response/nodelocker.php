@@ -17,6 +17,8 @@
 
 namespace OCA\ZimbraDrive\Response;
 
+use OC\Files\Filesystem;
+use OC\Files\View;
 use OCA\ZimbraDrive\Service\StorageService;
 use OCP\Files\Folder;
 use OCP\Files\Node;
@@ -30,10 +32,14 @@ class NodeLocker
     /** @var  StorageService */
     private $storageService;
 
+    /** @var  View */
+    private $view;
+
     public function __construct(StorageService $storageService, Node $node)
     {
         $this->storageService = $storageService;
         $this->node = $node;
+        $this->view = Filesystem::getView();
     }
 
     public function sharedLock()
@@ -48,7 +54,7 @@ class NodeLocker
 
     private function lockNode(Node $node)
     {
-        $node->lock(ILockingProvider::LOCK_SHARED);
+        $this->view->lockFile($this->node->getPath(), ILockingProvider::LOCK_SHARED);
         if($node instanceof Folder)
         {
             foreach ($node->getDirectoryListing() as $child)
@@ -60,7 +66,7 @@ class NodeLocker
 
     private function unlockNode(Node $node)
     {
-        $node->lock( ILockingProvider::LOCK_SHARED);
+        $this->view->unlockFile($this->node->getPath(), ILockingProvider::LOCK_SHARED);
         if($node instanceof Folder)
         {
             foreach ($node->getDirectoryListing() as $child)
