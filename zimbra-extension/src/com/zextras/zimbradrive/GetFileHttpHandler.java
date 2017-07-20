@@ -36,26 +36,32 @@ public class GetFileHttpHandler implements HttpHandler {
   private final static String CONTENT_DISPOSITION_HTTP_HEADER = "Content-Disposition";
   private final static int HTTP_LOWEST_ERROR_STATUS = 300;
 
-  private CloudUtils mCloudUtils;
+  private CloudRequestUtils mCloudUtils;
   private BackendUtils mBackendUtils;
+  private ZimbraDriveLog mZimbraDriveLog;
 
-  public GetFileHttpHandler(CloudUtils cloudUtils, BackendUtils backendUtils)
+  public GetFileHttpHandler(CloudRequestUtils cloudUtils, BackendUtils backendUtils, ZimbraDriveLog zmbraDriveLog)
   {
     mCloudUtils = cloudUtils;
     mBackendUtils = backendUtils;
+    mZimbraDriveLog = zmbraDriveLog;
   }
 
   @Override
   public void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException {
+    mZimbraDriveLog.setLogContext(httpServletRequest);
     try {
       doInternalGet(httpServletRequest, httpServletResponse);
     } catch (Exception ex) {
-      ZimbraLog.extensions.warn("Unable to get file", ex);
-      throw new RuntimeException(ex);
+      ZimbraLog.extensions.warn(mZimbraDriveLog.getIntroductionLog() + "Unable to get file", ex);
+    }
+    finally
+    {
+      ZimbraLog.clearContext();
     }
   }
 
-  public void doInternalGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException {
+  private void doInternalGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException {
     Map<String, String> paramsMap = new HashMap<>();
     String queryString = httpServletRequest.getQueryString();
     if (queryString != null)
@@ -71,6 +77,7 @@ public class GetFileHttpHandler implements HttpHandler {
       }
     }
     Account account = mBackendUtils.assertAccountFromAuthToken(httpServletRequest);
+    ZimbraLog.addAccountNameToContext(account.getName());
     String requestedUrl = httpServletRequest.getPathInfo();
     int lengthOfBaseUrl = this.getPath().length()+2; //   "/" + this.getPath() + "/"
     String path = requestedUrl.substring(lengthOfBaseUrl);
@@ -139,7 +146,7 @@ public class GetFileHttpHandler implements HttpHandler {
     return "ZimbraDrive_Download";
   }
 
-  public String triggerCallback(String callback) {
+  private String triggerCallback(String callback) {
     return
             "<html>\n" +
             "\t<head>\n" +

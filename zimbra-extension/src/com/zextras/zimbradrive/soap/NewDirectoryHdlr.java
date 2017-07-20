@@ -38,9 +38,9 @@ public class NewDirectoryHdlr implements SoapHandler
 
   private final static int HTTP_LOWEST_ERROR_STATUS = 300;
 
-  private final CloudUtils mCloudUtils;
+  private final CloudRequestUtils mCloudUtils;
 
-  public NewDirectoryHdlr(CloudUtils cloudUtils)
+  public NewDirectoryHdlr(CloudRequestUtils cloudUtils)
   {
     mCloudUtils = cloudUtils;
   }

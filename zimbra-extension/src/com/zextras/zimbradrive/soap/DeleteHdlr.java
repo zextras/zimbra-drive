@@ -38,9 +38,9 @@ public class DeleteHdlr implements SoapHandler
 
   private final static int HTTP_LOWEST_ERROR_STATUS = 300;
 
-  private final CloudUtils mCloudUtils;
+  private final CloudRequestUtils mCloudUtils;
 
-  public DeleteHdlr(CloudUtils cloudUtils)
+  public DeleteHdlr(CloudRequestUtils cloudUtils)
   {
     mCloudUtils = cloudUtils;
   }

@@ -38,9 +38,9 @@ public class SearchRequestHdlr implements SoapHandler
   public static final QName QNAME = new QName(COMMAND +"Request", ZimbraDriveExtension.SOAP_NAMESPACE);
   private static final QName RESPONSE_QNAME = new QName(COMMAND + "Response", ZimbraDriveExtension.SOAP_NAMESPACE);
 
-  private final CloudUtils mCloudUtils;
+  private final CloudRequestUtils mCloudUtils;
 
-  public SearchRequestHdlr(CloudUtils cloudUtils)
+  public SearchRequestHdlr(CloudRequestUtils cloudUtils)
   {
     mCloudUtils = cloudUtils;
   }

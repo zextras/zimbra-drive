@@ -18,7 +18,7 @@
 package com.zextras.zimbradrive.soap;
 
 
-import com.zextras.zimbradrive.CloudUtils;
+import com.zextras.zimbradrive.CloudRequestUtils;
 import org.openzal.zal.soap.QName;
 import org.openzal.zal.soap.SoapHandler;
 import org.openzal.zal.soap.SoapService;
@@ -30,7 +30,7 @@ public class NcSoapService implements SoapService
 {
   private final Map<QName, SoapHandler> mServiceMap;
 
-  public NcSoapService(final CloudUtils cloudUtils)
+  public NcSoapService(final CloudRequestUtils cloudUtils)
   {
     MoveHdlr moveHdlr = new MoveHdlr(cloudUtils);
     mServiceMap = new HashMap<>();

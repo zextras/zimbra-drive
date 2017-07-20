@@ -36,9 +36,9 @@ public class MoveHdlr implements SoapHandler
 
   private final static int HTTP_LOWEST_ERROR_STATUS = 300;
 
-  private final CloudUtils mCloudUtils;
+  private final CloudRequestUtils mCloudUtils;
 
-  MoveHdlr(CloudUtils cloudUtils)
+  MoveHdlr(CloudRequestUtils cloudUtils)
   {
     mCloudUtils = cloudUtils;
   }

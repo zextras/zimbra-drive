@@ -28,6 +28,12 @@ import java.io.IOException;
 public class ConnectivityTestHttpHandler implements HttpHandler
 {
 
+  private ZimbraDriveLog mZimbraDriveLog;
+
+  public ConnectivityTestHttpHandler(ZimbraDriveLog zimbraDriveLog) {
+    mZimbraDriveLog = zimbraDriveLog;
+  }
+
   @Override
   public void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException
   {
@@ -37,13 +43,17 @@ public class ConnectivityTestHttpHandler implements HttpHandler
   @Override
   public void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException
   {
+    mZimbraDriveLog.setLogContext(httpServletRequest);
     try
     {
       httpServletResponse.getOutputStream().println("ok");
     } catch (IOException e)
     {
-      ZimbraLog.mailbox.error("IO exception: error getting response output stream.", e);
-      throw e;
+      ZimbraLog.extensions.error(mZimbraDriveLog.getIntroductionLog() + "Unable to print connectivity test page. " + e.getMessage(), e);
+    }
+    finally
+    {
+      ZimbraLog.clearContext();
     }
   }
 

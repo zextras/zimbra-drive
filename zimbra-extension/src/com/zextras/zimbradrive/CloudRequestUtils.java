@@ -35,7 +35,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CloudUtils
+public class CloudRequestUtils
 {
 
   private static final String DRIVE_ON_CLOUD_URL = "/apps/zimbradrive/api/1.0/";
@@ -45,7 +45,7 @@ public class CloudUtils
   private final TokenManager mTokenManager;
   private final DriveProxy   mDriveProxy;
 
-  public CloudUtils(Provisioning provisioning, TokenManager tokenManager, DriveProxy driveProxy)
+  public CloudRequestUtils(Provisioning provisioning, TokenManager tokenManager, DriveProxy driveProxy)
   {
     mProvisioning = provisioning;
     mTokenManager = tokenManager;
