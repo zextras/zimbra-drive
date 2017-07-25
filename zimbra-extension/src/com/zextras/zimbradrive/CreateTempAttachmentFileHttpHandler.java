@@ -45,13 +45,13 @@ public class CreateTempAttachmentFileHttpHandler implements HttpHandler {
   private final static String CONTENT_DISPOSITION_HTTP_HEADER = "Content-Disposition";
   private final static int HTTP_LOWEST_ERROR_STATUS = 300;
 
-  private final CloudRequestUtils mCloudUtils;
+  private final CloudHttpRequestUtils mCloudHttpRequestUtils;
   private final BackendUtils mBackendUtils;
   private ZimbraDriveLog mZimbraDriveLog;
 
-  public CreateTempAttachmentFileHttpHandler(CloudRequestUtils cloudServerUtils, BackendUtils backendUtils, ZimbraDriveLog zimbraDriveLog)
+  public CreateTempAttachmentFileHttpHandler(CloudHttpRequestUtils cloudServerUtils, BackendUtils backendUtils, ZimbraDriveLog zimbraDriveLog)
   {
-    mCloudUtils = cloudServerUtils;
+    mCloudHttpRequestUtils = cloudServerUtils;
     mBackendUtils = backendUtils;
     mZimbraDriveLog = zimbraDriveLog;
   }
@@ -64,9 +64,11 @@ public class CreateTempAttachmentFileHttpHandler implements HttpHandler {
     {
       doInternalPost(httpServletRequest, httpServletResponse);
     }
-    catch (Exception ex)
+    catch (Exception exception)
     {
-      ZimbraLog.extensions.warn(mZimbraDriveLog.getIntroductionLog() + "Unable to add attachment", ex);
+      String errorMessage = mZimbraDriveLog.getLogIntroduction() + "Unable to add attachment";
+      ZimbraLog.extensions.error(errorMessage, exception);
+      httpServletResponse.sendError(500, errorMessage);
     }
     finally
     {
@@ -81,7 +83,7 @@ public class CreateTempAttachmentFileHttpHandler implements HttpHandler {
     String path;
     BufferedReader reader = httpServletRequest.getReader();
     while ((path = reader.readLine()) != null) {
-      HttpResponse fileRequestResponse = mCloudUtils.queryCloudServerService(account, path);
+      HttpResponse fileRequestResponse = mCloudHttpRequestUtils.queryCloudServerService(account, path);
 
       int responseCode = fileRequestResponse.getStatusLine().getStatusCode();
       if (responseCode < HTTP_LOWEST_ERROR_STATUS) {

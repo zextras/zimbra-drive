@@ -61,9 +61,11 @@ public class CloudAppTestsHttpHandler implements HttpHandler
     try
     {
       internalDoGet(httpServletRequest, httpServletResponse);
-    } catch (Exception e)
+    } catch (Exception exception)
     {
-      ZimbraLog.extensions.warn(mZimbraDriveLog.getIntroductionLog() + "Unable to print test page. " + e.getMessage(), e);
+      String errorMessage = mZimbraDriveLog.getLogIntroduction() + "Unable to print test page";
+      ZimbraLog.extensions.error(errorMessage, exception);
+      httpServletResponse.sendError(500, errorMessage);
     }
     finally
     {

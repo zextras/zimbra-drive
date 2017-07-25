@@ -64,9 +64,11 @@ public class UploadFileHttpHandler extends HttpServlet implements HttpHandler {
     {
       doInternalPost(httpServletRequest, httpServletResponse);
     }
-    catch (Exception ex)
+    catch (Exception exception)
     {
-      ZimbraLog.extensions.warn(mZimbraDriveLog.getIntroductionLog() + "Unable to upload file", ex);
+      String errorMessage = mZimbraDriveLog.getLogIntroduction() + "Unable to upload file";
+      ZimbraLog.extensions.error(errorMessage, exception);
+      httpServletResponse.sendError(500, errorMessage);
     }
     finally
     {
@@ -121,7 +123,7 @@ public class UploadFileHttpHandler extends HttpServlet implements HttpHandler {
     String usernamePartsString =
             "Content-Disposition: form-data; name=\"username\"\r\n" +
                     "\r\n" +
-                    userAccount.getName();
+                    userAccount.getId();
     String tokenPartsString =
             "Content-Disposition: form-data; name=\"token\"\r\n" +
                     "\r\n" +

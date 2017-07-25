@@ -47,9 +47,11 @@ public class ConnectivityTestHttpHandler implements HttpHandler
     try
     {
       httpServletResponse.getOutputStream().println("ok");
-    } catch (IOException e)
+    } catch (Exception exception)
     {
-      ZimbraLog.extensions.error(mZimbraDriveLog.getIntroductionLog() + "Unable to print connectivity test page. " + e.getMessage(), e);
+      String errorMessage = mZimbraDriveLog.getLogIntroduction() + "Unable to print connectivity test page";
+      ZimbraLog.extensions.error(errorMessage, exception);
+      httpServletResponse.sendError(500, errorMessage);
     }
     finally
     {

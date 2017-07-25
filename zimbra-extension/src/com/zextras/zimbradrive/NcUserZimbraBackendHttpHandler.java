@@ -46,12 +46,15 @@ public class NcUserZimbraBackendHttpHandler implements HttpHandler
   public void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException
   {
     mZimbraDriveLog.setLogContext(httpServletRequest);
-    try {
+    try
+    {
       internalDoPost(httpServletRequest, httpServletResponse);
     }
-    catch (Exception ex)
+    catch (Exception exception)
     {
-      ZimbraLog.extensions.warn(mZimbraDriveLog.getIntroductionLog() + "Unable to authenticate the user", ex);
+      String errorMessage = mZimbraDriveLog.getLogIntroduction() + "Unable to authenticate the user";
+      ZimbraLog.extensions.error(errorMessage, exception);
+      httpServletResponse.sendError(500, errorMessage);
     }
     finally
     {
@@ -71,17 +74,20 @@ public class NcUserZimbraBackendHttpHandler implements HttpHandler
 
     if (userAccount != null)
     {
-    ZimbraLog.security.info(mZimbraDriveLog.getIntroductionLog() + "Authentication success for user '" + userAccount.getName() + "'");
-    printUserAttributesResponse(httpServletResponse, userAccount);
+      if (!areTokenCredentials(userId)) //External authentication by username and password
+      {
+        ZimbraLog.security.info(mZimbraDriveLog.getLogIntroduction() + "Authentication success for user '" + userAccount.getName() + "'");
+      }
+      printUserAttributesResponse(httpServletResponse, userAccount);
     } else
     {
-      ZimbraLog.security.info(mZimbraDriveLog.getIntroductionLog() + "Authentication failed for user '" + userId + "'");
+      ZimbraLog.security.warn(mZimbraDriveLog.getLogIntroduction() + "Authentication failed for user '" + userId + "'");
     }
   }
 
   private Account getAccount(String userId, String password) {
     Account userAccount;
-    if (handleCredentialAsToken(userId)) {
+    if (areTokenCredentials(userId)) {
       userAccount = getAccountByToken(userId, password);
     } else {
       userAccount = getAccountByCredentials(userId, password);
@@ -90,12 +96,12 @@ public class NcUserZimbraBackendHttpHandler implements HttpHandler
   }
 
   private void printUserAttributesResponse(HttpServletResponse httpServletResponse, Account userAccount) throws IOException {
-    JSONObject userAttributesJson = getUserPropertiesJson(userAccount);
+    JSONObject userAttributesJson = getUserAttributesJson(userAccount);
     httpServletResponse.setContentType("application/json; charset=UTF-8");
     httpServletResponse.getOutputStream().println(userAttributesJson.toString());
   }
 
-  private boolean handleCredentialAsToken(String userId) {
+  private boolean areTokenCredentials(String userId) {
     Account accountById = mBackendUtils.getAccountById(userId);
     return accountById != null;
   }
@@ -110,12 +116,12 @@ public class NcUserZimbraBackendHttpHandler implements HttpHandler
     return null;
   }
 
-  private JSONObject getUserPropertiesJson(Account account) {
-    JSONObject returnObj = new JSONObject();
-    returnObj.put("accountId", account.getId());
-    returnObj.put("displayName", account.getDisplayName());
-    returnObj.put("email", account.getName());
-    return returnObj;
+  private JSONObject getUserAttributesJson(Account account) {
+    JSONObject userAttributesJson = new JSONObject();
+    userAttributesJson.put("accountId", account.getId());
+    userAttributesJson.put("displayName", account.getDisplayName());
+    userAttributesJson.put("email", account.getName());
+    return userAttributesJson;
   }
 
   private Account getAccountByCredentials(String username, String password)

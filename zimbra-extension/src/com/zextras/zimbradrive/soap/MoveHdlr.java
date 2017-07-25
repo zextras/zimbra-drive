@@ -36,11 +36,11 @@ public class MoveHdlr implements SoapHandler
 
   private final static int HTTP_LOWEST_ERROR_STATUS = 300;
 
-  private final CloudRequestUtils mCloudUtils;
+  private final CloudHttpRequestUtils mCloudHttpRequestUtils;
 
-  MoveHdlr(CloudRequestUtils cloudUtils)
+  MoveHdlr(CloudHttpRequestUtils cloudHttpRequestUtils)
   {
-    mCloudUtils = cloudUtils;
+    mCloudHttpRequestUtils = cloudHttpRequestUtils;
   }
 
   @Override
@@ -48,29 +48,33 @@ public class MoveHdlr implements SoapHandler
   {
     try
     {
-      String sourcePath = zimbraContext.getParameter(ZimbraDriveItem.F_SOURCE_PATH, "");
-      String targetPath = zimbraContext.getParameter(ZimbraDriveItem.F_TARGET_PATH, "");
-      HttpResponse response =sendMoveToDriveOnCloudServerService(zimbraContext, sourcePath, targetPath);
-
-      soapResponse.setQName(RESPONSE_QNAME);
-
-      final int responseStatusCode = response.getStatusLine().getStatusCode();
-      if(responseStatusCode >= HTTP_LOWEST_ERROR_STATUS)
-      {
-        throw new Exception(Integer.toString(responseStatusCode));
-      }
-
-    } catch (Exception e)
+      privateHandleRequest(zimbraContext, soapResponse);
+    } catch (Exception exception)
     {
-      throw new RuntimeException(e);
+      zimbraExceptionContainer.setException(exception);
+    }
+  }
+
+  private void privateHandleRequest(ZimbraContext zimbraContext, SoapResponse soapResponse) throws IOException
+  {
+    String sourcePath = zimbraContext.getParameter(ZimbraDriveItem.F_SOURCE_PATH, "");
+    String targetPath = zimbraContext.getParameter(ZimbraDriveItem.F_TARGET_PATH, "");
+    HttpResponse response =sendMoveToDriveOnCloudServerService(zimbraContext, sourcePath, targetPath);
+
+    soapResponse.setQName(RESPONSE_QNAME);
+
+    final int responseStatusCode = response.getStatusLine().getStatusCode();
+    if(responseStatusCode >= HTTP_LOWEST_ERROR_STATUS)
+    {
+      throw new RuntimeException(Integer.toString(responseStatusCode));
     }
   }
 
   private HttpResponse sendMoveToDriveOnCloudServerService(final ZimbraContext zimbraContext, final String sourcePath, final String targetPath) throws IOException {
-    List<NameValuePair> driveOnCloudParameters = mCloudUtils.createDriveOnCloudAuthenticationParams(zimbraContext);
+    List<NameValuePair> driveOnCloudParameters = mCloudHttpRequestUtils.createDriveOnCloudAuthenticationParams(zimbraContext);
     driveOnCloudParameters.add(new BasicNameValuePair(ZimbraDriveItem.F_SOURCE_PATH, sourcePath));
     driveOnCloudParameters.add(new BasicNameValuePair(ZimbraDriveItem.F_TARGET_PATH, targetPath));
-    return mCloudUtils.sendRequestToCloud(zimbraContext, driveOnCloudParameters, COMMAND);
+    return mCloudHttpRequestUtils.sendRequestToCloud(zimbraContext, driveOnCloudParameters, COMMAND);
   }
 
   @Override

@@ -52,7 +52,7 @@ public class TokenManager
     {
       return mTokenMap.get(accountId);
     }
-    throw new RuntimeException();
+    return null;
   }
 
   public synchronized boolean tokenExists(String accountId)

@@ -38,11 +38,11 @@ public class DeleteHdlr implements SoapHandler
 
   private final static int HTTP_LOWEST_ERROR_STATUS = 300;
 
-  private final CloudRequestUtils mCloudUtils;
+  private final CloudHttpRequestUtils mCloudHttpRequestUtils;
 
-  public DeleteHdlr(CloudRequestUtils cloudUtils)
+  public DeleteHdlr(CloudHttpRequestUtils cloudHttpRequestUtils)
   {
-    mCloudUtils = cloudUtils;
+    mCloudHttpRequestUtils = cloudHttpRequestUtils;
   }
 
   @Override
@@ -50,6 +50,15 @@ public class DeleteHdlr implements SoapHandler
   {
     try
     {
+      privateHandleRequest(zimbraContext, soapResponse);
+    } catch (Exception exception)
+    {
+      zimbraExceptionContainer.setException(exception);
+    }
+  }
+
+  private void privateHandleRequest(ZimbraContext zimbraContext, SoapResponse soapResponse) throws IOException
+  {
       String[] targetPath;
       String recPath = zimbraContext.getParameter(ZimbraDriveItem.F_PATH, "");
       try {
@@ -65,7 +74,6 @@ public class DeleteHdlr implements SoapHandler
 
       for (String target : targetPath)
       {
-        // TODO: Investigate about the `files/` prefix
         HttpResponse response = sendDeleteDriveOnCloudServerService(zimbraContext, target);
 
         soapResponse.setQName(RESPONSE_QNAME);
@@ -73,19 +81,15 @@ public class DeleteHdlr implements SoapHandler
         final int responseStatusCode = response.getStatusLine().getStatusCode();
         if (responseStatusCode >= HTTP_LOWEST_ERROR_STATUS)
         {
-          throw new Exception(Integer.toString(responseStatusCode));
+          throw new RuntimeException(Integer.toString(responseStatusCode));
         }
       }
-    } catch (Exception e)
-    {
-      throw new RuntimeException(e);
-    }
   }
 
   private HttpResponse sendDeleteDriveOnCloudServerService(final ZimbraContext zimbraContext, final String targetPath) throws IOException {
-    List<NameValuePair> driveOnCloudParameters = mCloudUtils.createDriveOnCloudAuthenticationParams(zimbraContext);
+    List<NameValuePair> driveOnCloudParameters = mCloudHttpRequestUtils.createDriveOnCloudAuthenticationParams(zimbraContext);
     driveOnCloudParameters.add(new BasicNameValuePair(ZimbraDriveItem.F_PATH, targetPath));
-    return mCloudUtils.sendRequestToCloud(zimbraContext, driveOnCloudParameters, COMMAND);
+    return mCloudHttpRequestUtils.sendRequestToCloud(zimbraContext, driveOnCloudParameters, COMMAND);
   }
 
   @Override

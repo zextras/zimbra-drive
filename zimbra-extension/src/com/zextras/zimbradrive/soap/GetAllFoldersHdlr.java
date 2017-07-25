@@ -35,11 +35,11 @@ public class GetAllFoldersHdlr implements SoapHandler
   public static final QName QNAME = new QName(COMMAND + "Request", ZimbraDriveExtension.SOAP_NAMESPACE);
   private static final QName RESPONSE_QNAME = new QName(COMMAND + "Response", ZimbraDriveExtension.SOAP_NAMESPACE);
 
-  private final CloudRequestUtils mCloudUtils;
+  private final CloudHttpRequestUtils mCloudHttpRequestUtils;
 
-  GetAllFoldersHdlr(CloudRequestUtils cloudUtils)
+  GetAllFoldersHdlr(CloudHttpRequestUtils cloudHttpRequestUtils)
   {
-    mCloudUtils = cloudUtils;
+    mCloudHttpRequestUtils = cloudHttpRequestUtils;
   }
 
   @Override
@@ -47,23 +47,27 @@ public class GetAllFoldersHdlr implements SoapHandler
   {
     try
     {
-      HttpResponse response = queryDriveOnCloudServerServiceFolder(zimbraContext);
-      BasicResponseHandler basicResponseHandler = new BasicResponseHandler();
-      String responseBody = basicResponseHandler.handleResponse(response);
-
-      soapResponse.setQName(RESPONSE_QNAME);
-
-      appendSoapResponseFromDriveResponseFolder(soapResponse, responseBody);
-
-    } catch (Exception e)
+      privateHandleRequest(zimbraContext, soapResponse);
+    } catch (Exception exception)
     {
-      throw new RuntimeException(e);
+      zimbraExceptionContainer.setException(exception);
     }
   }
 
+  private void privateHandleRequest(ZimbraContext zimbraContext, SoapResponse soapResponse) throws IOException
+  {
+    HttpResponse response = queryDriveOnCloudServerServiceFolder(zimbraContext);
+    BasicResponseHandler basicResponseHandler = new BasicResponseHandler();
+    String responseBody = basicResponseHandler.handleResponse(response);
+
+    soapResponse.setQName(RESPONSE_QNAME);
+
+    appendSoapResponseFromDriveResponseFolder(soapResponse, responseBody);
+  }
+
   private HttpResponse queryDriveOnCloudServerServiceFolder(final ZimbraContext zimbraContext) throws IOException {
-    List<NameValuePair> driveOnCloudParameters = mCloudUtils.createDriveOnCloudAuthenticationParams(zimbraContext);
-    return mCloudUtils.sendRequestToCloud(zimbraContext, driveOnCloudParameters, COMMAND);
+    List<NameValuePair> driveOnCloudParameters = mCloudHttpRequestUtils.createDriveOnCloudAuthenticationParams(zimbraContext);
+    return mCloudHttpRequestUtils.sendRequestToCloud(zimbraContext, driveOnCloudParameters, COMMAND);
   }
 
   private void appendSoapResponseFromDriveResponseFolder(final SoapResponse soapResponse, final String responseBody)

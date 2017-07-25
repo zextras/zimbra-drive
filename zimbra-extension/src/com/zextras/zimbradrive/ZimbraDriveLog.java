@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 public class ZimbraDriveLog {
   private static String introductionLog = "ZimbraDrive: ";
 
-  public String getIntroductionLog() {
+  public String getLogIntroduction() {
     return introductionLog;
   }
 
@@ -37,7 +37,7 @@ public class ZimbraDriveLog {
 
   private String getIp(HttpServletRequest httpServletRequest) {
     String ip = httpServletRequest.getHeader("X-FORWARDED-FOR");
-    if(ip == null)
+    if (ip == null)
     {
       ip = httpServletRequest.getRemoteAddr();
     }

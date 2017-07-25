@@ -51,18 +51,18 @@ public class ZimbraDriveExtension implements ZalExtension
     TokenManager tokenManager = new TokenManager();
     BackendUtils backendUtils = new BackendUtils(mZimbra.getProvisioning(), tokenManager);
     DriveProxy driveProxy = new DriveProxy(mZimbra.getProvisioning());
-    CloudRequestUtils cloudUtils = new CloudRequestUtils(mZimbra.getProvisioning(), tokenManager, driveProxy);
+    CloudHttpRequestUtils cloudHttpRequestUtils = new CloudHttpRequestUtils(mZimbra.getProvisioning(), tokenManager, driveProxy);
     mZimbraDriveLog = new ZimbraDriveLog();
 
     mSoapServiceManager = new SoapServiceManager();
-    mNcSoapService = new NcSoapService(cloudUtils);
+    mNcSoapService = new NcSoapService(cloudHttpRequestUtils);
 
     mHttpServiceManager = new HttpServiceManager();
     mNcUserZimbraBackendHttpHandler = new NcUserZimbraBackendHttpHandler(backendUtils, mZimbraDriveLog);
     mConnectivityTestHttpHandler = new ConnectivityTestHttpHandler(mZimbraDriveLog);
     mUploadFileHttpHandler = new UploadFileHttpHandler(backendUtils, driveProxy, mZimbraDriveLog);
-    mGetFileHttpHdlr = new GetFileHttpHandler(cloudUtils, backendUtils, mZimbraDriveLog);
-    mCreateTempAttachmentFileHttpHdlr = new CreateTempAttachmentFileHttpHandler(cloudUtils, backendUtils, mZimbraDriveLog);
+    mGetFileHttpHdlr = new GetFileHttpHandler(cloudHttpRequestUtils, backendUtils, mZimbraDriveLog);
+    mCreateTempAttachmentFileHttpHdlr = new CreateTempAttachmentFileHttpHandler(cloudHttpRequestUtils, backendUtils, mZimbraDriveLog);
     ConnectionTestUtils connectionTestUtils = new ConnectionTestUtils();
     mCloudAppTestHttpHdlr = new CloudAppTestsHttpHandler(backendUtils, driveProxy, connectionTestUtils, mZimbraDriveLog);
   }
@@ -100,7 +100,7 @@ public class ZimbraDriveExtension implements ZalExtension
       ZimbraLog.extensions.info("Loaded Zimbra Drive extension.");
     } catch( Throwable ex )
     {
-      ZimbraLog.extensions.error( mZimbraDriveLog.getIntroductionLog() + "#######Critical Exception on Startup.#######", ex );
+      ZimbraLog.extensions.error( mZimbraDriveLog.getLogIntroduction() + "#######Critical Exception on Startup.#######", ex );
     }
   }
 
@@ -117,6 +117,6 @@ public class ZimbraDriveExtension implements ZalExtension
     mHttpServiceManager.unregisterHandler(mUploadFileHttpHandler);
     mHttpServiceManager.unregisterHandler(mCreateTempAttachmentFileHttpHdlr);
     mHttpServiceManager.unregisterHandler(mCloudAppTestHttpHdlr);
-    ZimbraLog.extensions.info(mZimbraDriveLog.getIntroductionLog() + "Unloaded Zimbra Drive extension.");
+    ZimbraLog.extensions.info(mZimbraDriveLog.getLogIntroduction() + "Unloaded Zimbra Drive extension.");
   }
 }
