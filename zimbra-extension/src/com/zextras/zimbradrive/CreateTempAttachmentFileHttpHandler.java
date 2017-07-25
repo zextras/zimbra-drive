@@ -17,8 +17,6 @@
 
 package com.zextras.zimbradrive;
 
-import org.apache.http.Header;
-import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -47,36 +45,45 @@ public class CreateTempAttachmentFileHttpHandler implements HttpHandler {
   private final static String CONTENT_DISPOSITION_HTTP_HEADER = "Content-Disposition";
   private final static int HTTP_LOWEST_ERROR_STATUS = 300;
 
-  private final CloudUtils mCloudUtils;
+  private final CloudHttpRequestUtils mCloudHttpRequestUtils;
   private final BackendUtils mBackendUtils;
+  private ZimbraDriveLog mZimbraDriveLog;
 
-  public CreateTempAttachmentFileHttpHandler(CloudUtils cloudServerUtils, BackendUtils backendUtils)
+  public CreateTempAttachmentFileHttpHandler(CloudHttpRequestUtils cloudServerUtils, BackendUtils backendUtils, ZimbraDriveLog zimbraDriveLog)
   {
-    mCloudUtils = cloudServerUtils;
+    mCloudHttpRequestUtils = cloudServerUtils;
     mBackendUtils = backendUtils;
+    mZimbraDriveLog = zimbraDriveLog;
   }
 
   @Override
   public void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException
   {
+    mZimbraDriveLog.setLogContext(httpServletRequest);
     try
     {
       doInternalPost(httpServletRequest, httpServletResponse);
     }
-    catch (Exception ex)
+    catch (Exception exception)
     {
-      ZimbraLog.extensions.warn("Unable to add attachment", ex);
-      throw new RuntimeException(ex);
+      String errorMessage = mZimbraDriveLog.getLogIntroduction() + "Unable to add attachment";
+      ZimbraLog.extensions.error(errorMessage, exception);
+      httpServletResponse.sendError(500, errorMessage);
+    }
+    finally
+    {
+      ZimbraLog.clearContext();
     }
   }
 
-  public void doInternalPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException, KeyStoreException, NoSuchAlgorithmException, KeyManagementException
+  private void doInternalPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException, KeyStoreException, NoSuchAlgorithmException, KeyManagementException
   {
     Account account = mBackendUtils.assertAccountFromAuthToken(httpServletRequest);
+    ZimbraLog.addAccountNameToContext(account.getName());
     String path;
     BufferedReader reader = httpServletRequest.getReader();
     while ((path = reader.readLine()) != null) {
-      HttpResponse fileRequestResponse = mCloudUtils.queryCloudServerService(account, path);
+      HttpResponse fileRequestResponse = mCloudHttpRequestUtils.queryCloudServerService(account, path);
 
       int responseCode = fileRequestResponse.getStatusLine().getStatusCode();
       if (responseCode < HTTP_LOWEST_ERROR_STATUS) {
@@ -134,7 +141,7 @@ public class CreateTempAttachmentFileHttpHandler implements HttpHandler {
   }
 
   private String convertToUnicode(String source) {
-    String result = "";
+    StringBuilder resultsBuilder = new StringBuilder();
     if (source.length() == 0) return source;
     for (int i = 0; i < source.length(); i++) {
       int charCode = (int) source.charAt(i);
@@ -144,11 +151,11 @@ public class CreateTempAttachmentFileHttpHandler implements HttpHandler {
         while (temp.length() < 4) {
           temp = "0" + temp;
         }
-        result += "&#" + temp + ";";
+        resultsBuilder.append("&#").append(temp).append(";");
       } else {
-        result += source.charAt(i);
+        resultsBuilder.append(source.charAt(i));
       }
     }
-    return result;
+    return resultsBuilder.toString();
   }
 }

@@ -38,11 +38,11 @@ public class SearchRequestHdlr implements SoapHandler
   public static final QName QNAME = new QName(COMMAND +"Request", ZimbraDriveExtension.SOAP_NAMESPACE);
   private static final QName RESPONSE_QNAME = new QName(COMMAND + "Response", ZimbraDriveExtension.SOAP_NAMESPACE);
 
-  private final CloudUtils mCloudUtils;
+  private final CloudHttpRequestUtils mCloudHttpRequestUtils;
 
-  public SearchRequestHdlr(CloudUtils cloudUtils)
+  public SearchRequestHdlr(CloudHttpRequestUtils cloudHttpRequestUtils)
   {
-    mCloudUtils = cloudUtils;
+    mCloudHttpRequestUtils = cloudHttpRequestUtils;
   }
 
   @Override
@@ -50,48 +50,52 @@ public class SearchRequestHdlr implements SoapHandler
   {
     try
     {
-      soapResponse.setQName(RESPONSE_QNAME);
-
-      String query = zimbraContext.getParameter("query", "");
-      soapResponse.setValue("query", query);
-
-      String requestedTypesCsv = zimbraContext.getParameter("types", "");
-      soapResponse.setValue("types", requestedTypesCsv);
-
-      Boolean isCaseSensitive = false;
-      if(zimbraContext.getParameterMap().containsKey(ZimbraDriveItem.F_CASESENSITIVE))
-      {
-        isCaseSensitive = true;
-        soapResponse.setValue(ZimbraDriveItem.F_CASESENSITIVE, "");
-      }
-
-      if (query.equals("")) { return; }
-      String parsedQuery = getStandardQuery(query);
-
-      String[] requestedTypesArray = requestedTypesCsv.split(",");
-      if(requestedTypesArray.length == 1 && requestedTypesArray[0].length() == 0)
-      {
-        requestedTypesArray = new String[]{ZimbraDriveItem.F_NODE_TYPE_FILE,
-          ZimbraDriveItem.F_NODE_TYPE_FOLDER};
-      }
-      
-      JSONArray defaultTypesJsonArray = new JSONArray(requestedTypesArray);
-      requestedTypesCsv = defaultTypesJsonArray.toString();
-
-
-      HttpResponse response = queryDriveOnCloudServerService(zimbraContext,
-          parsedQuery,
-          isCaseSensitive,
-          requestedTypesCsv);
-      BasicResponseHandler basicResponseHandler = new BasicResponseHandler();
-      String responseBody = basicResponseHandler.handleResponse(response);  //throw HttpResponseException if status code >= 300
-
-      mCloudUtils.appendArrayNodesAttributeToSoapResponse(soapResponse, responseBody);
-
-    } catch (Exception e)
+      privateHandleRequest(zimbraContext, soapResponse);
+    } catch (Exception exception)
     {
-      throw new RuntimeException(e);
+      zimbraExceptionContainer.setException(exception);
     }
+  }
+
+  private void privateHandleRequest(ZimbraContext zimbraContext, SoapResponse soapResponse) throws IOException
+  {
+    soapResponse.setQName(RESPONSE_QNAME);
+
+    String query = zimbraContext.getParameter("query", "");
+    soapResponse.setValue("query", query);
+
+    String requestedTypesCsv = zimbraContext.getParameter("types", "");
+    soapResponse.setValue("types", requestedTypesCsv);
+
+    Boolean isCaseSensitive = false;
+    if(zimbraContext.getParameterMap().containsKey(ZimbraDriveItem.F_CASESENSITIVE))
+    {
+      isCaseSensitive = true;
+      soapResponse.setValue(ZimbraDriveItem.F_CASESENSITIVE, "");
+    }
+
+    if (query.equals("")) { return; }
+    String parsedQuery = getStandardQuery(query);
+
+    String[] requestedTypesArray = requestedTypesCsv.split(",");
+    if(requestedTypesArray.length == 1 && requestedTypesArray[0].length() == 0)
+    {
+      requestedTypesArray = new String[]{ZimbraDriveItem.F_NODE_TYPE_FILE,
+        ZimbraDriveItem.F_NODE_TYPE_FOLDER};
+    }
+
+    JSONArray defaultTypesJsonArray = new JSONArray(requestedTypesArray);
+    requestedTypesCsv = defaultTypesJsonArray.toString();
+
+
+    HttpResponse response = queryDriveOnCloudServerService(zimbraContext,
+        parsedQuery,
+        isCaseSensitive,
+        requestedTypesCsv);
+    BasicResponseHandler basicResponseHandler = new BasicResponseHandler();
+    String responseBody = basicResponseHandler.handleResponse(response);  //throw HttpResponseException if status code >= 300
+
+    mCloudHttpRequestUtils.appendArrayNodesAttributeToSoapResponse(soapResponse, responseBody);
   }
 
   private String getStandardQuery(String query) {
@@ -120,11 +124,11 @@ public class SearchRequestHdlr implements SoapHandler
                                                       final String query,
                                                       Boolean isCaseSensitive,
                                                       final String types) throws IOException {
-    List<NameValuePair> driveOnCloudParameters = mCloudUtils.createDriveOnCloudAuthenticationParams(zimbraContext);
+    List<NameValuePair> driveOnCloudParameters = mCloudHttpRequestUtils.createDriveOnCloudAuthenticationParams(zimbraContext);
     driveOnCloudParameters.add(new BasicNameValuePair("query", query));
     driveOnCloudParameters.add(new BasicNameValuePair("types", types));
     driveOnCloudParameters.add(new BasicNameValuePair("caseSensitive", isCaseSensitive.toString()));
-    return mCloudUtils.sendRequestToCloud(zimbraContext, driveOnCloudParameters, COMMAND + "Request");
+    return mCloudHttpRequestUtils.sendRequestToCloud(zimbraContext, driveOnCloudParameters, COMMAND + "Request");
   }
 
   @Override

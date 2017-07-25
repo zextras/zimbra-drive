@@ -34,39 +34,117 @@ public class NcUserZimbraBackendHttpHandler implements HttpHandler
   private final static String KEY_USERNAME = "username";
   private final static String KEY_PASSWORD = "password";
   private final BackendUtils mBackendUtils;
+  private final ZimbraDriveLog mZimbraDriveLog;
 
-  public NcUserZimbraBackendHttpHandler(BackendUtils backendUtils)
+  public NcUserZimbraBackendHttpHandler(BackendUtils backendUtils, ZimbraDriveLog zimbraDriveLog)
   {
     mBackendUtils = backendUtils;
+    mZimbraDriveLog = zimbraDriveLog;
+  }
+
+  @Override
+  public void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException
+  {
+    mZimbraDriveLog.setLogContext(httpServletRequest);
+    try
+    {
+      internalDoPost(httpServletRequest, httpServletResponse);
+    }
+    catch (Exception exception)
+    {
+      String errorMessage = mZimbraDriveLog.getLogIntroduction() + "Unable to authenticate the user";
+      ZimbraLog.extensions.error(errorMessage, exception);
+      httpServletResponse.sendError(500, errorMessage);
+    }
+    finally
+    {
+      ZimbraLog.clearContext();
+    }
+  }
+
+  private void internalDoPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException
+  {
+    final Map<String, String> paramsMap = BackendUtils.getJsonRequestParams(httpServletRequest);
+    String userId = paramsMap.get(KEY_USERNAME);
+    String password = paramsMap.get(KEY_PASSWORD);
+
+    ZimbraLog.addAccountNameToContext(userId);
+
+    Account userAccount = getAccount(userId, password);
+
+    if (userAccount != null)
+    {
+      if (!areTokenCredentials(userId)) //External authentication by username and password
+      {
+        ZimbraLog.security.info(mZimbraDriveLog.getLogIntroduction() + "Authentication success for user '" + userAccount.getName() + "'");
+      }
+      printUserAttributesResponse(httpServletResponse, userAccount);
+    } else
+    {
+      ZimbraLog.security.warn(mZimbraDriveLog.getLogIntroduction() + "Authentication failed for user '" + userId + "'");
+    }
+  }
+
+  private Account getAccount(String userId, String password) {
+    Account userAccount;
+    if (areTokenCredentials(userId)) {
+      userAccount = getAccountByToken(userId, password);
+    } else {
+      userAccount = getAccountByCredentials(userId, password);
+    }
+    return userAccount;
+  }
+
+  private void printUserAttributesResponse(HttpServletResponse httpServletResponse, Account userAccount) throws IOException {
+    JSONObject userAttributesJson = getUserAttributesJson(userAccount);
+    httpServletResponse.setContentType("application/json; charset=UTF-8");
+    httpServletResponse.getOutputStream().println(userAttributesJson.toString());
+  }
+
+  private boolean areTokenCredentials(String userId) {
+    Account accountById = mBackendUtils.getAccountById(userId);
+    return accountById != null;
+  }
+
+  private Account getAccountByToken(String username, String tokenStr)
+  {
+    AccountToken token = mBackendUtils.getAccountToken(username, tokenStr);
+    if (token != null && !token.isExpired())
+    {
+      return token.getAccount();
+    }
+    return null;
+  }
+
+  private JSONObject getUserAttributesJson(Account account) {
+    JSONObject userAttributesJson = new JSONObject();
+    userAttributesJson.put("accountId", account.getId());
+    userAttributesJson.put("displayName", account.getDisplayName());
+    userAttributesJson.put("email", account.getName());
+    return userAttributesJson;
+  }
+
+  private Account getAccountByCredentials(String username, String password)
+  {
+    if (username.contains("@"))
+    { // Must be an email address
+      Account account = mBackendUtils.getAccountByName(username);
+      if(account != null)
+      {
+        try
+        {
+          account.authAccount(password, Protocol.zsync);
+          return account;
+        } catch (ZimbraException ignore){}
+      }
+    }
+    return null;
   }
 
   @Override
   public void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException
   {
     throw new RuntimeException();
-  }
-
-  @Override
-  public void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException
-  {
-    final Map<String, String> paramsMap = BackendUtils.getJsonRequestParams(httpServletRequest);
-    
-    final JSONObject returnObj = new JSONObject();
-    Account accountById = mBackendUtils.getAccountById(paramsMap.get(KEY_USERNAME));
-    if (accountById != null) {
-      this.handleAsToken(paramsMap, returnObj);
-    } else {
-      this.handleAsAccount(paramsMap, returnObj);
-    }
-    try
-    {
-      httpServletResponse.setContentType("application/json; charset=UTF-8");
-      httpServletResponse.getOutputStream().println(returnObj.toString());
-    } catch (IOException e)
-    {
-      ZimbraLog.mailbox.error("IO exception: error getting response output stream.", e);
-      throw e;
-    }
   }
 
   @Override
@@ -79,45 +157,6 @@ public class NcUserZimbraBackendHttpHandler implements HttpHandler
   public String getPath()
   {
     return "ZimbraDrive_NcUserZimbraBackend";
-  }
-
-  private void handleAsToken(Map<String, String> paramsMap, JSONObject returnObj)
-  {
-    String username = paramsMap.get(KEY_USERNAME);
-    String tokenStr = paramsMap.get(KEY_PASSWORD);
-
-    AccountToken token = mBackendUtils.getAccountToken(username, tokenStr);
-    if (token == null || token.isExpired())
-    {
-      throw new RuntimeException();
-    }
-    Account account = token.getAccount();
-
-    ZimbraLog.mailbox.info("NcUserZimbraBackend: [TOKEN] Authenticated " + account.getId());
-    returnObj.put("accountId", account.getId());
-    returnObj.put("displayName", account.getDisplayName());
-    returnObj.put("email", account.getName());
-  }
-
-  private void handleAsAccount(Map<String, String> paramsMap, JSONObject returnObj)
-  {
-    String username = paramsMap.get(KEY_USERNAME);
-    String password = paramsMap.get(KEY_PASSWORD);
-
-    if (!username.contains("@"))
-    { // Must be an email address
-      throw new RuntimeException();
-    }
-    Account account = mBackendUtils.getAccountByName(username);
-    try {
-      account.authAccount(password, Protocol.zsync);
-    } catch (ZimbraException ex) {
-      mBackendUtils.getAccountToken(account.getId(), password);
-    }
-    ZimbraLog.mailbox.info("NcUserZimbraBackend: [PASSW] Authenticated " + account.getId());
-    returnObj.put("accountId", account.getId());
-    returnObj.put("displayName", account.getDisplayName());
-    returnObj.put("email", account.getName());
   }
 
 }

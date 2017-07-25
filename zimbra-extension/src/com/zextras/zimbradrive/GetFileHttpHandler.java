@@ -36,26 +36,36 @@ public class GetFileHttpHandler implements HttpHandler {
   private final static String CONTENT_DISPOSITION_HTTP_HEADER = "Content-Disposition";
   private final static int HTTP_LOWEST_ERROR_STATUS = 300;
 
-  private CloudUtils mCloudUtils;
+  private CloudHttpRequestUtils mCloudHttpRequestUtils;
   private BackendUtils mBackendUtils;
+  private ZimbraDriveLog mZimbraDriveLog;
 
-  public GetFileHttpHandler(CloudUtils cloudUtils, BackendUtils backendUtils)
+  public GetFileHttpHandler(CloudHttpRequestUtils cloudHttpRequestUtils, BackendUtils backendUtils, ZimbraDriveLog zmbraDriveLog)
   {
-    mCloudUtils = cloudUtils;
+    mCloudHttpRequestUtils = cloudHttpRequestUtils;
     mBackendUtils = backendUtils;
+    mZimbraDriveLog = zmbraDriveLog;
   }
 
   @Override
   public void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException {
-    try {
+    mZimbraDriveLog.setLogContext(httpServletRequest);
+    try
+    {
       doInternalGet(httpServletRequest, httpServletResponse);
-    } catch (Exception ex) {
-      ZimbraLog.extensions.warn("Unable to get file", ex);
-      throw new RuntimeException(ex);
+    }
+    catch (Exception exception) {
+      String errorMessage = mZimbraDriveLog.getLogIntroduction() + "Unable to get file";
+      ZimbraLog.extensions.error(errorMessage, exception);
+      httpServletResponse.sendError(500, errorMessage);
+    }
+    finally
+    {
+      ZimbraLog.clearContext();
     }
   }
 
-  public void doInternalGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException {
+  private void doInternalGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException {
     Map<String, String> paramsMap = new HashMap<>();
     String queryString = httpServletRequest.getQueryString();
     if (queryString != null)
@@ -71,6 +81,7 @@ public class GetFileHttpHandler implements HttpHandler {
       }
     }
     Account account = mBackendUtils.assertAccountFromAuthToken(httpServletRequest);
+    ZimbraLog.addAccountNameToContext(account.getName());
     String requestedUrl = httpServletRequest.getPathInfo();
     int lengthOfBaseUrl = this.getPath().length()+2; //   "/" + this.getPath() + "/"
     String path = requestedUrl.substring(lengthOfBaseUrl);
@@ -81,7 +92,7 @@ public class GetFileHttpHandler implements HttpHandler {
     }
     else
     {
-      HttpResponse fileRequestResponse = mCloudUtils.queryCloudServerService(account, path);
+      HttpResponse fileRequestResponse = mCloudHttpRequestUtils.queryCloudServerService(account, path);
 
       int responseCode = fileRequestResponse.getStatusLine().getStatusCode();
       if (responseCode < HTTP_LOWEST_ERROR_STATUS)
@@ -139,7 +150,7 @@ public class GetFileHttpHandler implements HttpHandler {
     return "ZimbraDrive_Download";
   }
 
-  public String triggerCallback(String callback) {
+  private String triggerCallback(String callback) {
     return
             "<html>\n" +
             "\t<head>\n" +

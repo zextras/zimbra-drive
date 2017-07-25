@@ -37,8 +37,19 @@ public class RenameHdlr implements SoapHandler
   }
 
   @Override
-  public void handleRequest(ZimbraContext zimbraContext, SoapResponse soapResponse, ZimbraExceptionContainer zimbraExceptionContainer) {
+  public void handleRequest(ZimbraContext zimbraContext, SoapResponse soapResponse, ZimbraExceptionContainer zimbraExceptionContainer)
+  {
+    try
+    {
+      privateHandleRequest(zimbraContext, soapResponse, zimbraExceptionContainer);
+    } catch (Exception exception)
+    {
+      zimbraExceptionContainer.setException(exception);
+    }
+  }
 
+  private void privateHandleRequest(ZimbraContext zimbraContext, SoapResponse soapResponse, ZimbraExceptionContainer zimbraExceptionContainer)
+  {
     String fileNewName = zimbraContext.getParameter(ZimbraDriveItem.F_NEW_NAME, "");
     String sourcePath = zimbraContext.getParameter(ZimbraDriveItem.F_SOURCE_PATH, "");
 

@@ -41,11 +41,13 @@ public class UploadFileHttpHandler extends HttpServlet implements HttpHandler {
 
   private final BackendUtils mBackendUtils;
   private final DriveProxy   mDriveProxy;
+  private ZimbraDriveLog mZimbraDriveLog;
 
-  public UploadFileHttpHandler(BackendUtils backendUtils, DriveProxy driveProxy)
+  public UploadFileHttpHandler(BackendUtils backendUtils, DriveProxy driveProxy, ZimbraDriveLog zimbraDriveLog)
   {
     mBackendUtils = backendUtils;
     mDriveProxy = driveProxy;
+    mZimbraDriveLog = zimbraDriveLog;
   }
 
   @Override
@@ -57,18 +59,24 @@ public class UploadFileHttpHandler extends HttpServlet implements HttpHandler {
   @Override
   public void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException
   {
+    mZimbraDriveLog.setLogContext(httpServletRequest);
     try
     {
       doInternalPost(httpServletRequest, httpServletResponse);
     }
-    catch (Exception ex)
+    catch (Exception exception)
     {
-      ZimbraLog.extensions.warn("Unable to upload file", ex);
-      throw new RuntimeException(ex);
+      String errorMessage = mZimbraDriveLog.getLogIntroduction() + "Unable to upload file";
+      ZimbraLog.extensions.error(errorMessage, exception);
+      httpServletResponse.sendError(500, errorMessage);
+    }
+    finally
+    {
+      ZimbraLog.clearContext();
     }
   }
 
-  public void doInternalPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException 
+  private void doInternalPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException
   {
     HttpResponse fileRequestResponseFromDrive = uploadFileToDrive(httpServletRequest);
 
@@ -83,7 +91,7 @@ public class UploadFileHttpHandler extends HttpServlet implements HttpHandler {
 
   private String createResponseForZimlet(HttpResponse fileRequestResponseFromDrive) {
     BasicResponseHandler basicResponseHandler = new BasicResponseHandler();
-    String responseBody = null;
+    String responseBody;
     try {
       responseBody = basicResponseHandler.handleResponse(fileRequestResponseFromDrive);
     } catch (IOException e) {
@@ -115,17 +123,16 @@ public class UploadFileHttpHandler extends HttpServlet implements HttpHandler {
     String usernamePartsString =
             "Content-Disposition: form-data; name=\"username\"\r\n" +
                     "\r\n" +
-                    userAccount.getName();
+                    userAccount.getId();
     String tokenPartsString =
             "Content-Disposition: form-data; name=\"token\"\r\n" +
                     "\r\n" +
                     token.getToken();
 
-    String userInfoParts =  getFirstBodyBoundary(boundaryOfParts) +
+    return getFirstBodyBoundary(boundaryOfParts) +
             usernamePartsString +
             getInternalBodyBoundary(boundaryOfParts) +
             tokenPartsString;
-    return userInfoParts;
   }
 
   private String getFirstBodyBoundary(String boundary)
@@ -164,8 +171,8 @@ public class UploadFileHttpHandler extends HttpServlet implements HttpHandler {
   private HttpResponse uploadFileToDrive(HttpServletRequest httpServletRequest) throws IOException {
     String formBoundary = getFormPartsBoundary(httpServletRequest);
     Account userAccount = mBackendUtils.assertAccountFromAuthToken(httpServletRequest);
+    ZimbraLog.addAccountNameToContext(userAccount.getName());
     HttpEntity requestToSendToDrive = createUploadFileRequest(httpServletRequest, formBoundary, userAccount);
-//    String driveOnCloudDomain = ConfigUtils.getNcDomain(userAccount.getDomainName());
     String driveOnCloudDomain = mDriveProxy.getDriveDomainAssociatedToDomain(userAccount.getDomainName());
     String fileUploadRequestUrl = driveOnCloudDomain + NEXT_CLOUD_UPLOAD_FILE_URL;
     HttpPost post = new HttpPost(fileUploadRequestUrl);

@@ -36,15 +36,15 @@ public class DriveProxy
   private final Provisioning mProvisioning;
 
   public DriveProxy(Provisioning provisioning) {
-    this.mProvisioning = provisioning;
+    mProvisioning = provisioning;
   }
 
   public String getDriveDomainAssociatedToDomain(String domainName) throws IOException {
     if (ZimbraVersion.current.isAtLeast(8, 7, 6)) {
-      return this.assertDriveDomainAssociatedToDomain(domainName);
+      return assertDriveDomainAssociatedToDomain(domainName);
     }
     else {
-      return this.getDriveDomainFromConfigurationFile(domainName);
+      return getDriveDomainFromConfigurationFile(domainName);
     }
   }
 
@@ -74,14 +74,14 @@ public class DriveProxy
       jsonConf = new JSONObject(readFile(CONFIG_FILE, Charset.defaultCharset()));
     } catch (IOException e)
     {
-      ZimbraLog.mailbox.error("Unable to get Drive Domain", e);
+      ZimbraLog.extensions.error("Unable to get Drive Domain", e);
       throw e;
     }
     JSONObject domainMap = jsonConf.getJSONObject("domains");
     return domainMap.getString(domain);
   }
 
-  static String readFile(String path, Charset encoding) throws IOException
+  private static String readFile(String path, Charset encoding) throws IOException
   {
     byte[] encoded;
     try
@@ -89,7 +89,7 @@ public class DriveProxy
       encoded = Files.readAllBytes(Paths.get(path));
     } catch (IOException e)
     {
-      ZimbraLog.mailbox.info("IO exception: error reading file" + path, e);
+      ZimbraLog.extensions.info("IO exception: error reading file" + path, e);
       throw e;
     }
     return new String(encoded, encoding);

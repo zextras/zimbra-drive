@@ -18,7 +18,8 @@
 package com.zextras.zimbradrive.soap;
 
 
-import com.zextras.zimbradrive.CloudUtils;
+import com.zextras.zimbradrive.CloudHttpRequestUtils;
+import com.zextras.zimbradrive.ZimbraDriveLog;
 import org.openzal.zal.soap.QName;
 import org.openzal.zal.soap.SoapHandler;
 import org.openzal.zal.soap.SoapService;
@@ -30,16 +31,16 @@ public class NcSoapService implements SoapService
 {
   private final Map<QName, SoapHandler> mServiceMap;
 
-  public NcSoapService(final CloudUtils cloudUtils)
+  public NcSoapService(final CloudHttpRequestUtils cloudHttpRequestUtils)
   {
-    MoveHdlr moveHdlr = new MoveHdlr(cloudUtils);
+    MoveHdlr moveHdlr = new MoveHdlr(cloudHttpRequestUtils);
     mServiceMap = new HashMap<>();
-    mServiceMap.put(SearchRequestHdlr.QNAME, new SearchRequestHdlr(cloudUtils));
-    mServiceMap.put(GetAllFoldersHdlr.QNAME, new GetAllFoldersHdlr(cloudUtils));
-    mServiceMap.put(DeleteHdlr.QNAME, new DeleteHdlr(cloudUtils));
+    mServiceMap.put(SearchRequestHdlr.QNAME, new SearchRequestHdlr(cloudHttpRequestUtils));
+    mServiceMap.put(GetAllFoldersHdlr.QNAME, new GetAllFoldersHdlr(cloudHttpRequestUtils));
+    mServiceMap.put(DeleteHdlr.QNAME, new DeleteHdlr(cloudHttpRequestUtils));
     mServiceMap.put(MoveHdlr.QNAME, moveHdlr);
     mServiceMap.put(RenameHdlr.QNAME, new RenameHdlr(moveHdlr));
-    mServiceMap.put(NewDirectoryHdlr.QNAME, new NewDirectoryHdlr(cloudUtils));
+    mServiceMap.put(NewDirectoryHdlr.QNAME, new NewDirectoryHdlr(cloudHttpRequestUtils));
   }
 
   @Override

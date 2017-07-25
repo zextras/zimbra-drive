@@ -27,20 +27,20 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.URL;
 import java.util.LinkedList;
-import java.util.List;
 
 public class CloudAppTestsHttpHandler implements HttpHandler
 {
   final private BackendUtils mBackendUtils;
   final private DriveProxy mDriveProxy;
   private final LinkedList<ConnectionTest> mConnectionTests;
+  private ZimbraDriveLog mZimbraDriveLog;
 
-  public CloudAppTestsHttpHandler(BackendUtils backendUtils, DriveProxy driveProxy, ConnectionTestUtils connectionTestUtils) {
+  public CloudAppTestsHttpHandler(BackendUtils backendUtils, DriveProxy driveProxy, ConnectionTestUtils connectionTestUtils, ZimbraDriveLog zimbraDriveLog) {
     mBackendUtils = backendUtils;
     mDriveProxy = driveProxy;
+    mZimbraDriveLog = zimbraDriveLog;
 
     mConnectionTests = new LinkedList<>();
     mConnectionTests.add(new CloudHostConnectionConnectionTest(connectionTestUtils));
@@ -57,14 +57,19 @@ public class CloudAppTestsHttpHandler implements HttpHandler
   @Override
   public void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException
   {
+    mZimbraDriveLog.setLogContext(httpServletRequest);
     try
     {
       internalDoGet(httpServletRequest, httpServletResponse);
-    } catch (Exception e)
+    } catch (Exception exception)
     {
-      ZimbraLog.mailbox.warn("Unable to print test page", e);
-      ZimbraLog.mailbox.debug(e.getMessage(), e);
-      throw new RuntimeException(e);
+      String errorMessage = mZimbraDriveLog.getLogIntroduction() + "Unable to print test page";
+      ZimbraLog.extensions.error(errorMessage, exception);
+      httpServletResponse.sendError(500, errorMessage);
+    }
+    finally
+    {
+      ZimbraLog.clearContext();
     }
   }
 
@@ -73,6 +78,7 @@ public class CloudAppTestsHttpHandler implements HttpHandler
     assertAdmin(httpServletRequest);
 
     Account userAccount = mBackendUtils.assertAccountFromAuthToken(httpServletRequest);
+    ZimbraLog.addAccountNameToContext(userAccount.getName());
     String userDomain = userAccount.getDomainName();
     String driveOnCloudDomain = mDriveProxy.getDriveDomainAssociatedToDomain(userDomain);
     URL driveOnCloudUrl = new URL(driveOnCloudDomain);
