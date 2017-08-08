@@ -54,13 +54,6 @@ class Application extends App {
         $container->registerService('IConfig', function($c) {
             return $c->query('ServerContainer')->getConfig();
         });
-
-        $container->registerService('AccountManager', function($c) {
-            return new AccountManager(
-                $c->getDatabaseConnection(),
-                $c->getEventDispatcher()
-            );
-        });
     }
 }
 
