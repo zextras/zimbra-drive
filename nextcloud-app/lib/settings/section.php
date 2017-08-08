@@ -47,7 +47,7 @@ else
         public function __construct()
         {
             require_once __DIR__ . '/../../../../lib/private/legacy/template/functions.php';
-            style(Application::APP_NAME, 'style');
+            style('zimbradrive', 'style');
         }
 
         public function getIconName()
