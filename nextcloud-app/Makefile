@@ -27,13 +27,14 @@ dist/zimbradrive.tar.gz:
 	mkdir -p build
 	mkdir -p dist
 	rsync -rv \
-		--exclude=Makefile \
-		--exclude=*.iml \
-		--exclude=.gitignore \
-		--exclude=dist \
-		--exclude=.git \
-		--exclude=build/ \
-		. build/$(app_name)/
+		appinfo \
+		css \
+		img \
+		js \
+		lib \
+		templates \
+		admin.php \
+		build/$(app_name)/
 	cp LICENSE build/LICENSE
 	cd "build/$(app_name)" && find . -type f -not -name "$(app_name).md5" -exec md5sum "{}" + > "$(app_name).md5"
 	cd build/ && tar cvzf $(app_name).tar.gz $(app_name) --owner=0 --group=0
