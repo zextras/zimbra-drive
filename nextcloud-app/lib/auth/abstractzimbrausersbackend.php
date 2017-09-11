@@ -46,11 +46,15 @@ abstract class AbstractZimbraUsersBackend extends \OC_User_Backend
         $this->userManager = $server->getUserManager();
         $this->groupManager = $server->getGroupManager();
 
-        if(class_exists('OC\Accounts\AccountManager')) //Nextcloud 11
+        if(class_exists('OC\Accounts\AccountManager')) //Nextcloud >= 11
         {
             $this->accountManager = new AccountManager(
                 $server->getDatabaseConnection(),
-                $server->getEventDispatcher());
+                $server->getEventDispatcher(),
+                $server->getJobList() //Nextcloud >= 12.0.1
+            );
+
+
         }
 
         $appSettings = new AppSettings($this->config);
