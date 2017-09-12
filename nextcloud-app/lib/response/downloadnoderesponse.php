@@ -35,7 +35,7 @@ class DownloadNodeResponse extends Response  implements ICallbackResponse
         {
             /** @var Folder $node */
             $this->downloadResponseInstance = $downloadResponseFactory->makeDownloadZipFolderResponseFactory($node);
-        } elseif ($node instanceof File) //Todo change!!!
+        } elseif ($node instanceof File)
         {
             /** @var File $node */
             $this->downloadResponseInstance = $downloadResponseFactory->makeDownloadFileResponse($node);
