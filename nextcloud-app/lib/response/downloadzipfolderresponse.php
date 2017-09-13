@@ -40,14 +40,9 @@ class DownloadZipFolderResponse extends Response  implements ICallbackResponse
         $this->storageService = $storageService;
         $this->folder = $folder;
 
-        $this->nodeLocker = $nodeLockerFactory->makeNodeLocker($this->folder);
+        $this->nodeLocker = $nodeLockerFactory->make($this->folder);
     }
 
-    /**
-     *
-     * @param IOutput $output a small wrapper that handles output
-     * @since 8.1.0
-     */
     public function callback (IOutput $output)
     {
         $this->nodeLocker->sharedLock();

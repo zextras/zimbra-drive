@@ -17,50 +17,53 @@
 
 namespace OCA\ZimbraDrive\Auth;
 
-class HttpRequestResponse
+class HttpRequestResponseBuilder
 {
-    /** @var  string */
     private $rawResponse;
-    /** @var  int */
+    /** @var int */
     private $httpCode;
     /** @var bool */
     private $isConnectionErrorOccurred;
     private $connectionError;
 
-    public function __construct($rawResponse, $httpCode, $isConnectionErrorOccurred, $connectionError)
+
+    public function __construct()
+    {
+        $this->rawResponse = "";
+        $this->httpCode = 200;
+        $this->isConnectionErrorOccurred = false;
+        $this->connectionError = "";
+    }
+
+
+    public function setRawResponse($rawResponse)
     {
         $this->rawResponse = $rawResponse;
+    }
+
+    /**
+     * @param int $httpCode
+     */
+    public function setHttpCode($httpCode)
+    {
         $this->httpCode = $httpCode;
+    }
+
+    /**
+     * @param bool $isConnectionErrorOccurred
+     */
+    public function setIsConnectionErrorOccurred($isConnectionErrorOccurred)
+    {
         $this->isConnectionErrorOccurred = $isConnectionErrorOccurred;
+    }
+
+    public function setConnectionError($connectionError)
+    {
         $this->connectionError = $connectionError;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getRawResponse()
+    public function build()
     {
-        return $this->rawResponse;
-    }
-
-    /**
-     * @return integer
-     */
-    public function getHttpCode()
-    {
-        return $this->httpCode;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isConnectionErrorOccurred()
-    {
-        return $this->isConnectionErrorOccurred;
-    }
-
-    public function getConnectionError()
-    {
-        return $this->connectionError;
+        return new HttpRequestResponse($this->rawResponse, $this->httpCode, $this->isConnectionErrorOccurred, $this->connectionError);
     }
 }

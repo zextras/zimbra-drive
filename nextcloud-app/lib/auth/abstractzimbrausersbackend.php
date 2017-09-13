@@ -46,11 +46,15 @@ abstract class AbstractZimbraUsersBackend extends \OC_User_Backend
         $this->userManager = $server->getUserManager();
         $this->groupManager = $server->getGroupManager();
 
-        if(class_exists('OC\Accounts\AccountManager')) //Nextcloud 11
+        if(class_exists('OC\Accounts\AccountManager')) //Nextcloud >= 11
         {
             $this->accountManager = new AccountManager(
                 $server->getDatabaseConnection(),
-                $server->getEventDispatcher());
+                $server->getEventDispatcher(),
+                $server->getJobList() //Nextcloud >= 12.0.1
+            );
+
+
         }
 
         $appSettings = new AppSettings($this->config);
@@ -207,20 +211,14 @@ abstract class AbstractZimbraUsersBackend extends \OC_User_Backend
      * @param $password string
      * @return string
      */
-    private function buildPostField($uid, $password)
+    private function buildPostFields($uid, $password)
     {
         $fields = array(
             "username" => $uid,
             "password" => $password
         );
 
-        //url-ify the data for the POST
-        $fields_string = "";
-        foreach ($fields as $key => $value) {
-            $fields_string .= $key . "=" . $value . "&";
-        }
-        $fields_string = rtrim($fields_string, "&");
-        return $fields_string;
+        return http_build_query($fields);
     }
 
     /**
@@ -230,7 +228,7 @@ abstract class AbstractZimbraUsersBackend extends \OC_User_Backend
      */
     private function doZimbraAuthenticationRequest($uid, $password)
     {
-        $fields_string = $this->buildPostField($uid, $password);
+        $postFields = $this->buildPostFields($uid, $password);
 
         //open connection
         $ch = curl_init();
@@ -238,7 +236,7 @@ abstract class AbstractZimbraUsersBackend extends \OC_User_Backend
         //set the url, number of POST vars, POST data
         curl_setopt($ch, CURLOPT_URL, $this->url);
         curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $fields_string);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
         if ($this->trust_invalid_certs) {
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
@@ -253,7 +251,11 @@ abstract class AbstractZimbraUsersBackend extends \OC_User_Backend
         $response_info = curl_getinfo($ch);
         curl_close($ch);
         $http_code = $response_info["http_code"];
-        $httpRequestResponse = new HttpRequestResponse($raw_response, $http_code);
+
+        $httpRequestResponseBuilder = new HttpRequestResponseBuilder();
+        $httpRequestResponseBuilder->setRawResponse($raw_response);
+        $httpRequestResponseBuilder->setHttpCode($http_code);
+        $httpRequestResponse = $httpRequestResponseBuilder->build();
         return $httpRequestResponse;
     }
 }

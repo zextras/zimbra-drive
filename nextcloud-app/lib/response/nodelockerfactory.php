@@ -30,7 +30,7 @@ class NodeLockerFactory
         $this->storageService = $storageService;
     }
 
-    public function makeNodeLocker(Node $node)
+    public function make(Node $node)
     {
         return new NodeLocker($this->storageService, $node);
     }

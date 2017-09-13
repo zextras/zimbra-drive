@@ -234,7 +234,7 @@ class StorageService
         $lastCharTargetPath = $targetPath[strlen($targetPath)-1];
         if($lastCharTargetPath === "/")
         {
-            $targetPath = $targetPath . "/" . $nodeToMove->getName();
+            $targetPath = $targetPath . $nodeToMove->getName();
         }
 
         $targetDirectoryPath  = dirname($targetPath);

@@ -45,7 +45,7 @@ class DownloadFileResponse extends Response  implements ICallbackResponse
         $this->storageService = $storageService;
         $this->file = $file;
 
-        $this->nodeLocker = $nodeLockerFactory->makeNodeLocker($this->file);
+        $this->nodeLocker = $nodeLockerFactory->make($this->file);
     }
 
     public function callback (/** @noinspection PhpUnusedParameterInspection */ IOutput $output)
