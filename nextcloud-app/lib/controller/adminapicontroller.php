@@ -18,33 +18,31 @@
 namespace OCA\ZimbraDrive\Controller;
 
 use OCA\ZimbraDrive\Service\LogService;
+use OCA\ZimbraDrive\Service\ZimbraAuthentication;
 use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http\JSONResponse;
-use OCP\IConfig;
 use OCP\IRequest;
 use OCP\AppFramework\Http\Response;
 
 class AdminApiController extends ApiController
 {
-    const USER_BACKEND_VAR_NAME = 'user_backends';
-    const ZIMBRA_USER_BACKEND_CLASS_VALUE = 'OCA\ZimbraDrive\Auth\ZimbraUsersBackend';
     private $logger;
     /**
-     * @var IConfig
+     * @var ZimbraAuthentication
      */
-    private $config;
+    private $authenticationService;
 
     /**
      * AdminApiController constructor.
      * @param string $appName
      * @param IRequest $request
-     * @param IConfig $config
+     * @param ZimbraAuthentication $authenticationService
      * @param LogService $logger
      */
     public function __construct(
         $appName,
         IRequest $request,
-        IConfig $config,
+        ZimbraAuthentication $authenticationService,
         LogService $logger
     )
     {
@@ -55,7 +53,7 @@ class AdminApiController extends ApiController
         );
 
         $this->logger = $logger;
-        $this->config = $config;
+        $this->authenticationService = $authenticationService;
     }
 
     /**
@@ -63,15 +61,7 @@ class AdminApiController extends ApiController
      */
     public function enableZimbraAuthentication()
     {
-        $userBackends = $this->config->getSystemValue(self::USER_BACKEND_VAR_NAME, array());
-
-        $zimbraUserBackend = array(
-            'class' => self::ZIMBRA_USER_BACKEND_CLASS_VALUE,
-            'arguments' => array (),
-        );
-        $userBackends[] = $zimbraUserBackend;
-
-        $this->config->setSystemValue(self::USER_BACKEND_VAR_NAME, $userBackends);
+        $this->authenticationService->enableZimbraAuthentication();
         return $this->successResponse();
     }
 
@@ -80,23 +70,7 @@ class AdminApiController extends ApiController
      */
     public function disableZimbraAuthentication()
     {
-        $userBackends = $this->config->getSystemValue(self::USER_BACKEND_VAR_NAME, array());
-
-        $userBackendsWithoutZimbra = array();
-        foreach($userBackends as $userBackend)
-        {
-            if($userBackend['class'] !== self::ZIMBRA_USER_BACKEND_CLASS_VALUE)
-            {
-                $userBackendsWithoutZimbra[] = $userBackend;
-            }
-        }
-        if(count($userBackendsWithoutZimbra) === 0)
-        {
-            $this->config->deleteSystemValue(self::USER_BACKEND_VAR_NAME);
-        }else
-        {
-            $this->config->setSystemValue(self::USER_BACKEND_VAR_NAME, $userBackendsWithoutZimbra);
-        }
+        $this->authenticationService->disableZimbraAuthentication();
         return $this->successResponse();
     }
 

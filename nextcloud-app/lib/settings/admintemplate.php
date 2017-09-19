@@ -18,7 +18,7 @@
 namespace OCA\ZimbraDrive\Settings;
 
 use OCA\ZimbraDrive\AppInfo\Application;
-use OCA\ZimbraDrive\Controller\AdminApiController;
+use OCA\ZimbraDrive\Service\ZimbraAuthentication;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\IConfig;
 
@@ -32,32 +32,28 @@ class AdminTemplate
      * @var AppSettings
      */
     private $appConfig;
+    /**
+     * @var ZimbraAuthentication
+     */
+    private $zimbraAuthentication;
 
     /**
      * AdminTemplate constructor.
      * @param IConfig $config
      * @param AppSettings $appConfig
+     * @param ZimbraAuthentication $zimbraAuthentication
      */
-    public function __construct(IConfig $config, AppSettings $appConfig)
+    public function __construct(IConfig $config, AppSettings $appConfig, ZimbraAuthentication $zimbraAuthentication)
     {
         $this->config = $config;
         $this->appConfig = $appConfig;
+        $this->zimbraAuthentication = $zimbraAuthentication;
     }
 
     public function getTemplate()
     {
-        /** @var array $user_backends */
-        $user_backends = $this->config->getSystemValue(AdminApiController::USER_BACKEND_VAR_NAME, array());
         /** @var bool $isUserBackEndOC_User_ZimbraDefined */
-        $isUserBackEndOC_User_ZimbraDefined = false;
-        foreach($user_backends as $user_backend){
-            $class = $user_backend['class'];
-            if(isset($class) && $class === AdminApiController::ZIMBRA_USER_BACKEND_CLASS_VALUE)
-            {
-                $isUserBackEndOC_User_ZimbraDefined = true;
-                break;
-            }
-        }
+        $isUserBackEndOC_User_ZimbraDefined = $this->zimbraAuthentication->isZimbraAuthenticationEnabled();
 
         $template = new TemplateResponse(
             Application::APP_NAME,

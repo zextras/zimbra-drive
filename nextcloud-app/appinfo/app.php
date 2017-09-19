@@ -92,3 +92,5 @@ $container->query('OCP\INavigationManager')->add(function () use ($container) {
         'name' => $l10n->t('Zimbra'),
     ];
 });
+
+\OC_Hook::connect('OC_App', 'pre_disable', '\OCA\ZimbraDrive\Service\DisableZimbraDriveHandler', 'handle');
