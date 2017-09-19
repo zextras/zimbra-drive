@@ -22,10 +22,10 @@ use OCA\ZimbraDrive\Settings\AdminTemplate;
 use OCA\ZimbraDrive\Settings\AppSettings;
 
 $server = \OC::$server;
-$config = $server->getConfig();
-
-$appSettings = new AppSettings($config);
-$adminTemplate = new AdminTemplate($config, $appSettings);
+/**
+ * @var AdminTemplate $adminTemplate
+ */
+$adminTemplate = $server->query('OCA\ZimbraDrive\Settings\AdminTemplate');
 $template = $adminTemplate->getTemplate();
 
 return $template->render();

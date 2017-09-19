@@ -20,14 +20,9 @@ namespace OCA\ZimbraDrive\Settings;
 use OCA\ZimbraDrive\AppInfo\Application;
 use OCA\ZimbraDrive\Service\ZimbraAuthentication;
 use OCP\AppFramework\Http\TemplateResponse;
-use OCP\IConfig;
 
 class AdminTemplate
 {
-    /**
-     * @var IConfig
-     */
-    private $config;
     /**
      * @var AppSettings
      */
@@ -37,19 +32,15 @@ class AdminTemplate
      */
     private $zimbraAuthentication;
 
-    /**
-     * AdminTemplate constructor.
-     * @param IConfig $config
-     * @param AppSettings $appConfig
-     * @param ZimbraAuthentication $zimbraAuthentication
-     */
-    public function __construct(IConfig $config, AppSettings $appConfig, ZimbraAuthentication $zimbraAuthentication)
+    public function __construct(AppSettings $appConfig, ZimbraAuthentication $zimbraAuthentication)
     {
-        $this->config = $config;
         $this->appConfig = $appConfig;
         $this->zimbraAuthentication = $zimbraAuthentication;
     }
 
+    /**
+     * @return TemplateResponse
+     */
     public function getTemplate()
     {
         /** @var bool $isUserBackEndOC_User_ZimbraDefined */

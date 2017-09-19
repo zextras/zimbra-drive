@@ -17,12 +17,10 @@
 
 namespace OCA\ZimbraDrive\AppInfo;
 
-use OC\Accounts\AccountManager;
 use OCA\ZimbraDrive\Service\LogService;
 use OCP\AppFramework\App;
 use OC;
 use OCP\IURLGenerator;
-use OCP\Settings\ISettings;
 
 
 class Application extends App {
