@@ -26,15 +26,17 @@ class Admin implements ISettings
 {
     const SECTION_PRIORITY = 0;
     const SECTION_ID = 'zimbradrive';
-    /** @var IConfig */
-    private $config;
+    /**
+     * @var AdminTemplate
+     */
+    private $adminTemplate;
 
     /**
-     * @param IConfig $config
+     * @param AdminTemplate $adminTemplate
      */
-    public function __construct(IConfig $config)
+    public function __construct(AdminTemplate $adminTemplate)
     {
-        $this->config = $config;
+        $this->adminTemplate = $adminTemplate;
     }
 
     /**
@@ -42,9 +44,7 @@ class Admin implements ISettings
      */
     public function getForm()
     {
-        $appSettings = new AppSettings($this->config);
-        $adminTemplate = new AdminTemplate($this->config, $appSettings);
-        $template = $adminTemplate->getTemplate();
+        $template = $this->adminTemplate->getTemplate();
         return $template;
     }
 

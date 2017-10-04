@@ -17,12 +17,10 @@
 
 namespace OCA\ZimbraDrive\AppInfo;
 
-use OC\Accounts\AccountManager;
 use OCA\ZimbraDrive\Service\LogService;
 use OCP\AppFramework\App;
 use OC;
 use OCP\IURLGenerator;
-use OCP\Settings\ISettings;
 
 
 class Application extends App {
@@ -92,3 +90,5 @@ $container->query('OCP\INavigationManager')->add(function () use ($container) {
         'name' => $l10n->t('Zimbra'),
     ];
 });
+
+\OC_Hook::connect('OC_App', 'pre_disable', '\OCA\ZimbraDrive\Service\DisableZimbraDriveHandler', 'handle');

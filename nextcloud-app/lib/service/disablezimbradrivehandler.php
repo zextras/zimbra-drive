@@ -15,18 +15,19 @@
  * limitations under the License.
  */
 
-//File created to display admin's configuration on ownCloud 9.0
-namespace OCA\ZimbraDrive;
+namespace OCA\ZimbraDrive\Service;
 
-use OCA\ZimbraDrive\Settings\AdminTemplate;
-use OCA\ZimbraDrive\Settings\AppSettings;
 
-$server = \OC::$server;
-/**
- * @var AdminTemplate $adminTemplate
- */
-$adminTemplate = $server->query('OCA\ZimbraDrive\Settings\AdminTemplate');
-$template = $adminTemplate->getTemplate();
+class DisableZimbraDriveHandler
+{
+    public static function handle(array $app)
+    {
+        if($app['app'] === 'zimbradrive')
+        {
+            $server = \OC::$server;
+            $authenticationService = $server->query('OCA\ZimbraDrive\Service\ZimbraAuthentication');
+            $authenticationService->disableZimbraAuthentication();
+        }
+    }
 
-return $template->render();
-
+}
