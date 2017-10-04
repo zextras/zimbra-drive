@@ -17,8 +17,7 @@
 
 namespace OCA\ZimbraDrive\Service\Test;
 
-
-use OCA\ZimbraDrive\Controller\AdminApiController;
+use OCA\ZimbraDrive\Service\ZimbraAuthentication;
 use OCP\IConfig;
 
 class EnabledZimbraUsersTest implements Test
@@ -64,11 +63,11 @@ class EnabledZimbraUsersTest implements Test
     {
         $isZimbraDriveAuthenticationEnabled = false;
 
-        $userBackEnds = $this->config->getSystemValue(AdminApiController::USER_BACKEND_VAR_NAME, array());
+        $userBackEnds = $this->config->getSystemValue(ZimbraAuthentication::USER_BACKEND_VAR_NAME, array());
 
         foreach($userBackEnds as $userBackEnd)
         {
-            if($userBackEnd['class'] === AdminApiController::ZIMBRA_USER_BACKEND_CLASS_VALUE)
+            if($userBackEnd['class'] === ZimbraAuthentication::ZIMBRA_USER_BACKEND_CLASS_VALUE)
             {
                 $isZimbraDriveAuthenticationEnabled = true;
             }
