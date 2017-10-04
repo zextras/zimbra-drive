@@ -34,6 +34,7 @@ dist/zimbradrive.tar.gz:
 		lib \
 		templates \
 		admin.php \
+		LICENSE \
 		build/$(app_name)/
 	cp LICENSE build/LICENSE
 	cd "build/$(app_name)" && find . -type f -not -name "$(app_name).md5" -exec md5sum "{}" + > "$(app_name).md5"
