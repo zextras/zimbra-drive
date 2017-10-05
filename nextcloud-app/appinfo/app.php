@@ -21,6 +21,8 @@
 namespace OCA\ZimbraDrive\AppInfo;
 
 use OCA\ZimbraDrive\Service\LogService;
+use OCA\ZimbraDrive\Service\DisableZimbraDriveHandler;
+use OCP\App\ManagerEvent;
 use OCP\AppFramework\App;
 use OC;
 use OCP\IURLGenerator;
@@ -94,4 +96,10 @@ $container->query('OCP\INavigationManager')->add(function () use ($container) {
     ];
 });
 
-\OC_Hook::connect('OC_App', 'pre_disable', '\OCA\ZimbraDrive\Service\DisableZimbraDriveHandler', 'handle');
+$dispatcher = $container->getServer()->getEventDispatcher();
+$listener = function($event) {
+    if ($event instanceof ManagerEvent) {
+        DisableZimbraDriveHandler::handle(array ('app' => $event->getAppID()));
+    }
+};
+$dispatcher->addListener('OCP\App\IAppManager::disableApp', $listener);
