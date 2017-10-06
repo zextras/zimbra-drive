@@ -23,8 +23,9 @@
     <id>zimbradrive</id>
     <name>Zimbra Drive</name>
     <summary>Integration with Zimbra</summary>
-    <description lang="en">
-        <![CDATA[Add Nextcloud / ownCloud as Briefcase in Zimbra with the full features of both applications.]]></description>
+    <description>
+        Add Nextcloud / ownCloud as Briefcase in Zimbra with the full features of both applications.
+    </description>
     <licence>agpl</licence>
     <author>ZeXtras</author>
     <version>0.8.15</version>
