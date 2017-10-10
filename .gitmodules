@@ -1,3 +1,0 @@
-[submodule "zimlet/src/zimbra"]
-	path = zimlet/src/zimbra
-	url = git@github.com:ZeXtras/zimbra-lib-ts.git
