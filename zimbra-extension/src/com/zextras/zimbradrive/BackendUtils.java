@@ -17,10 +17,12 @@
 
 package com.zextras.zimbradrive;
 
-
+import java.nio.charset.StandardCharsets;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.openzal.zal.Account;
 import org.openzal.zal.AuthToken;
 import org.openzal.zal.Provisioning;
@@ -116,32 +118,17 @@ public class BackendUtils
   }
 
 
-  public static Map<String, String> getJsonRequestParams(HttpServletRequest httpServletRequest)
+  public static Map<String, String> getJsonRequestParams(HttpServletRequest httpServletRequest) throws IOException
   {
-    try
-    {
-      StringBuilder jb = new StringBuilder();
-      String line = null;
-      BufferedReader reader = httpServletRequest.getReader();
-      while ((line = reader.readLine()) != null)
-      {
-        jb.append(line);
-      }
-      Map<String, String> paramsMap = new HashMap<String, String>();
+    String body = IOUtils.toString(httpServletRequest.getReader());
+    List<NameValuePair> requestParameters = URLEncodedUtils.parse(body, StandardCharsets.UTF_8);
 
-      String[] params = jb.toString().split("&");
-      for (String param : params)
-      {
-        String[] subParam = param.split("=");
-        paramsMap.put(subParam[0], subParam[1]);
-      }
-
-      return paramsMap;
-    } catch (IOException e)
+    Map<String, String> paramsMap = new HashMap<String, String>();
+    for (NameValuePair item : requestParameters)
     {
-      ZimbraLog.extensions.error("IO exception: error reading request to JSON", e);
-      throw new RuntimeException();
+      paramsMap.put(item.getName(), item.getValue());
     }
+    return paramsMap;
   }
 
   public static HttpEntity getEncodedForm(List<NameValuePair> driveOnCloudParameters)  throws UnsupportedEncodingException
