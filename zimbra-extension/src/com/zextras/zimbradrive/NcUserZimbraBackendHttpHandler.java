@@ -82,6 +82,7 @@ public class NcUserZimbraBackendHttpHandler implements HttpHandler
     } else
     {
       ZimbraLog.security.warn(mZimbraDriveLog.getLogIntroduction() + "Authentication failed for user '" + userId + "'");
+      throw new ServletException();
     }
   }
 
