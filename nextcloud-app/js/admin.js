@@ -108,7 +108,7 @@ var documentsSettings = {
     }
   },
 
-  saveAllowZimbraUsersLoginValueFromCheckbox: function () {
+  saveAllowZimbraUsersLoginValueFromCheckbox: function (event) {
     var element = $(event.srcElement);
     var elementValue = (element.attr('checked') === 'checked');
     documentsSettings.setValue('allow_zimbra_users_login', elementValue);

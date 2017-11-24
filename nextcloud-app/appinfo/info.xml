@@ -26,9 +26,9 @@
     <description>
         Add Nextcloud / ownCloud as Briefcase in Zimbra with the full features of both applications.
     </description>
-    <licence>agpl</licence>
+    <licence>AGPL</licence>
     <author>ZeXtras</author>
-    <version>0.8.15</version>
+    <version>0.8.16</version>
     <namespace>ZimbraDrive</namespace>
     <category>auth</category>
     <category>integration</category>
