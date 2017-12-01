@@ -23,26 +23,38 @@ namespace OCA\ZimbraDrive\Auth;
 use OC\Accounts\AccountManager;
 use OCA\ZimbraDrive\Settings\AppSettings;
 use OC\User\User;
+use OCP\IServerContainer;
 
 abstract class AbstractZimbraUsersBackend extends \OC_User_Backend
 {
     const ZIMBRA_GROUP = "zimbra";
     protected $logger;
     protected $config;
-    protected $zimbra_url;
-    protected $zimbra_port;
-    protected $use_ssl;
-    protected $trust_invalid_certs;
-    protected $url;
     protected $userManager;
     protected $groupManager;
     protected $allow_zimbra_users_login;
     /** @var AccountManager */
     private $accountManager;
+    /** @var ZimbraAuthenticationBackend  */
+    private $zimbraAuthenticationBackend;
 
-    public function __construct()
+    /**
+     * @param IServerContainer $server
+     * @param ZimbraAuthenticationBackend $zimbraAuthenticationBackend
+     */
+    public function __construct($server = null, $zimbraAuthenticationBackend = null)
     {
-        $server = \OC::$server;
+        if(is_null($server))
+        {
+            $server = \OC::$server;
+        }
+        if(is_null($zimbraAuthenticationBackend))
+        {
+            $this->zimbraAuthenticationBackend = new ZimbraAuthenticationBackendImpl($server);
+        } else
+        {
+            $this->zimbraAuthenticationBackend = $zimbraAuthenticationBackend;
+        }
 
         $this->logger = $server->getLogger();
         $this->config = $server->getConfig();
@@ -56,24 +68,10 @@ abstract class AbstractZimbraUsersBackend extends \OC_User_Backend
                 $server->getEventDispatcher(),
                 $server->getJobList() //Nextcloud >= 12.0.1
             );
-
-
         }
 
         $appSettings = new AppSettings($this->config);
-
-        $this->zimbra_url =$appSettings->getServerUrl();
-        $this->zimbra_port = $appSettings->getServerPort();
-        $this->use_ssl = $appSettings->useSSLDuringZimbraAuthentication();
-        $this->trust_invalid_certs = $appSettings->trustInvalidCertificatesDuringZimbraAuthentication();
         $this->allow_zimbra_users_login = $appSettings->allowZimbraUsersLogin();
-
-        $this->url = sprintf(
-            "%s://%s:%s/service/extension/ZimbraDrive_NcUserZimbraBackend",
-            "http" . ($this->use_ssl ? "s" : ""),
-            $this->zimbra_url,
-            $this->zimbra_port
-        );
     }
 
     /**
@@ -92,35 +90,29 @@ abstract class AbstractZimbraUsersBackend extends \OC_User_Backend
             return false;
         }
 
-        $httpRequestResponse = $this->doZimbraAuthenticationRequest($uid, $password);
-
-        if ($httpRequestResponse->getHttpCode() === 200) {
-            $response = json_decode($httpRequestResponse->getRawResponse());
-            $userId = $response->{'accountId'};
-            $userDisplayName = $response->{'displayName'};
-            $userEmail = $response->{'email'};
-
-            if(!$this->userManager->userExists($userId))
+        try
+        {
+            $zimbraUser = $this->zimbraAuthenticationBackend->getZimbraUser($uid, $password);
+            if(!$this->userManager->userExists($zimbraUser->getUid()))
             {
-                $this->createUser($userId, $userDisplayName);
+                $this->createUser($zimbraUser->getUid(), $zimbraUser->getDisplayName());
             }
-            $this->setDefaultUserAttributes($userId, $userEmail, $userDisplayName);
+            $this->setDefaultUserAttributes($zimbraUser);
 
-            return $userId;
-        } else {
+            return $zimbraUser->getUid();
+        } catch (\Exception $ignore)
+        {
             return false;
         }
     }
 
     /**
-     * @param $userId string
-     * @param $userEmail string
-     * @param $userDisplayName string
+     * @param ZimbraUser $zimbraUser
      */
-    private function setDefaultUserAttributes($userId, $userEmail, $userDisplayName){
-        $user = $this->userManager->get($userId);
-        $this->restoreUserEmailIfChanged($user, $userEmail);
-        $this->restoreUserDisplayNameIfChanged($user, $userDisplayName);
+    private function setDefaultUserAttributes($zimbraUser){
+        $user = $this->userManager->get($zimbraUser->getUid());
+        $this->restoreUserEmailIfChanged($user, $zimbraUser->getEmail());
+        $this->restoreUserDisplayNameIfChanged($user, $zimbraUser->getDisplayName());
         $this->setDefaultGroups($user);
     }
 
@@ -130,8 +122,15 @@ abstract class AbstractZimbraUsersBackend extends \OC_User_Backend
     private function setDefaultGroups($user)
     {
         $this->insertUserInGroup($user, self::ZIMBRA_GROUP);
-        $this->insertUserInGroup($user, $this->zimbra_url);
+        $this->insertUserInGroup($user, $this->getEmailDomain($user->getEMailAddress()));
     }
+
+    private function getEmailDomain($email)
+    {
+        $domain = substr($email, strpos($email, '@') + 1);
+        return $domain;
+    }
+
 
     /**
      * @param $userId string
@@ -208,58 +207,5 @@ abstract class AbstractZimbraUsersBackend extends \OC_User_Backend
      * @return bool
      */
     public abstract function setDisplayName($uid, $display_name);
-
-    /**
-     * @param $uid string
-     * @param $password string
-     * @return string
-     */
-    private function buildPostFields($uid, $password)
-    {
-        $fields = array(
-            "username" => $uid,
-            "password" => $password
-        );
-
-        return http_build_query($fields);
-    }
-
-    /**
-     * @param $uid string
-     * @param $password string
-     * @return HttpRequestResponse
-     */
-    private function doZimbraAuthenticationRequest($uid, $password)
-    {
-        $postFields = $this->buildPostFields($uid, $password);
-
-        //open connection
-        $ch = curl_init();
-
-        //set the url, number of POST vars, POST data
-        curl_setopt($ch, CURLOPT_URL, $this->url);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-        if ($this->trust_invalid_certs) {
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-        } else {
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 2);
-        }
-
-        //execute post
-        $raw_response = curl_exec($ch);
-        $response_info = curl_getinfo($ch);
-        curl_close($ch);
-        $http_code = $response_info["http_code"];
-
-        $httpRequestResponseBuilder = new HttpRequestResponseBuilder();
-        $httpRequestResponseBuilder->setRawResponse($raw_response);
-        $httpRequestResponseBuilder->setHttpCode($http_code);
-        $httpRequestResponse = $httpRequestResponseBuilder->build();
-        return $httpRequestResponse;
-    }
 }
 

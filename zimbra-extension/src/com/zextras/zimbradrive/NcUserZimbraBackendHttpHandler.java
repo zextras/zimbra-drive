@@ -62,7 +62,9 @@ public class NcUserZimbraBackendHttpHandler implements HttpHandler
     }
   }
 
-  private void internalDoPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException
+  private void internalDoPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
+    throws
+    IOException
   {
     final Map<String, String> paramsMap = BackendUtils.getJsonRequestParams(httpServletRequest);
     String userId = paramsMap.get(KEY_USERNAME);
@@ -70,18 +72,20 @@ public class NcUserZimbraBackendHttpHandler implements HttpHandler
 
     ZimbraLog.addAccountNameToContext(userId);
 
-    Account userAccount = getAccount(userId, password);
-
-    if (userAccount != null)
+    Account userAccount;
+    try
     {
+      userAccount = getAccount(userId,
+                               password);
       if (!areTokenCredentials(userId)) //External authentication by username and password
       {
         ZimbraLog.security.info(mZimbraDriveLog.getLogIntroduction() + "Authentication success for user '" + userAccount.getName() + "'");
       }
       printUserAttributesResponse(httpServletResponse, userAccount);
-    } else
+    }catch (RuntimeException e)
     {
       ZimbraLog.security.warn(mZimbraDriveLog.getLogIntroduction() + "Authentication failed for user '" + userId + "'");
+      throw e;
     }
   }
 
@@ -91,6 +95,10 @@ public class NcUserZimbraBackendHttpHandler implements HttpHandler
       userAccount = getAccountByToken(userId, password);
     } else {
       userAccount = getAccountByCredentials(userId, password);
+    }
+    if(userAccount == null)
+    {
+      throw new RuntimeException("Username or password not valid.");
     }
     return userAccount;
   }
