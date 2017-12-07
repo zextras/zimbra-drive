@@ -36,4 +36,5 @@ class ResponseVarName
     const PATH_VAR_NAME = 'path';
     const NODE_FILE = 'file';
     const NODE_FOLDER = 'folder';
+    const PUBLIC_VAR_NAME = 'public';
 }
