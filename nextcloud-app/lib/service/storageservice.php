@@ -27,6 +27,7 @@ use OCP\Files\IMimeTypeDetector;
 use OCP\IServerContainer;
 use OC\Files\Filesystem;
 use OCP\Files\Node;
+use OCP\Share\IManager;
 
 class StorageService
 {
@@ -38,12 +39,18 @@ class StorageService
     private $serverContainer;
     private $logger;
     private $mimeTypeDetector;
+    /**
+     * @var IManager
+     */
+    private $shareManager;
 
-    public function __construct(IServerContainer $serverContainer, IMimeTypeDetector $mimeTypeDetector, LogService $logService)
+    public function __construct(IServerContainer $serverContainer, IMimeTypeDetector $mimeTypeDetector, LogService $logService, IManager $shareManager
+    )
     {
         $this->serverContainer = $serverContainer;
         $this->logger = $logService;
         $this->mimeTypeDetector = $mimeTypeDetector;
+        $this->shareManager = $shareManager;
     }
 
     /**
@@ -141,7 +148,8 @@ class StorageService
             ResponseVarName::SIZE_VAR_NAME => $node->getSize(),
             ResponseVarName::MODIFIED_TIME_VAR_NAME => $node->getMTime(),
             ResponseVarName::ID_VAR_NAME => $node->getId(),
-            ResponseVarName::PATH_VAR_NAME => $node->getInternalPath()
+            ResponseVarName::PATH_VAR_NAME => $node->getInternalPath(),
+            ResponseVarName::PUBLIC_VAR_NAME => $this->isPublic($node, $nodeOwner)
         ];
         return $nodeAttributeMap;
     }
@@ -455,5 +463,22 @@ class StorageService
     public function getRelativePath(Node $node)
     {
         return substr($node->getInternalPath(), 5); //5 = length("files")
+    }
+
+    /**
+     * @param $node
+     * @param $owner
+     * @return bool
+     */
+    public function isPublic($node, $owner)
+    {
+        $shares = $this->shareManager->getSharesBy(
+            $owner->getUID(),
+            \OCP\Share::SHARE_TYPE_LINK,
+            $node,
+            false,
+            1
+        );
+        return count($shares) > 0;
     }
 }

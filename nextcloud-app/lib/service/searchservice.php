@@ -159,7 +159,7 @@ class SearchService
     {
         try
         {
-            $folder = $searchedFolder = $this->storageService->getFolder($path);
+            $folder = $this->storageService->getFolder($path);
         } catch (NotFoundException $notFoundException)
         {
             throw new BadRequestException($notFoundException->getMessage());
