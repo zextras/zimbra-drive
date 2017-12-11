@@ -20,7 +20,7 @@
 
 namespace OCA\ZimbraDrive\Settings;
 
-use OCA\ZimbraDrive\AppInfo\Application;
+use OCA\ZimbraDrive\AppInfo\App;
 use OCP\Settings\ISection;
 use OCP\Settings\IIconSection;
 use OCP\IURLGenerator;

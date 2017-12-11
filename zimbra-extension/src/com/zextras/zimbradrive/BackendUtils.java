@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -121,7 +122,7 @@ public class BackendUtils
     try
     {
       StringBuilder jb = new StringBuilder();
-      String line = null;
+      String line;
       BufferedReader reader = httpServletRequest.getReader();
       while ((line = reader.readLine()) != null)
       {
@@ -132,7 +133,8 @@ public class BackendUtils
       String[] params = jb.toString().split("&");
       for (String param : params)
       {
-        String[] subParam = param.split("=");
+        String decodeParam = URLDecoder.decode(param, "UTF-8");
+        String[] subParam = decodeParam.split("=");
         paramsMap.put(subParam[0], subParam[1]);
       }
 

@@ -44,7 +44,7 @@ dist/zimbradrive.tar.gz:
 
 install: guard-MYCLOUD_DEV_SERVER dist/zimbradrive.tar.gz
 	scp dist/zimbradrive.tar.gz root@${MYCLOUD_DEV_SERVER}:/tmp/
-	ssh root@${MYCLOUD_DEV_SERVER} "cd ${drive_apps_path} && rm -rf zimbradrive/ && tar -xvzf /tmp/zimbradrive.tar.gz"
+	ssh root@${MYCLOUD_DEV_SERVER} "cd ${drive_apps_path} && rm -rf zimbradrive/ && tar -xvzf /tmp/zimbradrive.tar.gz && chown -R www-data:root ./zimbradrive"
 
 guard-%:
 	@ if [ "${${*}}" = "" ]; then \

@@ -20,7 +20,7 @@
 
 namespace OCA\ZimbraDrive\Settings;
 
-use OCA\ZimbraDrive\AppInfo\Application;
+use OCA\ZimbraDrive\AppInfo\App;
 use OCA\ZimbraDrive\Service\ZimbraAuthentication;
 use OCP\AppFramework\Http\TemplateResponse;
 
@@ -50,7 +50,7 @@ class AdminTemplate
         $isUserBackEndOC_User_ZimbraDefined = $this->zimbraAuthentication->isZimbraAuthenticationEnabled();
 
         $template = new TemplateResponse(
-            Application::APP_NAME,
+            App::APP_NAME,
             'admin',
             [
                 AppSettings::ZIMBRA_URL => $this->appConfig->getServerUrl(),
