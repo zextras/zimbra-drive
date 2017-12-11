@@ -69,30 +69,15 @@ class ZimbraAuthenticationBackendImpl implements ZimbraAuthenticationBackend
     public function doZimbraAuthenticationRequest($uid, $password)
     {
         $postFields = $this->buildPostFields($uid, $password);
+        $httpRequestResponse = $this->getZimbraAuthenticationRequestResponse($postFields);
 
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->ZimbraUserBackendHandlerUrl());
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-        if ($this->trust_invalid_certs) {
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-        } else {
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 2);
+        if($httpRequestResponse->getHttpCode() !== 200 or strlen($httpRequestResponse->getRawResponse()) === 0)
+        {
+            $postFields = $this->retroCompatibleBuildPostField($uid, $password);
+            $httpRequestResponse = $this->getZimbraAuthenticationRequestResponse($postFields);
         }
-
-        $raw_response = curl_exec($ch);
-        $response_info = curl_getinfo($ch);
-        curl_close($ch);
-        $http_code = $response_info["http_code"];
-
-        $httpRequestResponseBuilder = new HttpRequestResponseBuilder();
-        $httpRequestResponseBuilder->setRawResponse($raw_response);
-        $httpRequestResponseBuilder->setHttpCode($http_code);
-        $httpRequestResponse = $httpRequestResponseBuilder->build();
         return $httpRequestResponse;
+
     }
 
     /**
@@ -110,7 +95,56 @@ class ZimbraAuthenticationBackendImpl implements ZimbraAuthenticationBackend
         return http_build_query($fields);
     }
 
-    private function ZimbraUserBackendHandlerUrl()
+    private function retroCompatibleBuildPostField($uid, $password)
+    {
+        $fields = array(
+            "username" => $uid,
+            "password" => $password
+        );
+
+        $fields_string = "";
+        foreach ($fields as $key => $value) {
+            $fields_string .= $key . "=" . $value . "&";
+        }
+        $fields_string = rtrim($fields_string, "&");
+        return $fields_string;
+    }
+
+    /**
+     * @param $postFields
+     * @return HttpRequestResponse
+     */
+    private function getZimbraAuthenticationRequestResponse($postFields)
+    {
+        $ch = curl_init();
+        $sslVerify = 2;
+        if ($this->trust_invalid_certs)
+        {
+            $sslVerify = FALSE;
+        }
+        $requestSetting = array (
+            CURLOPT_URL => $this->zimbraUserBackendHandlerUrl(),
+            CURLOPT_POST => TRUE,
+            CURLOPT_POSTFIELDS => $postFields,
+            CURLOPT_RETURNTRANSFER => TRUE,
+            CURLOPT_SSL_VERIFYHOST => $sslVerify,
+            CURLOPT_SSL_VERIFYPEER => $sslVerify
+        );
+        curl_setopt_array($ch, $requestSetting);
+
+        $raw_response = curl_exec($ch);
+        $response_info = curl_getinfo($ch);
+        curl_close($ch);
+        $http_code = $response_info["http_code"];
+
+        $httpRequestResponseBuilder = new HttpRequestResponseBuilder();
+        $httpRequestResponseBuilder->setRawResponse($raw_response);
+        $httpRequestResponseBuilder->setHttpCode($http_code);
+        $httpRequestResponse = $httpRequestResponseBuilder->build();
+        return $httpRequestResponse;
+    }
+
+    private function zimbraUserBackendHandlerUrl()
     {
         return sprintf(
             "%s://%s:%s/service/extension/ZimbraDrive_NcUserZimbraBackend",
