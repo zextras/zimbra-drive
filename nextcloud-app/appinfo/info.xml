@@ -28,7 +28,7 @@
     </description>
     <licence>AGPL</licence>
     <author>ZeXtras</author>
-    <version>0.8.16</version>
+    <version>0.8.17</version>
     <namespace>ZimbraDrive</namespace>
     <category>auth</category>
     <category>integration</category>
