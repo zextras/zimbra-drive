@@ -60,7 +60,7 @@ $disableZimbraUsersUrl = $urlGenerator->linkToRoute('zimbradrive.admin_api.disab
     </div>
     <div>
         <input type="checkbox" class="checkbox" name="check_certs" id="check_certs"
-           value="1" <?php if (!$_[AppSettings::TRUST_INVALID_CERTS]) print_unescaped('checked="checked"'); ?>>
+           value="1" <?php if (!$_[AppSettings::TRUST_INVALID_CERTS]) print_unescaped('checked="checked"'); if (!$_[AppSettings::USE_SSL]) print_unescaped(' disabled="disabled"');?>>
         <label for="check_certs"><?php p($l->t('Enable certificate verification')) ?></label>
     </div>
     <div>
