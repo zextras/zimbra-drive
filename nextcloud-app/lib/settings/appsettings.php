@@ -21,7 +21,7 @@
 namespace OCA\ZimbraDrive\Settings;
 
 
-use OCA\ZimbraDrive\AppInfo\Application;
+use OCA\ZimbraDrive\AppInfo\App;
 use OCP\IConfig;
 
 class AppSettings
@@ -48,34 +48,34 @@ class AppSettings
 
     public function getServerUrl()
     {
-        return $this->config->getAppValue(Application::APP_NAME, self::ZIMBRA_URL);
+        return $this->config->getAppValue(App::APP_NAME, self::ZIMBRA_URL);
     }
 
     public function getServerPort()
     {
-        return $this->config->getAppValue(Application::APP_NAME, self::ZIMBRA_PORT);
+        return $this->config->getAppValue(App::APP_NAME, self::ZIMBRA_PORT);
     }
 
     public function useSSLDuringZimbraAuthentication()
     {
-        return $this->config->getAppValue(Application::APP_NAME, self::USE_SSL, 'true') === 'true';
+        return $this->config->getAppValue(App::APP_NAME, self::USE_SSL, 'true') === 'true';
     }
 
 
     public function trustInvalidCertificatesDuringZimbraAuthentication()
     {
-        return $this->config->getAppValue(Application::APP_NAME, self::TRUST_INVALID_CERTS, 'false') === 'true';
+        return $this->config->getAppValue(App::APP_NAME, self::TRUST_INVALID_CERTS, 'false') === 'true';
     }
 
 
     public function getZimbraPreauthKey()
     {
-        return $this->config->getAppValue(Application::APP_NAME, self::PREAUTH_KEY);
+        return $this->config->getAppValue(App::APP_NAME, self::PREAUTH_KEY);
     }
 
     public function allowZimbraUsersLogin()
     {
-        return $this->config->getAppValue(Application::APP_NAME, self::ALLOW_ZIMBRA_USERS_LOGIN, 'false') === 'true';
+        return $this->config->getAppValue(App::APP_NAME, self::ALLOW_ZIMBRA_USERS_LOGIN, 'false') === 'true';
     }
 
 }

@@ -20,7 +20,7 @@
 
 namespace OCA\ZimbraDrive\Settings;
 
-use OCA\ZimbraDrive\AppInfo\Application;
+use OCA\ZimbraDrive\AppInfo\App;
 use OCP\Settings\ISection;
 use OCP\Settings\IIconSection;
 use OCP\IURLGenerator;
@@ -49,8 +49,7 @@ else
     {
         public function __construct()
         {
-            require_once __DIR__ . '/../../../../lib/private/legacy/template/functions.php';
-            style('zimbradrive', 'style');
+            \OC_Util::addStyle('zimbradrive', 'style');
         }
 
         public function getIconName()
