@@ -17,6 +17,7 @@
 
 package com.zextras.zimbradrive;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.openzal.zal.*;
 import org.openzal.zal.exceptions.ZimbraException;
@@ -118,9 +119,16 @@ public class NcUserZimbraBackendHttpHandler implements HttpHandler
 
   private JSONObject getUserAttributesJson(Account account) {
     JSONObject userAttributesJson = new JSONObject();
-    userAttributesJson.put("accountId", account.getId());
-    userAttributesJson.put("displayName", account.getDisplayName());
-    userAttributesJson.put("email", account.getName());
+    try
+    {
+      userAttributesJson.put("accountId", account.getId());
+      userAttributesJson.put("displayName", account.getDisplayName());
+      userAttributesJson.put("email", account.getName());
+    }
+    catch (JSONException e)
+    {
+      throw new RuntimeException(e);
+    }
     return userAttributesJson;
   }
 
@@ -142,13 +150,13 @@ public class NcUserZimbraBackendHttpHandler implements HttpHandler
   }
 
   @Override
-  public void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException
+  public void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
   {
     throw new RuntimeException();
   }
 
   @Override
-  public void doOptions(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException
+  public void doOptions(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
   {
     throw new RuntimeException();
   }

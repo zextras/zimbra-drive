@@ -30,9 +30,7 @@ import org.openzal.zal.log.ZimbraLog;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -131,14 +129,8 @@ public class BackendUtils
     return paramsMap;
   }
 
-  public static HttpEntity getEncodedForm(List<NameValuePair> driveOnCloudParameters)  throws UnsupportedEncodingException
+  public static HttpEntity getEncodedForm(List<NameValuePair> driveOnCloudParameters)
   {
-    try {
-      return new UrlEncodedFormEntity(driveOnCloudParameters, "UTF-8");
-    }
-    catch (UnsupportedEncodingException ex) {
-      ZimbraLog.extensions.error("Unsupported encoding exception: error encoding drive on cloud parameters.", ex);
-      throw ex;
-    }
+    return new UrlEncodedFormEntity(driveOnCloudParameters, StandardCharsets.UTF_8);
   }
 }
