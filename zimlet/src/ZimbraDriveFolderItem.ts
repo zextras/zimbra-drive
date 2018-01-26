@@ -52,6 +52,7 @@ export class ZimbraDriveFolderItem extends ZimbraDriveItem {
     let path: string = this.folder.getPath(true);
     if (urlEncode) {
       path = AjxStringUtil.urlComponentEncode(path);
+      path = path.replace(/%2F/g, "/");
     }
     return path;
   }
