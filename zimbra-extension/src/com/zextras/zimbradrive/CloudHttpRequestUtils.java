@@ -58,7 +58,7 @@ public class CloudHttpRequestUtils
     AccountToken token = mTokenManager.getAccountToken(account);
 
     List<NameValuePair> driveOnCloudParameters = new ArrayList<>();
-    driveOnCloudParameters.add(new BasicNameValuePair("username", token.getAccount().getId()));
+    driveOnCloudParameters.add(new BasicNameValuePair("username", account.getId()));
     driveOnCloudParameters.add(new BasicNameValuePair("token", token.getToken()));
     return driveOnCloudParameters;
   }
@@ -84,7 +84,7 @@ public class CloudHttpRequestUtils
     AccountToken token = mTokenManager.getAccountToken(account);
 
     List<NameValuePair> driveOnCloudParameters = new ArrayList<>();
-    driveOnCloudParameters.add(new BasicNameValuePair("username", token.getAccount().getId()));
+    driveOnCloudParameters.add(new BasicNameValuePair("username", account.getId()));
     driveOnCloudParameters.add(new BasicNameValuePair("token", token.getToken()));
     driveOnCloudParameters.add(new BasicNameValuePair("path", filePath));
 

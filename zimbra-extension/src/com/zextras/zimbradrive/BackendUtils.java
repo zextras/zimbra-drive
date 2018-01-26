@@ -26,6 +26,7 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.openzal.zal.Account;
 import org.openzal.zal.AuthToken;
 import org.openzal.zal.Provisioning;
+import org.openzal.zal.exceptions.NoSuchAccountException;
 import org.openzal.zal.log.ZimbraLog;
 
 import javax.servlet.http.Cookie;
@@ -51,16 +52,16 @@ public class BackendUtils
 
   public Account assertAccountFromAuthToken(HttpServletRequest httpServletRequest)
   {
+    String accountId = "null";
     try {
       AuthToken authToken = assertAuthToken(httpServletRequest);
-      String accountId = authToken.getAccountId();
-      Account account = mProvisioning.getAccountById(accountId);
-      if(account == null)
-      {
-        ZimbraLog.extensions.debug("Unable to find account with id:", accountId);
-        throw new NotValidAuthTokenException();
-      }
-      return account;
+      accountId = authToken.getAccountId();
+      return mProvisioning.assertAccountById(accountId);
+    }
+    catch (NoSuchAccountException ignore)
+    {
+      ZimbraLog.extensions.debug("Unable to find account with id:", accountId);
+      throw new NotValidAuthTokenException();
     }
     catch (Exception ex) {
       ZimbraLog.extensions.error("Error on authentication", ex);
@@ -97,14 +98,6 @@ public class BackendUtils
 
   public String getServerServiceUrl(String path) {
     return mProvisioning.getLocalServer().getServiceURL(path);
-  }
-
-  public Account getAccountById(String accountId) {
-    return mProvisioning.getAccountById(accountId);
-  }
-
-  public Account getAccountByName(String accountName) {
-    return mProvisioning.getAccountByName(accountName);
   }
 
   public AccountToken getAccountToken(Account account) {
