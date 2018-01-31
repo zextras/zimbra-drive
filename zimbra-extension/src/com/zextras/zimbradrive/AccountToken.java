@@ -26,23 +26,16 @@ public class AccountToken
   private static long EXPIRATION = 12 * 60 * 60 * 1000L;
 
   private long mCreation;
-  private final Account mAccount;
   private String mToken;
 
-  public AccountToken(Account account)
+  public AccountToken()
   {
-    mAccount = account;
     renew();
   }
 
   public boolean isExpired()
   {
     return System.currentTimeMillis() >= mCreation + EXPIRATION;
-  }
-
-  public Account getAccount()
-  {
-    return mAccount;
   }
 
   public String getToken()

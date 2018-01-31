@@ -17,6 +17,12 @@
 
 package com.zextras.zimbradrive;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.openzal.zal.*;
@@ -24,10 +30,12 @@ import org.openzal.zal.exceptions.ZimbraException;
 import org.openzal.zal.http.HttpHandler;
 import org.openzal.zal.log.ZimbraLog;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class NcUserZimbraBackendHttpHandler implements HttpHandler
@@ -36,11 +44,16 @@ public class NcUserZimbraBackendHttpHandler implements HttpHandler
   private final static String KEY_PASSWORD = "password";
   private final BackendUtils mBackendUtils;
   private final ZimbraDriveLog mZimbraDriveLog;
+  private Provisioning mProvisioning;
 
-  public NcUserZimbraBackendHttpHandler(BackendUtils backendUtils, ZimbraDriveLog zimbraDriveLog)
+  public NcUserZimbraBackendHttpHandler(
+    BackendUtils backendUtils,
+    ZimbraDriveLog zimbraDriveLog,
+    Provisioning provisioning)
   {
     mBackendUtils = backendUtils;
     mZimbraDriveLog = zimbraDriveLog;
+    mProvisioning = provisioning;
   }
 
   @Override
@@ -72,57 +85,111 @@ public class NcUserZimbraBackendHttpHandler implements HttpHandler
     String password = paramsMap.get(KEY_PASSWORD);
 
     ZimbraLog.addAccountNameToContext(userId);
+    Account account;
 
-    Account userAccount;
-    try
+    boolean areTokenCredentials = areTokenCredentials(userId);
+    if (areTokenCredentials)
     {
-      userAccount = getAccount(userId,
-                               password);
-      if (!areTokenCredentials(userId))
+      account = mProvisioning.assertAccountById(userId);
+    }
+    else
+    {
+      account = mProvisioning.assertAccountByName(userId);
+    }
+
+
+    if (areTokenCredentials)
+    {
+      if (account.isLocalAccount())
       {
-        ZimbraLog.security.info(mZimbraDriveLog.getLogIntroduction() + "Authentication success for user '" + userAccount.getName() + "'");
+        authenticateByToken(account,
+                            password);
       }
-      printUserAttributesResponse(httpServletResponse, userAccount);
-    }catch (Exception e)
+      else
+      {
+        ZimbraLog.extensions.debug(
+          mZimbraDriveLog.getLogIntroduction() + "user: " + account.getName() +
+          ", redirect request to " + account.getMailHost());
+        redirectRequestToRemoteServer(account,
+                                      userId,
+                                      password,
+                                      httpServletResponse);
+      }
+    }
+    else
     {
-      ZimbraLog.security.warn(mZimbraDriveLog.getLogIntroduction() + "Authentication failed for user '" + userId + "'");
-      throw e;
+      authenticateByLogin(account,
+                          password);
+    }
+    printUserAttributesResponse(httpServletResponse,
+                                account);
+
+  }
+
+  private void redirectRequestToRemoteServer(
+    Account account,
+    String userId,
+    String password,
+    HttpServletResponse httpServletResponse)
+    throws IOException
+  {
+    List<NameValuePair> remoteAuthRequestParameters = new ArrayList<>();
+    remoteAuthRequestParameters.add(new BasicNameValuePair(KEY_USERNAME, userId));
+    remoteAuthRequestParameters.add(new BasicNameValuePair(KEY_PASSWORD, password));
+
+    Server remoteServer = mProvisioning.getServerByName(account.getMailHost());
+    String authRequestUrl = remoteServer.getServiceURL("/service/extension/" + getPath());
+
+    HttpPost post = new HttpPost(authRequestUrl);
+    post.setEntity(BackendUtils.getEncodedForm(remoteAuthRequestParameters));
+
+    HttpClient client = HttpClientBuilder.create().build();
+    HttpResponse response = client.execute(post);
+    try (OutputStream responseOutputStream = httpServletResponse.getOutputStream())
+    {
+      response.getEntity().writeTo(responseOutputStream);
+    }
+
+  }
+
+  private void authenticateByToken(
+    Account account,
+    String tokenStr)
+  {
+    AccountToken token = mBackendUtils.getAccountToken(account.getId(),
+                                                       tokenStr);
+    if (token == null || token.isExpired())
+    {
+      ZimbraLog.security.warn(mZimbraDriveLog.getLogIntroduction() +
+                              "Authentication failed for user '" +
+                              account.getName() + "': token not valid");
+      throw new RuntimeException("Token not valid.");
     }
   }
 
-  private Account getAccount(String userId, String password) {
-    Account userAccount;
-    if (areTokenCredentials(userId)) {
-      userAccount = getAccountByToken(userId, password);
-    } else {
-      userAccount = getAccountByCredentials(userId, password);
-    }
-    if(userAccount == null)
+  private void authenticateByLogin(
+    Account account,
+    String password)
+  {
+    try
     {
-      throw new RuntimeException("Username or password not valid.");
+      account.authAccount(password,
+                          Protocol.zsync);
     }
-    return userAccount;
+    catch (ZimbraException ignore)
+    {
+      ZimbraLog.security.warn(mZimbraDriveLog.getLogIntroduction() +
+                              "Authentication failed for user '" +
+                              account.getName() + "': password not valid");
+      throw new RuntimeException("Password not valid.");
+    }
+    ZimbraLog.security.info(mZimbraDriveLog.getLogIntroduction() + "Authentication success for user '" + account.getName() + "'");
   }
 
   private void printUserAttributesResponse(HttpServletResponse httpServletResponse, Account userAccount) throws IOException {
     JSONObject userAttributesJson = getUserAttributesJson(userAccount);
     httpServletResponse.setContentType("application/json; charset=UTF-8");
     httpServletResponse.getOutputStream().println(userAttributesJson.toString());
-  }
-
-  private boolean areTokenCredentials(String userId) {
-    Account accountById = mBackendUtils.getAccountById(userId);
-    return accountById != null;
-  }
-
-  private Account getAccountByToken(String username, String tokenStr)
-  {
-    AccountToken token = mBackendUtils.getAccountToken(username, tokenStr);
-    if (token != null && !token.isExpired())
-    {
-      return token.getAccount();
-    }
-    return null;
   }
 
   private JSONObject getUserAttributesJson(Account account) {
@@ -138,23 +205,6 @@ public class NcUserZimbraBackendHttpHandler implements HttpHandler
       throw new RuntimeException(e);
     }
     return userAttributesJson;
-  }
-
-  private Account getAccountByCredentials(String username, String password)
-  {
-    if (username.contains("@"))
-    { // Must be an email address
-      Account account = mBackendUtils.getAccountByName(username);
-      if(account != null)
-      {
-        try
-        {
-          account.authAccount(password, Protocol.zsync);
-          return account;
-        } catch (ZimbraException ignore){}
-      }
-    }
-    return null;
   }
 
   @Override
@@ -173,6 +223,10 @@ public class NcUserZimbraBackendHttpHandler implements HttpHandler
   public String getPath()
   {
     return "ZimbraDrive_NcUserZimbraBackend";
+  }
+
+  private boolean areTokenCredentials(String userId) {
+    return !userId.contains("@");
   }
 
 }

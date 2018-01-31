@@ -40,7 +40,7 @@ public class TokenManager
     }
     else
     {
-      accountToken = new AccountToken(account);
+      accountToken = new AccountToken();
       mTokenMap.put(account.getId(), accountToken);
     }
     return accountToken;
@@ -48,9 +48,10 @@ public class TokenManager
 
   public synchronized AccountToken getAccountToken(String accountId, String tokenStr)
   {
-    if (mTokenMap.get(accountId) != null && mTokenMap.get(accountId).getToken().equals(tokenStr))
+    AccountToken accountToken = mTokenMap.get(accountId);
+    if (accountToken != null && accountToken.getToken().equals(tokenStr))
     {
-      return mTokenMap.get(accountId);
+      return accountToken;
     }
     return null;
   }

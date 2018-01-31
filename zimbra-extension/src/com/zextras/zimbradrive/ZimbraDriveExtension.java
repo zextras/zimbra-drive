@@ -19,6 +19,7 @@ package com.zextras.zimbradrive;
 
 import com.zextras.zimbradrive.soap.NcSoapService;
 import com.zextras.zimbradrive.statustest.ConnectionTestUtils;
+import org.openzal.zal.Provisioning;
 import org.openzal.zal.extension.ZalExtension;
 import org.openzal.zal.extension.ZalExtensionController;
 import org.openzal.zal.extension.Zimbra;
@@ -49,16 +50,17 @@ public class ZimbraDriveExtension implements ZalExtension
   {
     Zimbra mZimbra = new Zimbra();
     TokenManager tokenManager = new TokenManager();
-    BackendUtils backendUtils = new BackendUtils(mZimbra.getProvisioning(), tokenManager);
-    DriveProxy driveProxy = new DriveProxy(mZimbra.getProvisioning());
-    CloudHttpRequestUtils cloudHttpRequestUtils = new CloudHttpRequestUtils(mZimbra.getProvisioning(), tokenManager, driveProxy);
+    Provisioning provisioning = mZimbra.getProvisioning();
+    BackendUtils backendUtils = new BackendUtils(provisioning, tokenManager);
+    DriveProxy driveProxy = new DriveProxy(provisioning);
+    CloudHttpRequestUtils cloudHttpRequestUtils = new CloudHttpRequestUtils(provisioning, tokenManager, driveProxy);
     mZimbraDriveLog = new ZimbraDriveLog();
 
     mSoapServiceManager = new SoapServiceManager();
     mNcSoapService = new NcSoapService(cloudHttpRequestUtils);
 
     mHttpServiceManager = new HttpServiceManager();
-    mNcUserZimbraBackendHttpHandler = new NcUserZimbraBackendHttpHandler(backendUtils, mZimbraDriveLog);
+    mNcUserZimbraBackendHttpHandler = new NcUserZimbraBackendHttpHandler(backendUtils, mZimbraDriveLog, provisioning);
     mConnectivityTestHttpHandler = new ConnectivityTestHttpHandler(mZimbraDriveLog);
     mUploadFileHttpHandler = new UploadFileHttpHandler(backendUtils, driveProxy, mZimbraDriveLog);
     mGetFileHttpHdlr = new GetFileHttpHandler(cloudHttpRequestUtils, backendUtils, mZimbraDriveLog);
