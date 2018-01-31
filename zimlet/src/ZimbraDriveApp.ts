@@ -77,9 +77,9 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
   public static GET_ALL_FOLDERS_RESP: string = "GetAllFoldersResponse";
   public static NEW_DIRECTORY_RESP: string = "NewDirectoryResponse";
 
-  public static DOWNLOAD_URL: string = "service/extension/ZimbraDrive_Download";
-  public static UPLOAD_URL: string = "service/extension/ZimbraDrive_Upload";
-  public static CREATE_TEMP_FILES_URL: string = "service/extension/ZimbraDrive_CreateTempFiles";
+  public static DOWNLOAD_URL: string = "/service/extension/ZimbraDrive_Download";
+  public static UPLOAD_URL: string = "/service/extension/ZimbraDrive_Upload";
+  public static CREATE_TEMP_FILES_URL: string = "/service/extension/ZimbraDrive_CreateTempFiles";
 
   private _defaultNewButtonMenu: DwtMenu;
   private _zimbraDriveNewButtonMenu: ZmActionMenu;
