@@ -1,3 +1,4 @@
 /.idea/workspace.xml
 /build/
 /dist/
+/zimbra-extension/src/java/com/zextras/lib/BuildInfo.java
