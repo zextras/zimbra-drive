@@ -57,12 +57,10 @@ Deploy the zimlet
 ```bash
 zmzimletctl deploy /tmp/zimbradrive/zimlet/com_zextras_drive_open.zip
 ```
-Enable the zimlet
-```bash
-zmzimletctl enable com_zextras_drive_open
-```
+Enable the zimlet in your class of service.
 
 ### 5. Install Nextcloud/ownCloud ZimbraDrive App
+Get the zimbradrive application from https://apps.nextcloud.com/apps/zimbradrive or https://marketplace.owncloud.com/apps/zimbradrive.
 Extract `zimbradrive.tar.gz` in the folder `apps` of Nextcloud/ownCloud.
 ```bash
 tar -xzvf zimbradrive.tar.gz  --directory=/var/www/html/apps
