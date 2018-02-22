@@ -96,9 +96,9 @@ abstract class AbstractZimbraUsersBackend extends \OC_User_Backend
             if(!$this->userManager->userExists($zimbraUser->getUid()))
             {
                 $this->createUser($zimbraUser->getUid(), $zimbraUser->getDisplayName());
+                $this->setDefaultUserAttributes($zimbraUser);
             }
-            $this->setDefaultUserAttributes($zimbraUser);
-
+            
             return $zimbraUser->getUid();
         } catch (\Exception $ignore)
         {
