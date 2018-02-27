@@ -25,7 +25,7 @@ use OCA\ZimbraDrive\Settings\AppSettings;
 use OC\User\User;
 use OCP\IServerContainer;
 
-abstract class AbstractZimbraUsersBackend extends \OC_User_Backend
+abstract class AbstractZimbraUsersBackend extends RetroCompatibleBackend
 {
     const ZIMBRA_GROUP = "zimbra";
     protected $logger;
