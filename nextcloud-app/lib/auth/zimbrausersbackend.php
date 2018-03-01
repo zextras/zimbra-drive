@@ -20,7 +20,7 @@
 
 namespace OCA\ZimbraDrive\Auth;
 
-class ZimbraUsersBackend extends \OC_User_Backend
+class ZimbraUsersBackend extends RetroCompatibleBackend
 {
     const ZIMBRA_GROUP = "zimbra";
 
