@@ -97,6 +97,7 @@ class ZimbraDriveExtensionConnectivityTest implements Test
 
         //set the url, number of POST vars, POST data
         curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, "");
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
         if ($trust_invalid_certs) {
