@@ -87,6 +87,10 @@ var documentsSettings = {
         documentsSettings.setValue('allow_zimbra_users_login', isEnabled);
     },
 
+    setZimbraGroupToUsers: function (isEnabled) {
+        documentsSettings.setValue('set_zimbra_group', isEnabled);
+    },
+
     initialize: function () {
         setEnableZimbrasUsersUpdateHandler();
         setAllowZimbrasUsersLoginUpdateHandler();
@@ -95,6 +99,7 @@ var documentsSettings = {
         setZimbraUrlChangeHandler();
         setZimbraPortChangeHandler();
         setPreAuthKeyChangeHandler();
+        setZimbraGroupToUsersUpdateHandler();
 
 
         function setEnableZimbrasUsersUpdateHandler() {
@@ -144,6 +149,10 @@ var documentsSettings = {
             function handler() {
                 documentsSettings.setValue(this.name, this.value);
             }
+        }
+
+        function setZimbraGroupToUsersUpdateHandler() {
+            addClickHandlerToCheckableItem("set_zimbra_group", documentsSettings.setZimbraGroupToUsers);
         }
     }
 };
