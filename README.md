@@ -10,7 +10,7 @@ Features:
 - Attach Nextcloud / ownCloud files to email.
 
 Supported Versions:
-- Nextcloud: 9, 10, 11, 12
+- Nextcloud: 9, 10, 11, 12, 13
 - ownCloud: 9, 9.1, 10
 
 ## Install
@@ -123,3 +123,6 @@ mysql -u root --password="${mysql_pwd}" "${occ_db}" -N -s \
             -e "DELETE FROM oc_accounts WHERE uid = '${uid}' LIMIT 1"; \
       done
 ```
+
+## Issues
+Zimbra Drive is an official Zimbra product - support is provided through the official Zimbra channels to both Open Source and Network Edition customers.
