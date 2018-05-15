@@ -140,6 +140,10 @@ class StorageService
     public function getNodesCommonAttributes(Node $node)
     {
         $nodeOwner = $node->getOwner();
+
+	$path = substr($node->getPath(),1);
+	$path = substr($path, strpos($path, "/")+1);	// strip account name
+	
         $nodeAttributeMap = [
             ResponseVarName::NAME_VAR_NAME => $node->getName(),
             ResponseVarName::PERMISSIONS_VAR_NAME => $this->getPermission($node),
@@ -148,7 +152,7 @@ class StorageService
             ResponseVarName::SIZE_VAR_NAME => $node->getSize(),
             ResponseVarName::MODIFIED_TIME_VAR_NAME => $node->getMTime(),
             ResponseVarName::ID_VAR_NAME => $node->getId(),
-            ResponseVarName::PATH_VAR_NAME => $node->getInternalPath(),
+            ResponseVarName::PATH_VAR_NAME => $path,
             ResponseVarName::PUBLIC_VAR_NAME => $this->isPublic($node, $nodeOwner)
         ];
         return $nodeAttributeMap;
