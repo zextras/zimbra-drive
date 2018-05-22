@@ -189,7 +189,7 @@ public class NcUserZimbraBackendHttpHandler implements HttpHandler
   private void printUserAttributesResponse(HttpServletResponse httpServletResponse, Account userAccount) throws IOException {
     JSONObject userAttributesJson = getUserAttributesJson(userAccount);
     httpServletResponse.setContentType("application/json; charset=UTF-8");
-    httpServletResponse.getOutputStream().println(userAttributesJson.toString());
+    httpServletResponse.getOutputStream().write((userAttributesJson.toString()+"\n").getBytes("UTF-8"));
   }
 
   private JSONObject getUserAttributesJson(Account account) {
