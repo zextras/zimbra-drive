@@ -215,7 +215,7 @@ class ZimbraUsersBackendInDb extends AbstractZimbraUsersBackend
      */
     public function userExists($uid)
     {
-        $sql='SELECT COUNT(*) FROM `*PREFIX*zimbradrive_users`'
+        $sql='SELECT COUNT(*) AS users_find FROM `*PREFIX*zimbradrive_users`'
             . ' WHERE LOWER(`uid`) = LOWER(?)';
 
         $statement = $this->databaseConnection->prepare($sql);
@@ -224,8 +224,7 @@ class ZimbraUsersBackendInDb extends AbstractZimbraUsersBackend
 
         $row = $statement->fetch();
         $statement->closeCursor();
-
-        return $row['COUNT(*)'] !== "0";
+        return $row['users_find'] != 0; //$row['users_find'] in mysql is a string, in postgresql is a integer
     }
 }
 
