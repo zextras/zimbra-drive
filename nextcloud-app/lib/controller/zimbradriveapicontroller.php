@@ -115,8 +115,7 @@ class ZimbraDriveApiController extends ApiController
         }
 
         $results = $this->filterNodesByType($wantedFiles, $types);
-        $resultsNoShares = $this->filterShareNodes($results);
-        return new JSONResponse($resultsNoShares);
+        return new JSONResponse($results);
     }
 
     /**
@@ -173,8 +172,7 @@ class ZimbraDriveApiController extends ApiController
             return new EmptyResponse(Http::STATUS_FORBIDDEN);
         }
         $folderTree = $this->storageService->getFolderTreeAttributes($searchedFolder);
-        $folderTreeNoShare = $this->filterShareTreeNodes($folderTree);
-        return new JSONResponse($folderTreeNoShare);
+        return new JSONResponse($folderTree);
     }
 
     /**
@@ -383,50 +381,6 @@ class ZimbraDriveApiController extends ApiController
     private function createFileStatusResponse($statusCode)
     {
         return array("statusCode" => $statusCode);
-    }
-
-    /**
-     * @param $nodes array
-     * @return array
-     */
-    private function filterShareNodes($nodes)
-    {
-        $results = array();
-        foreach ($nodes as $node)
-        {
-            if($node[ResponseVarName::SHARED_VAR_NAME] === false)
-            {
-                $results[] = $node;
-            }
-        }
-        return $results;
-    }
-
-    /**
-     * @param $nodeTree
-     * @return array
-     */
-    private function filterShareTreeNodes($nodeTree)
-    {
-        $filterTree = $nodeTree;
-        if($nodeTree[ResponseVarName::SHARED_VAR_NAME] === true)
-        {
-            return array();
-        }
-
-        $filterChildren = array();
-        $children = $nodeTree[ResponseVarName::CHILDREN_VAR_NAME];
-        foreach ($children as $child)
-        {
-            $filterChild = self::filterShareTreeNodes($child);
-            if(!empty($filterChild))
-            {
-                $filterChildren[] = $filterChild;
-            }
-        }
-        $filterTree[ResponseVarName::CHILDREN_VAR_NAME] = $filterChildren;
-        return $filterTree;
-
     }
 
     /**
