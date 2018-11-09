@@ -148,7 +148,7 @@ class StorageService
             ResponseVarName::SIZE_VAR_NAME => $node->getSize(),
             ResponseVarName::MODIFIED_TIME_VAR_NAME => $node->getMTime(),
             ResponseVarName::ID_VAR_NAME => $node->getId(),
-            ResponseVarName::PATH_VAR_NAME => $node->getInternalPath(),
+            ResponseVarName::PATH_VAR_NAME => $this->getInternalPath($node),
             ResponseVarName::PUBLIC_VAR_NAME => $this->isPublic($node, $nodeOwner)
         ];
         return $nodeAttributeMap;
@@ -453,6 +453,26 @@ class StorageService
             }
         }
         return $nodeDescendants;
+    }
+
+    /**
+     * @param Node $node
+     * @return string
+     */
+    public function getInternalPath(Node $node)
+    {
+        // strip everything "below" root folder from path
+        if ( $node->isMounted() || $node->isShared() )
+        {
+            $nodePath = $node->getPath();
+            $userRootFolder = $this->getFolder(self::ROOT)->getName();
+
+            $nodeInternalPath = substr( $nodePath, strpos($nodePath, '/'.$userRootFolder.'/')+1 );
+        } else {
+            $nodeInternalPath = $node->getInternalPath();
+        }
+
+        return $nodeInternalPath;
     }
 
 
