@@ -158,7 +158,7 @@ export class ZimbraDriveUploadDialog extends ZmUploadDialog {
                 alreadyExistsFiles.push(this._fileMapIdName[id]);
               }
             }
-            else if (status === ZimbraDriveUploadDialog.FILE_ALREADY_EXISTS_STATUS_CODE) {
+            else if (status === ZimbraDriveUploadDialog.NOT_PERMITTED_EXCEPTION_STATUS_CODE) {
               if (this._fileMapIdName.hasOwnProperty(id)) {
                 filesUploadNotPermitted.push(this._fileMapIdName[id]);
               }
@@ -182,7 +182,7 @@ export class ZimbraDriveUploadDialog extends ZmUploadDialog {
           level = ZmStatusView.LEVEL_WARNING;
         }
         else if (filesUploadNotPermitted.length > 0) {
-          ZimbraDriveApp.getMessage("errorUploadFileUploadNotPermitted", [filesUploadNotPermitted.join(", ")]);
+          msg = ZimbraDriveApp.getMessage("errorUploadFileUploadNotPermitted", [filesUploadNotPermitted.join(", ")]);
           level = ZmStatusView.LEVEL_WARNING;
         }
         break;

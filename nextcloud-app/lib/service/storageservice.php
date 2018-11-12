@@ -24,6 +24,7 @@ use OCP\Files\FileInfo;
 use OCP\Files\Folder;
 use OCP\Files\File;
 use OCP\Files\IMimeTypeDetector;
+use OCP\Files\NotPermittedException;
 use OCP\IServerContainer;
 use OC\Files\Filesystem;
 use OCP\Files\Node;
@@ -148,7 +149,7 @@ class StorageService
             ResponseVarName::SIZE_VAR_NAME => $node->getSize(),
             ResponseVarName::MODIFIED_TIME_VAR_NAME => $node->getMTime(),
             ResponseVarName::ID_VAR_NAME => $node->getId(),
-            ResponseVarName::PATH_VAR_NAME => $node->getInternalPath(),
+            ResponseVarName::PATH_VAR_NAME => $this->getInternalPath($node),
             ResponseVarName::PUBLIC_VAR_NAME => $this->isPublic($node, $nodeOwner)
         ];
         return $nodeAttributeMap;
@@ -237,11 +238,18 @@ class StorageService
      * @param $sourcePath string
      * @param $targetPath string
      * @throws MethodNotAllowedException
+     * @throws NotPermittedException
+     * @throws UnauthorizedException
+     * @throws \OCP\Files\InvalidPathException
+     * @throws \OCP\Files\NotFoundException
      */
     public function move($sourcePath, $targetPath)
     {
         //if the $targetPath is a directory, it use the $filePath file name
         $nodeToMove = $this->getNode($sourcePath);
+        if ( $nodeToMove->getPermissions() >= \OCP\Constants::PERMISSION_DELETE) {
+            throw new UnauthorizedException();
+        }
         $lastCharTargetPath = $targetPath[strlen($targetPath)-1];
         if($lastCharTargetPath === "/")
         {
@@ -289,6 +297,7 @@ class StorageService
      * @param $path
      * @param $tempFilePath
      * @throws MethodNotAllowedException
+     * @throws NotPermittedException
      */
     public function uploadFile($name, $path, $tempFilePath)
     {
@@ -303,7 +312,11 @@ class StorageService
             throw new MethodNotAllowedException($errorMessage);
         }
 
-        Filesystem::fromTmpFile($tempFilePath, $newFileFullPath);
+        $uploadResult = Filesystem::fromTmpFile($tempFilePath, $newFileFullPath);
+
+        if ($uploadResult === false) {
+            throw new NotPermittedException();
+        }
     }
 
     /**
@@ -453,6 +466,26 @@ class StorageService
             }
         }
         return $nodeDescendants;
+    }
+
+    /**
+     * @param Node $node
+     * @return string
+     */
+    public function getInternalPath(Node $node)
+    {
+        // strip everything "below" root folder from path
+        if ( $node->isMounted() || $node->isShared() )
+        {
+            $nodePath = $node->getPath();
+            $userRootFolder = $this->getFolder(self::ROOT)->getName();
+
+            $nodeInternalPath = substr( $nodePath, strpos($nodePath, '/'.$userRootFolder.'/')+1 );
+        } else {
+            $nodeInternalPath = $node->getInternalPath();
+        }
+
+        return $nodeInternalPath;
     }
 
 
