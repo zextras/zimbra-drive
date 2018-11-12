@@ -273,7 +273,7 @@ class ZimbraDriveApiController extends ApiController
         catch (NotPermittedException $exception)
         {
             $this->logger->info($exception->getMessage());
-            return new EmptyResponse(Http::STATUS_METHOD_NOT_ALLOWED);
+            return new EmptyResponse(Http::STATUS_FORBIDDEN);
         }
 //        catch (Exception $exception) {
 //            $this->logger->info($exception->getMessage());
