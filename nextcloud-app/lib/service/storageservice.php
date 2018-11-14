@@ -247,7 +247,7 @@ class StorageService
     {
         //if the $targetPath is a directory, it use the $filePath file name
         $nodeToMove = $this->getNode($sourcePath);
-        if ( $nodeToMove->getPermissions() >= \OCP\Constants::PERMISSION_DELETE) {
+        if ( $nodeToMove->getPermissions() <= \OCP\Constants::PERMISSION_DELETE ) {
             throw new UnauthorizedException();
         }
         $lastCharTargetPath = $targetPath[strlen($targetPath)-1];
@@ -260,8 +260,7 @@ class StorageService
         $targetFileName = basename($targetPath);
         $targetDirectory = $this->getFolder($targetDirectoryPath);
         $targetExists = $targetDirectory->nodeExists($targetFileName);
-        if($targetExists)
-        {
+        if($targetExists) {
             $errorMessage = "Cannot move the file because a file already exist in the destination path ($targetPath).";
             throw new MethodNotAllowedException($errorMessage);
         }

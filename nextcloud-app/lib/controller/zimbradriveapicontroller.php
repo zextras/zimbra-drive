@@ -86,6 +86,50 @@ class ZimbraDriveApiController extends ApiController
      * @param $caseSensitive bool
      * @return Response
      */
+    public function searchRequestShareItemFiltered($username, $token, $query, $types, $caseSensitive)
+    {
+        $this->logger->debug($username . ' call searchRequestShareItemFiltered.');
+        try {
+            $this->loginService->login($username, $token);
+        } catch (UnauthorizedException $unauthorizedException) {
+            $this->logUnauthorizedLogin($unauthorizedException);
+            return new EmptyResponse(Http::STATUS_UNAUTHORIZED);
+        }
+
+        $types = json_decode($types, false);
+        if($types === array('document'))
+        {
+            $types = array('file');
+        }
+        $caseSensitive = $caseSensitive === "true";
+
+        try {
+            $wantedFiles =  $this->searchService->search($query, $caseSensitive);
+        } catch (BadRequestException $badRequestException) {
+            $this->logger->info($badRequestException->getMessage());
+            return new EmptyResponse(Http::STATUS_BAD_REQUEST);
+        }
+        catch (MethodNotAllowedException $methodNotAllowedException) {
+            $this->logger->info($methodNotAllowedException->getMessage());
+            return new EmptyResponse(Http::STATUS_METHOD_NOT_ALLOWED);
+        }
+
+        $results = $this->filterNodesByType($wantedFiles, $types);
+        $resultsNoShares = $this->filterShareNodes($results);
+        return new JSONResponse($resultsNoShares);
+    }
+
+    /**
+     * @CORS
+     * @NoCSRFRequired
+     * @PublicPage
+     * @param $username
+     * @param $token
+     * @param $query
+     * @param $types
+     * @param $caseSensitive bool
+     * @return Response
+     */
     public function searchRequest($username, $token, $query, $types, $caseSensitive)
     {
         $this->logger->debug($username . ' call searchRequest.');
@@ -135,6 +179,45 @@ class ZimbraDriveApiController extends ApiController
         }
         return $results;
 
+    }
+
+    /**
+     * @param $node Node
+     * @param $validTypes array
+     * @return bool
+     */
+    private function nodeHasAValidTypeShareItemFiltered($node, $validTypes)
+    {
+        return in_array($node[ResponseVarName::NODE_TYPE_VAR_NAME], $validTypes, true);
+    }
+
+    /**
+     * @CORS
+     * @NoCSRFRequired
+     * @PublicPage
+     * @param $username
+     * @param $token
+     * @return \OCP\AppFramework\Http\Response
+     */
+    public function getAllFoldersShareItemFiltered($username, $token)
+    {
+        $this->logger->debug($username . ' call getAllFoldersShareItemFiltered.');
+        try {
+            $this->loginService->login($username, $token);
+        } catch (UnauthorizedException $unauthorizedException) {
+            $this->logUnauthorizedLogin($unauthorizedException);
+            return new EmptyResponse(Http::STATUS_UNAUTHORIZED);
+        }
+
+        try {
+            $searchedFolder = $this->storageService->getFolder(StorageService::ROOT);
+        } catch (Exception $exception) {
+            $this->logger->info($exception->getMessage());
+            return new EmptyResponse(Http::STATUS_FORBIDDEN);
+        }
+        $folderTree = $this->storageService->getFolderTreeAttributes($searchedFolder);
+        $folderTreeNoShare = $this->filterShareTreeNodes($folderTree);
+        return new JSONResponse($folderTreeNoShare);
     }
 
     /**
@@ -273,7 +356,7 @@ class ZimbraDriveApiController extends ApiController
         catch (NotPermittedException $exception)
         {
             $this->logger->info($exception->getMessage());
-            return new EmptyResponse(Http::STATUS_FORBIDDEN);
+            return new EmptyResponse(Http::STATUS_FORBIDDEN); //todo test retrocompatibility
         }
 //        catch (Exception $exception) {
 //            $this->logger->info($exception->getMessage());
@@ -381,6 +464,50 @@ class ZimbraDriveApiController extends ApiController
     private function createFileStatusResponse($statusCode)
     {
         return array("statusCode" => $statusCode);
+    }
+
+    /**
+     * @param $nodes array
+     * @return array
+     */
+    private function filterShareNodes($nodes)
+    {
+        $results = array();
+        foreach ($nodes as $node)
+        {
+            if($node[ResponseVarName::SHARED_VAR_NAME] === false)
+            {
+                $results[] = $node;
+            }
+        }
+        return $results;
+    }
+
+    /**
+     * @param $nodeTree
+     * @return array
+     */
+    private function filterShareTreeNodes($nodeTree)
+    {
+        $filterTree = $nodeTree;
+        if($nodeTree[ResponseVarName::SHARED_VAR_NAME] === true)
+        {
+            return array();
+        }
+
+        $filterChildren = array();
+        $children = $nodeTree[ResponseVarName::CHILDREN_VAR_NAME];
+        foreach ($children as $child)
+        {
+            $filterChild = self::filterShareTreeNodes($child);
+            if(!empty($filterChild))
+            {
+                $filterChildren[] = $filterChild;
+            }
+        }
+        $filterTree[ResponseVarName::CHILDREN_VAR_NAME] = $filterChildren;
+        return $filterTree;
+
     }
 
     /**

@@ -29,8 +29,8 @@
 return [
     'routes' => [
         ['name' => 'page#index', 'url' => '/', 'verb' => 'GET'],
-        ['name' => 'zimbra_drive_api#searchRequest', 'url' => '/api/1.0/SearchRequest', 'verb' => 'POST'],
-        ['name' => 'zimbra_drive_api#getAllFolders', 'url' => '/api/1.0/GetAllFolders', 'verb' => 'POST'],
+        ['name' => 'zimbra_drive_api#searchRequestShareItemFiltered', 'url' => '/api/1.0/SearchRequest', 'verb' => 'POST'],
+        ['name' => 'zimbra_drive_api#getAllFoldersShareItemFiltered', 'url' => '/api/1.0/GetAllFolders', 'verb' => 'POST'],
         ['name' => 'zimbra_drive_api#getFile', 'url' => '/api/1.0/GetFile', 'verb' => 'POST'],
         ['name' => 'zimbra_drive_api#uploadFile', 'url' => '/api/1.0/UploadFile', 'verb' => 'POST'],
         ['name' => 'zimbra_drive_api#delete', 'url' => '/api/1.0/Delete', 'verb' => 'POST'],
@@ -41,5 +41,9 @@ return [
         ['name' => 'admin_api#disableZimbraAuthentication', 'url' => '/admin/DisableZimbraAuthentication', 'verb' => 'POST'],
         ['name' => 'test#all', 'url' => '/test/All', 'verb' => 'GET'],
         ['name' => 'test#connectivityTest', 'url' => '/test/ConnectivityTest', 'verb' => 'GET'],
+
+        ['name' => 'zimbra_drive_api#getVersion', 'url' => '/api/2.0/GetVersion', 'verb' => 'POST'],
+        ['name' => 'zimbra_drive_api#searchRequest', 'url' => '/api/2.0/SearchRequest', 'verb' => 'POST'],
+        ['name' => 'zimbra_drive_api#getAllFolders', 'url' => '/api/2.0/GetAllFolders', 'verb' => 'POST'],
     ]
 ];

@@ -74,7 +74,8 @@ public class MoveHdlr implements SoapHandler
     List<NameValuePair> driveOnCloudParameters = mCloudHttpRequestUtils.createDriveOnCloudAuthenticationParams(zimbraContext);
     driveOnCloudParameters.add(new BasicNameValuePair(ZimbraDriveItem.F_SOURCE_PATH, sourcePath));
     driveOnCloudParameters.add(new BasicNameValuePair(ZimbraDriveItem.F_TARGET_PATH, targetPath));
-    return mCloudHttpRequestUtils.sendRequestToCloud(zimbraContext, driveOnCloudParameters, COMMAND);
+    return mCloudHttpRequestUtils.sendRequestToCloud(zimbraContext, driveOnCloudParameters, COMMAND,
+      "1.0");
   }
 
   @Override
