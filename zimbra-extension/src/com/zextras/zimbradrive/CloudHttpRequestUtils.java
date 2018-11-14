@@ -38,8 +38,8 @@ import java.util.List;
 public class CloudHttpRequestUtils
 {
 
-  private static final String DRIVE_ON_CLOUD_URL = "/apps/zimbradrive/api/"; //1.0/
-  private static final String GET_FILE_URL = DRIVE_ON_CLOUD_URL + "GetFile";
+  private static final String DRIVE_ON_CLOUD_URL = "/apps/zimbradrive/api/";
+  private static final String GET_FILE_URL = DRIVE_ON_CLOUD_URL + "1.0/GetFile";
 
   private final Provisioning mProvisioning;
   private final TokenManager mTokenManager;
