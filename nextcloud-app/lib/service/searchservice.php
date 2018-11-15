@@ -69,7 +69,7 @@ class SearchService
      */
     public function search($query, $isCaseSensitive)
     {
-        if($this->filterUtils->queryIsFoldersContentsRequest($query)) //actually only 'in:' is supports
+        if($this->filterUtils->queryIsFoldersContentsRequest($query)) // only 'in:' is supports
         {
             $path = $this->filterUtils->assertPathFromToken($query);
 

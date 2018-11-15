@@ -21,6 +21,7 @@
 namespace OCA\ZimbraDrive\Service\Filter;
 
 use OCA\ZimbraDrive\Service\LogService;
+use OCA\ZimbraDrive\Service\StorageService;
 use OCP\Files\Node;
 
 class PartialNameNodeFilter implements NodesFilter
@@ -34,14 +35,19 @@ class PartialNameNodeFilter implements NodesFilter
      * @var LogService
      */
     private $logger;
+    /**
+     * @var StorageService
+     */
+    private $storageService;
 
     /**
      * PartialNameNodeFilter constructor.
      * @param $targetPartialName string
      * @param $isCaseSensitive
+     * @param StorageService $storageService
      * @param LogService $logService
      */
-    public function __construct($targetPartialName, $isCaseSensitive, LogService $logService)
+    public function __construct($targetPartialName, $isCaseSensitive, StorageService $storageService, LogService $logService)
     {
         $this->logger = $logService;
         if(!$isCaseSensitive)
@@ -50,6 +56,7 @@ class PartialNameNodeFilter implements NodesFilter
         }
         $this->isCaseSensitive = $isCaseSensitive;
         $this->targetPartialName = $targetPartialName;
+        $this->storageService = $storageService;
     }
 
 
@@ -59,7 +66,7 @@ class PartialNameNodeFilter implements NodesFilter
         /** @var Node $node */
         foreach($nodes as $node)
         {
-            $nodePath = $node->getInternalPath();
+            $nodePath = $this->storageService->getInternalPath($node);
             $name = basename($nodePath);
 
             if(!$this->isCaseSensitive)

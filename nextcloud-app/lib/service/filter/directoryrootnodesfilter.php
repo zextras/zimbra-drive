@@ -21,6 +21,7 @@
 namespace OCA\ZimbraDrive\Service\Filter;
 
 use OCA\ZimbraDrive\Service\LogService;
+use OCA\ZimbraDrive\Service\StorageService;
 use OCP\Files\Node;
 
 class DirectoryRootNodesFilter implements NodesFilter
@@ -37,19 +38,25 @@ class DirectoryRootNodesFilter implements NodesFilter
      * @var LogService
      */
     private $logger;
+    /**
+     * @var StorageService
+     */
+    private $storageService;
 
 
     /**
      * DirectoryRootNodesFilter constructor.
      * @param $path string
      * @param $isCaseSensitive
+     * @param StorageService $storageService
      * @param LogService $logService
      */
-    public function __construct($path, $isCaseSensitive, LogService $logService)
+    public function __construct($path, $isCaseSensitive, StorageService $storageService, LogService $logService)
     {
         $this->path = $path;
         $this->isCaseSensitive = $isCaseSensitive;
         $this->logger = $logService;
+        $this->storageService = $storageService;
     }
 
     /**
@@ -62,8 +69,7 @@ class DirectoryRootNodesFilter implements NodesFilter
         /** @var Node $node */
         foreach($nodes as $node)
         {
-            $nodeInternalPath = $node->getInternalPath();
-            $nodeUserRootRelativePath = substr($nodeInternalPath, strlen("files"));
+            $nodeUserRootRelativePath = $this->storageService->getRelativePath($node);
             if($this->isInTheDirectoryTree($nodeUserRootRelativePath, $this->path))
             {
                 $filteredNodes[] = $node;
