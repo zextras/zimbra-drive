@@ -131,7 +131,11 @@ export class ZimbraDriveItem extends ZmItem {
   }
 
   public getAuthor(): string {
-    return this.author;
+    //If Autor is Empty then return string with space. " ". 
+   if (empty(this.author)) {
+      return "";} else {
+             return this.author;
+        }
   }
 
   public getPath(urlEncode?: boolean): string {
