@@ -1,5 +1,12 @@
-Zimbra Drive
+Open Drive
 ============
+
+Open Drive is not not a fully fledged Zextras product under active support and development, but a contribution provided to the Zimbra Community "as is". 
+
+Anyone is free to download it and to clone the repository to apply any change complying with the project's licensing but there is no official commitment on updates, on the inclusion of features and/or the approval of pull requests. 
+
+---
+ 
 
 Zimbra and Nextcloud / ownCloud integration.
 
