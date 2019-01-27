@@ -122,7 +122,7 @@ abstract class AbstractZimbraUsersBackend extends RetroCompatibleBackend
     private function setDefaultGroups($user)
     {
         $this->insertUserInGroup($user, self::ZIMBRA_GROUP);
-        $this->insertUserInGroup($user, $this->getEmailDomain($user->getEMailAddress()));
+        $this->insertUserInGroup($user, $this->getEmailDomain($this->getUserEmail($user)));
     }
 
     private function getEmailDomain($email)
@@ -144,7 +144,7 @@ abstract class AbstractZimbraUsersBackend extends RetroCompatibleBackend
      */
     private function restoreUserEmailIfChanged(User $user, $userEmail)
     {
-        if( $user->getEMailAddress() !== $userEmail)
+        if($this->getUserEmail($user) !== $userEmail)
         {
             if(!is_null($this->accountManager)) //Nextcloud 11
             {
@@ -207,5 +207,30 @@ abstract class AbstractZimbraUsersBackend extends RetroCompatibleBackend
      * @return bool
      */
     public abstract function setDisplayName($uid, $display_name);
+
+    /**
+     * Get email of user
+     *
+     * @param User $user
+     *
+     * @return string
+     */
+    private function getUserEmail(User $user)
+    {
+        if(!is_null($this->accountManager))
+        {
+            $userData = $this->accountManager->getUser($user);
+            if (isset($userData[AccountManager::PROPERTY_EMAIL]['value']))
+            {
+                return $userData[AccountManager::PROPERTY_EMAIL]['value'];
+            } else
+            {
+                return '';
+            }
+        } else
+        {
+            return $user->getEMailAddress();
+        }
+    }
 }
 
