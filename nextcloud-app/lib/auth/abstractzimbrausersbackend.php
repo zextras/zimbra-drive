@@ -149,17 +149,33 @@ abstract class AbstractZimbraUsersBackend extends RetroCompatibleBackend
      */
     private function restoreUserEmailIfChanged(User $user, $userEmail)
     {
-        if( $user->getEMailAddress() !== $userEmail)
+        if( $this->getUserEmailAddress($user) !== $userEmail)
         {
-            if(!is_null($this->accountManager)) //Nextcloud 11
-            {
-                $userData = $this->accountManager->getUser($user);
-                $userData[AccountManager::PROPERTY_EMAIL]['value'] = $userEmail;
-                $this->accountManager->updateUser($user, $userData);
-            } else
-            {
-                $user->setEMailAddress($userEmail);
-            }
+            $this->setUserEmailAddress($user, $userEmail);
+        }
+    }
+
+    private function getUserEmailAddress(User $user){
+        if(!is_null($this->accountManager)) //Nextcloud 11
+        {
+            $userData = $this->accountManager->getUser($user);
+            $userEmailAddress = $userData[AccountManager::PROPERTY_EMAIL]['value'];
+        } else
+        {
+            $userEmailAddress = $user->getEMailAddress();
+        }
+        return $userEmailAddress;
+    }
+
+    private function setUserEmailAddress(User $user, $userEmail){
+        if(!is_null($this->accountManager)) //Nextcloud 11
+        {
+            $userData = $this->accountManager->getUser($user);
+            $userData[AccountManager::PROPERTY_EMAIL]['value'] = $userEmail;
+            $this->accountManager->updateUser($user, $userData);
+        } else
+        {
+            $user->setEMailAddress($userEmail);
         }
     }
 

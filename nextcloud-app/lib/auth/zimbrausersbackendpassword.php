@@ -24,6 +24,13 @@ use \phpseclib\Crypt\Random;
 
 class ZimbraUsersBackendPassword extends AbstractZimbraUsersBackend
 {
+    /** @var ZimbraUsersBackend */
+    private $backend;
+    public function __construct($backend, $server = null, $zimbraAuthenticationBackend = null)
+    {
+        parent::__construct($server, $zimbraAuthenticationBackend);
+        $this->backend = $backend;
+    }
 
     /**
      * @param $userId
@@ -33,7 +40,7 @@ class ZimbraUsersBackendPassword extends AbstractZimbraUsersBackend
     {
         parent::__construct();
 
-        $user = $this->userManager->createUser($userId, Random::string(255));
+        $user = $this->userManager->createUserFromBackend($userId, Random::string(255), $this->backend);
         $user->setDisplayName($userDisplayName);
     }
 

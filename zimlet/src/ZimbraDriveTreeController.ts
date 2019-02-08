@@ -43,7 +43,6 @@ import {ZmCsfeResult} from "./zimbra/zimbra/csfe/ZmCsfeResult";
 import {DwtDropEvent} from "./zimbra/ajax/dwt/dnd/DwtDropEvent";
 import {ZimbraDriveController} from "./ZimbraDriveController";
 import {ZDId} from "./ZDId";
-import {AjxMessageFormat} from "./zimbra/ajax/util/AjxText";
 import {AjxStringUtil} from "./zimbra/ajax/util/AjxStringUtil";
 import {PreviewPaneView} from "./view/PreviewPaneView";
 import {DwtTree} from "./zimbra/ajax/dwt/widgets/DwtTree";
@@ -52,7 +51,6 @@ import {ZmFolderSearchFilterGetMoveParamsValue} from "./zimbra/zimbraMail/share/
 import {ZmOverview} from "./zimbra/zimbraMail/share/view/ZmOverview";
 import {ZmStatusView} from "./zimbra/zimbraMail/share/view/ZmStatusView";
 import {ZmCsfeException} from "./zimbra/zimbra/csfe/ZmCsfeException";
-import {ZimbraDriveFolderTree} from "./ZimbraDriveFolderTree";
 import {ZmFolderTreeController} from "./zimbra/zimbraMail/share/controller/ZmFolderTreeController";
 import {ZmOrganizer} from "./zimbra/zimbraMail/share/model/ZmOrganizer";
 import {DwtHeaderTreeItem} from "./zimbra/ajax/dwt/widgets/DwtHeaderTreeItem";
@@ -175,8 +173,17 @@ export class ZimbraDriveTreeController extends ZmFolderTreeController {
       soapDoc: soapDoc,
       asyncMode: true,
       callback: new AjxCallback(this, this._newFolderCallback, [this._newFolderDialog.getFolder()]),
-      errorCallback: new AjxCallback(this, this._newFolderDialog.popdown, [])
+      errorCallback: new AjxCallback(this, this._createFolderError, [])
     });
+  }
+
+  private _createFolderError = (): boolean => {
+    this._newFolderDialog.popdown();
+    appCtxt.setStatusMsg({
+      msg: ZimbraDriveApp.getMessage("errorCreateNewFolder"),
+      level: ZmStatusView.LEVEL_WARNING,
+    });
+    return true;
   }
 
   private _newFolderCallback(parentFolder: ZimbraDriveFolder, result: ZmCsfeResult): void {

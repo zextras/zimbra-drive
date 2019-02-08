@@ -128,7 +128,8 @@ public class SearchRequestHdlr implements SoapHandler
     driveOnCloudParameters.add(new BasicNameValuePair("query", query));
     driveOnCloudParameters.add(new BasicNameValuePair("types", types));
     driveOnCloudParameters.add(new BasicNameValuePair("caseSensitive", isCaseSensitive.toString()));
-    return mCloudHttpRequestUtils.sendRequestToCloud(zimbraContext, driveOnCloudParameters, COMMAND + "Request");
+    return mCloudHttpRequestUtils.sendRequestToCloud(zimbraContext, driveOnCloudParameters, COMMAND + "Request",
+      "2.0");
   }
 
   @Override

@@ -38,8 +38,8 @@ import java.util.List;
 public class CloudHttpRequestUtils
 {
 
-  private static final String DRIVE_ON_CLOUD_URL = "/apps/zimbradrive/api/1.0/";
-  private static final String GET_FILE_URL = DRIVE_ON_CLOUD_URL + "GetFile";
+  private static final String DRIVE_ON_CLOUD_URL = "/apps/zimbradrive/api/";
+  private static final String GET_FILE_URL = DRIVE_ON_CLOUD_URL + "1.0/GetFile";
 
   private final Provisioning mProvisioning;
   private final TokenManager mTokenManager;
@@ -63,14 +63,18 @@ public class CloudHttpRequestUtils
     return driveOnCloudParameters;
   }
 
-  public HttpResponse sendRequestToCloud(final ZimbraContext zimbraContext, List<NameValuePair> driveOnCloudParameters, String driveCommand)  
+  public HttpResponse sendRequestToCloud(
+    final ZimbraContext zimbraContext,
+    List<NameValuePair> driveOnCloudParameters,
+    String driveCommand,
+    String apiVersion)
     throws IOException
   {
     String authenticatedAccountId = zimbraContext.getAuthenticatedAccontId();
     Account authenticatedUser = mProvisioning.assertAccountById(authenticatedAccountId);
     String userDomain = authenticatedUser.getDomainName();
     String driveOnCloudDomain = mDriveProxy.getDriveDomainAssociatedToDomain(userDomain);
-    String searchRequestUrl = driveOnCloudDomain + DRIVE_ON_CLOUD_URL + driveCommand;
+    String searchRequestUrl = driveOnCloudDomain + DRIVE_ON_CLOUD_URL + apiVersion + "/" + driveCommand;
 
     HttpPost post = new HttpPost(searchRequestUrl);
     post.setEntity(BackendUtils.getEncodedForm(driveOnCloudParameters));
