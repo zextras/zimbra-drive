@@ -33,6 +33,7 @@ abstract class AbstractZimbraUsersBackend extends RetroCompatibleBackend
     protected $userManager;
     protected $groupManager;
     protected $allow_zimbra_users_login;
+    protected $setZimbraGroupToUsers;
     /** @var AccountManager */
     private $accountManager;
     /** @var ZimbraAuthenticationBackend  */
@@ -72,6 +73,7 @@ abstract class AbstractZimbraUsersBackend extends RetroCompatibleBackend
 
         $appSettings = new AppSettings($this->config);
         $this->allow_zimbra_users_login = $appSettings->allowZimbraUsersLogin();
+        $this->setZimbraGroupToUsers = $appSettings->setZimbraGroupToUsers();
     }
 
     /**
@@ -121,10 +123,11 @@ abstract class AbstractZimbraUsersBackend extends RetroCompatibleBackend
      */
     private function setDefaultGroups($user)
     {
-        $this->insertUserInGroup($user, self::ZIMBRA_GROUP);
-        $userEmailAddress = $this->getUserEmailAddress($user);
-        $userDomain = $this->getEmailDomain($userEmailAddress);
-        $this->insertUserInGroup($user, $userDomain);
+        if ($this->setZimbraGroupToUsers)
+        {
+            $this->insertUserInGroup($user, self::ZIMBRA_GROUP);
+        }
+        $this->insertUserInGroup($user, $this->getEmailDomain($user->getEMailAddress()));
     }
 
     private function getEmailDomain($email)
