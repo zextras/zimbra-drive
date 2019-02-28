@@ -7,12 +7,12 @@ pipeline {
     stages {
         stage('Node version') {
             steps {
-                sh 'nvm use 6'
+                sh '. $NVM_DIR/nvm.sh && nvm use 6'
             }
         }
         stage('Make') {
             steps {
-                sh 'make clean all'
+                sh '. $NVM_DIR/nvm.sh && make clean all'
             }
         }
     }
