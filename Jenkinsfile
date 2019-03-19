@@ -16,4 +16,15 @@ pipeline {
             }
         }
     }
+    post {
+        always {
+            script {
+                GIT_COMMIT_EMAIL = sh (
+                    script: 'git --no-pager show -s --format=\'%ae\'',
+                    returnStdout: true
+                ).trim()
+            }
+            emailext attachLog: true, body: '$DEFAULT_CONTENT', recipientProviders: [requestor()], subject: '$DEFAULT_SUBJECT',  to: "${GIT_COMMIT_EMAIL}"
+        }
+    }
 }
