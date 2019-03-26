@@ -4,6 +4,9 @@ pipeline {
             label 'nodejs-agent-v1'
         }
     }
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '50'))
+    }
     stages {
         stage('Node version') {
             steps {
