@@ -229,7 +229,7 @@ export class PreviewView extends DwtComposite {
       this.getElement("modified").innerHTML = dateFormatter.format(new Date(item.getModifiedTimeMillis()));
     }
     if (this.getElement("creator"))
-      this.getElement("creator").innerHTML = item.getAuthor();
+      this.getElement("creator").innerHTML = AjxStringUtil.htmlEncode(item.getAuthor());
 
     if (this.getElement("lock"))
       this.getElement("lock").innerHTML = AjxImg.getImageHtml(!item.getPermissions().writable ? "Padlock" : "Blank_16");
@@ -278,7 +278,7 @@ export class PreviewView extends DwtComposite {
     this.getElement("name").innerHTML = AjxStringUtil.htmlEncode(item.getName());
     this.getElement("image").className = "ImgBriefcase_48";
     if (this.getElement("modifier"))
-      this.getElement("modifier").innerHTML = item.getAuthor();
+      this.getElement("modifier").innerHTML = AjxStringUtil.htmlEncode(item.getAuthor());
     this._setIframeContent(AjxTemplate.expand("briefcase.Briefcase#FolderPreview"));
   }
 
