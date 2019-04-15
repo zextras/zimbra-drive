@@ -10,12 +10,12 @@ pipeline {
     stages {
         stage('Node version') {
             steps {
-                sh '. $NVM_DIR/nvm.sh && nvm use 6'
+                sh '. /usr/bin/load_nvm && nvm use 6'
             }
         }
         stage('Make') {
             steps {
-                sh '. $NVM_DIR/nvm.sh && make clean all'
+                sh '. /usr/bin/load_nvm && make clean all'
                 archiveArtifacts artifacts: "dist/zimbra_drive.tgz", fingerprint: true
                 archiveArtifacts artifacts: "dist/zimbradrive.tar.gz", fingerprint: true
                 archiveArtifacts artifacts: "dist/zimbra_drive.md5", fingerprint: true
