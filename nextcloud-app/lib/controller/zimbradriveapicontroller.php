@@ -86,9 +86,9 @@ class ZimbraDriveApiController extends ApiController
      * @param $caseSensitive bool
      * @return Response
      */
-    public function searchRequest($username, $token, $query, $types, $caseSensitive)
+    public function searchRequestShareItemFiltered($username, $token, $query, $types, $caseSensitive)
     {
-        $this->logger->debug($username . ' call searchRequest.');
+        $this->logger->debug($username . ' call searchRequestShareItemFiltered.');
         try {
             $this->loginService->login($username, $token);
         } catch (UnauthorizedException $unauthorizedException) {
@@ -120,6 +120,49 @@ class ZimbraDriveApiController extends ApiController
     }
 
     /**
+     * @CORS
+     * @NoCSRFRequired
+     * @PublicPage
+     * @param $username
+     * @param $token
+     * @param $query
+     * @param $types
+     * @param $caseSensitive bool
+     * @return Response
+     */
+    public function searchRequest($username, $token, $query, $types, $caseSensitive)
+    {
+        $this->logger->debug($username . ' call searchRequest.');
+        try {
+            $this->loginService->login($username, $token);
+        } catch (UnauthorizedException $unauthorizedException) {
+            $this->logUnauthorizedLogin($unauthorizedException);
+            return new EmptyResponse(Http::STATUS_UNAUTHORIZED);
+        }
+
+        $types = json_decode($types, false);
+        if($types === array('document'))
+        {
+            $types = array('file');
+        }
+        $caseSensitive = $caseSensitive === "true";
+
+        try {
+            $wantedFiles =  $this->searchService->search($query, $caseSensitive);
+        } catch (BadRequestException $badRequestException) {
+            $this->logger->info($badRequestException->getMessage());
+            return new EmptyResponse(Http::STATUS_BAD_REQUEST);
+        }
+        catch (MethodNotAllowedException $methodNotAllowedException) {
+            $this->logger->info($methodNotAllowedException->getMessage());
+            return new EmptyResponse(Http::STATUS_METHOD_NOT_ALLOWED);
+        }
+
+        $results = $this->filterNodesByType($wantedFiles, $types);
+        return new JSONResponse($results);
+    }
+
+    /**
      * @param $nodes array
      * @param $allowedTypes array of string
      * @return array
@@ -136,6 +179,45 @@ class ZimbraDriveApiController extends ApiController
         }
         return $results;
 
+    }
+
+    /**
+     * @param $node Node
+     * @param $validTypes array
+     * @return bool
+     */
+    private function nodeHasAValidTypeShareItemFiltered($node, $validTypes)
+    {
+        return in_array($node[ResponseVarName::NODE_TYPE_VAR_NAME], $validTypes, true);
+    }
+
+    /**
+     * @CORS
+     * @NoCSRFRequired
+     * @PublicPage
+     * @param $username
+     * @param $token
+     * @return \OCP\AppFramework\Http\Response
+     */
+    public function getAllFoldersShareItemFiltered($username, $token)
+    {
+        $this->logger->debug($username . ' call getAllFoldersShareItemFiltered.');
+        try {
+            $this->loginService->login($username, $token);
+        } catch (UnauthorizedException $unauthorizedException) {
+            $this->logUnauthorizedLogin($unauthorizedException);
+            return new EmptyResponse(Http::STATUS_UNAUTHORIZED);
+        }
+
+        try {
+            $searchedFolder = $this->storageService->getFolder(StorageService::ROOT);
+        } catch (Exception $exception) {
+            $this->logger->info($exception->getMessage());
+            return new EmptyResponse(Http::STATUS_FORBIDDEN);
+        }
+        $folderTree = $this->storageService->getFolderTreeAttributes($searchedFolder);
+        $folderTreeNoShare = $this->filterShareTreeNodes($folderTree);
+        return new JSONResponse($folderTreeNoShare);
     }
 
     /**
@@ -173,8 +255,7 @@ class ZimbraDriveApiController extends ApiController
             return new EmptyResponse(Http::STATUS_FORBIDDEN);
         }
         $folderTree = $this->storageService->getFolderTreeAttributes($searchedFolder);
-        $folderTreeNoShare = $this->filterShareTreeNodes($folderTree);
-        return new JSONResponse($folderTreeNoShare);
+        return new JSONResponse($folderTree);
     }
 
     /**
@@ -275,7 +356,7 @@ class ZimbraDriveApiController extends ApiController
         catch (NotPermittedException $exception)
         {
             $this->logger->info($exception->getMessage());
-            return new EmptyResponse(Http::STATUS_METHOD_NOT_ALLOWED);
+            return new EmptyResponse(Http::STATUS_FORBIDDEN);
         }
 //        catch (Exception $exception) {
 //            $this->logger->info($exception->getMessage());

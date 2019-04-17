@@ -38,6 +38,7 @@ import {DwtDragEvent} from "../zimbra/ajax/dwt/dnd/DwtDragEvent";
 import {DwtDropEvent} from "../zimbra/ajax/dwt/dnd/DwtDropEvent";
 import {AjxMessageFormat} from "../zimbra/ajax/util/AjxText";
 import {AjxEnv} from "../zimbra/ajax/boot/AjxEnv";
+import {AjxStringUtil} from "../zimbra/ajax/util/AjxStringUtil";
 
 export class DetailListView extends ZimbraDriveBaseView {
 
@@ -183,7 +184,7 @@ export class DetailListView extends ZimbraDriveBaseView {
       } else if (field === ZimbraDriveItem.F_DATE) {
         htmlArr[idx++] = "";
       } else if (field === ZimbraDriveItem.F_FROM) {
-        htmlArr[idx++] = zimbraDriveItem.getAuthor();
+        htmlArr[idx++] = AjxStringUtil.htmlEncode(zimbraDriveItem.getAuthor());
       } else if (field === ZimbraDriveItem.F_FOLDER) {
         zimbraDriveItem.setParentNameElId(this._getFieldId(zimbraDriveItem, ZimbraDriveItem.F_FOLDER));
         htmlArr[idx++] = "<div id='" + zimbraDriveItem.getParentNameElId() + "'>" + zimbraDriveItem.getParentName() + "</div>";
@@ -206,7 +207,7 @@ export class DetailListView extends ZimbraDriveBaseView {
       } else if (field === ZimbraDriveItem.F_DATE) {
         htmlArr[idx++] = AjxDateUtil.simpleComputeDateStr(new Date(zimbraDriveItem.getModifiedTimeMillis()));
       } else if (field === ZimbraDriveItem.F_FROM) {
-        htmlArr[idx++] = zimbraDriveItem.getAuthor();
+        htmlArr[idx++] = AjxStringUtil.htmlEncode(zimbraDriveItem.getAuthor());
       } else if (field === ZimbraDriveItem.F_FOLDER) {
         zimbraDriveItem.setParentNameElId(this._getFieldId(zimbraDriveItem, ZimbraDriveItem.F_FOLDER));
         htmlArr[idx++] = "<div id='" + zimbraDriveItem.getParentNameElId() + "'>" + zimbraDriveItem.getParentName() + "</div>";

@@ -581,7 +581,8 @@ export class ZimbraDriveController extends ZmListController {
     (<ZmZimbraMail>appCtxt.getAppController()).sendRequest({
       soapDoc: soapDoc,
       asyncMode: true,
-      callback: new AjxCallback(this, this._onDeleteDone, [items])
+      callback: new AjxCallback(this, this._onDeleteDone, [items]),
+      errorCallback: new AjxCallback(this, this._onDeleteError),
     });
   }
 
@@ -608,6 +609,14 @@ export class ZimbraDriveController extends ZmListController {
     if (this.isSearchResults) {
       this.refreshList(false);
     }
+  }
+
+  private _onDeleteError(): boolean {
+    appCtxt.setStatusMsg({
+      msg: ZimbraDriveApp.getMessage("errorDelete"),
+      level: ZmStatusView.LEVEL_WARNING,
+    });
+    return true;
   }
 
   private _renameFileListener(ev: DwtUiEvent): void {

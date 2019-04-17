@@ -20,7 +20,7 @@
 
 namespace OCA\ZimbraDrive\Auth;
 
-class ZimbraUsersBackend extends \OC_User_Backend
+class ZimbraUsersBackend extends RetroCompatibleBackend
 {
     const ZIMBRA_GROUP = "zimbra";
 
@@ -41,7 +41,7 @@ class ZimbraUsersBackend extends \OC_User_Backend
     private function initializeOcUserZimbraBackend()
     {
         if (class_exists('OC\\User\\Account')) { //ownCloud 10 all user backend will be 'degraded' to authentication backend
-            $this->oc_user_zimbra_backend = new ZimbraUsersBackendPassword();
+            $this->oc_user_zimbra_backend = new ZimbraUsersBackendPassword($this);
         } else {
             $this->oc_user_zimbra_backend = new ZimbraUsersBackendInDb();
         }

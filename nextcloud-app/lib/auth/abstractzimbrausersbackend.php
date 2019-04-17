@@ -25,7 +25,7 @@ use OCA\ZimbraDrive\Settings\AppSettings;
 use OC\User\User;
 use OCP\IServerContainer;
 
-abstract class AbstractZimbraUsersBackend extends \OC_User_Backend
+abstract class AbstractZimbraUsersBackend extends RetroCompatibleBackend
 {
     const ZIMBRA_GROUP = "zimbra";
     protected $logger;
@@ -33,6 +33,7 @@ abstract class AbstractZimbraUsersBackend extends \OC_User_Backend
     protected $userManager;
     protected $groupManager;
     protected $allow_zimbra_users_login;
+    protected $setZimbraGroupToUsers;
     /** @var AccountManager */
     private $accountManager;
     /** @var ZimbraAuthenticationBackend  */
@@ -72,6 +73,7 @@ abstract class AbstractZimbraUsersBackend extends \OC_User_Backend
 
         $appSettings = new AppSettings($this->config);
         $this->allow_zimbra_users_login = $appSettings->allowZimbraUsersLogin();
+        $this->setZimbraGroupToUsers = $appSettings->setZimbraGroupToUsers();
     }
 
     /**
@@ -121,7 +123,10 @@ abstract class AbstractZimbraUsersBackend extends \OC_User_Backend
      */
     private function setDefaultGroups($user)
     {
-        $this->insertUserInGroup($user, self::ZIMBRA_GROUP);
+        if ($this->setZimbraGroupToUsers)
+        {
+            $this->insertUserInGroup($user, self::ZIMBRA_GROUP);
+        }
         $this->insertUserInGroup($user, $this->getEmailDomain($user->getEMailAddress()));
     }
 
@@ -144,17 +149,33 @@ abstract class AbstractZimbraUsersBackend extends \OC_User_Backend
      */
     private function restoreUserEmailIfChanged(User $user, $userEmail)
     {
-        if( $user->getEMailAddress() !== $userEmail)
+        if( $this->getUserEmailAddress($user) !== $userEmail)
         {
-            if(!is_null($this->accountManager)) //Nextcloud 11
-            {
-                $userData = $this->accountManager->getUser($user);
-                $userData[AccountManager::PROPERTY_EMAIL]['value'] = $userEmail;
-                $this->accountManager->updateUser($user, $userData);
-            } else
-            {
-                $user->setEMailAddress($userEmail);
-            }
+            $this->setUserEmailAddress($user, $userEmail);
+        }
+    }
+
+    private function getUserEmailAddress(User $user){
+        if(!is_null($this->accountManager)) //Nextcloud 11
+        {
+            $userData = $this->accountManager->getUser($user);
+            $userEmailAddress = $userData[AccountManager::PROPERTY_EMAIL]['value'];
+        } else
+        {
+            $userEmailAddress = $user->getEMailAddress();
+        }
+        return $userEmailAddress;
+    }
+
+    private function setUserEmailAddress(User $user, $userEmail){
+        if(!is_null($this->accountManager)) //Nextcloud 11
+        {
+            $userData = $this->accountManager->getUser($user);
+            $userData[AccountManager::PROPERTY_EMAIL]['value'] = $userEmail;
+            $this->accountManager->updateUser($user, $userData);
+        } else
+        {
+            $user->setEMailAddress($userEmail);
         }
     }
 

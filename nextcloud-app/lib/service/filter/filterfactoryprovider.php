@@ -22,6 +22,7 @@
 namespace OCA\ZimbraDrive\Service\Filter;
 
 use OCA\ZimbraDrive\Service\LogService;
+use OCA\ZimbraDrive\Service\StorageService;
 
 class FilterFactoryProvider
 {
@@ -33,16 +34,22 @@ class FilterFactoryProvider
      * @var LogService
      */
     private $logger;
+    /**
+     * @var StorageService
+     */
+    private $storageService;
 
     /**
      * FilterFactoryProvider constructor.
      * @param FilterUtils $filterUtils
+     * @param StorageService $storageService
      * @param LogService $logService
      */
-    public function __construct(FilterUtils $filterUtils, LogService $logService)
+    public function __construct(FilterUtils $filterUtils, StorageService $storageService, LogService $logService)
     {
         $this->filterUtils = $filterUtils;
         $this->logger = $logService;
+        $this->storageService = $storageService;
     }
 
     /**
@@ -51,7 +58,7 @@ class FilterFactoryProvider
     public function getCaseSensitiveFilterFactory()
     {
         $isCaseSensitive = true;
-        return new FilterFactory($this->filterUtils, $isCaseSensitive, $this->logger);
+        return new FilterFactory($this->filterUtils, $isCaseSensitive, $this->storageService, $this->logger);
 
     }
 
@@ -61,6 +68,6 @@ class FilterFactoryProvider
     public function getNonCaseSensitiveFilterFactory()
     {
         $isCaseSensitive = false;
-        return new FilterFactory($this->filterUtils, $isCaseSensitive, $this->logger);
+        return new FilterFactory($this->filterUtils, $isCaseSensitive, $this->storageService, $this->logger);
     }
 }

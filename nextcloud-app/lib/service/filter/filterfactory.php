@@ -22,6 +22,7 @@ namespace OCA\ZimbraDrive\Service\Filter;
 
 
 use OCA\ZimbraDrive\Service\LogService;
+use OCA\ZimbraDrive\Service\StorageService;
 
 class FilterFactory
 {
@@ -34,35 +35,42 @@ class FilterFactory
      * @var LogService
      */
     private $logger;
+    /**
+     * @var StorageService
+     */
+    private $storageService;
 
     /**
      * FilterFactory constructor.
      * @param FilterUtils $filterUtils
      * @param $isCaseSensitive
+     * @param StorageService $storageService
      * @param LogService $logService
      */
-    public function __construct(FilterUtils $filterUtils, $isCaseSensitive, LogService $logService)
+    public function __construct(FilterUtils $filterUtils, $isCaseSensitive, StorageService $storageService, LogService $logService)
     {
         $this->isCaseSensitive = $isCaseSensitive;
         $this->filterUtils = $filterUtils;
         $this->logger = $logService;
+        $this->storageService = $storageService;
     }
 
     /**
      * @param $token
      * @return NodesFilter
      * @throws NoSuchFilterException
+     * @throws \OCA\ZimbraDrive\Service\BadRequestException
      */
     public function createFilter($token)
     {
         if($this->filterUtils->queryIsFoldersContentsRequest($token))
         {
             $searchRootPath = $this->filterUtils->assertPathFromToken($token);
-            return new DirectoryRootNodesFilter($searchRootPath, $this->isCaseSensitive, $this->logger);
+            return new DirectoryRootNodesFilter($searchRootPath, $this->isCaseSensitive, $this->storageService, $this->logger);
         }
         if($this->filterUtils->isPlainText($token))
         {
-            return new PartialNameNodeFilter($token, $this->isCaseSensitive, $this->logger);
+            return new PartialNameNodeFilter($token, $this->isCaseSensitive, $this->storageService, $this->logger);
         }
         throw new NoSuchFilterException();
     }

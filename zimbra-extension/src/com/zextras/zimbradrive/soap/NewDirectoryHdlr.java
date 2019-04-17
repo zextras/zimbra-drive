@@ -87,7 +87,8 @@ public class NewDirectoryHdlr implements SoapHandler
   private HttpResponse sendNewDirectoryToDriveOnCloudServerService(final ZimbraContext zimbraContext, final String path) throws IOException {
     List<NameValuePair> driveOnCloudParameters = mCloudHttpRequestUtils.createDriveOnCloudAuthenticationParams(zimbraContext);
     driveOnCloudParameters.add(new BasicNameValuePair(ZimbraDriveItem.F_PATH, path));
-    return mCloudHttpRequestUtils.sendRequestToCloud(zimbraContext, driveOnCloudParameters, COMMAND);
+    return mCloudHttpRequestUtils.sendRequestToCloud(zimbraContext, driveOnCloudParameters, COMMAND,
+      "1.0");
   }
 
   @Override
