@@ -51,7 +51,9 @@ class ZimbraAuthenticationBackendImpl implements ZimbraAuthenticationBackend
         {
             throw new AuthenticationException();
         }
-        $response = json_decode($httpRequestResponse->getRawResponse());
+        $rawResponse = $httpRequestResponse->getRawResponse();
+        $rawResponse = utf8_encode($rawResponse);
+        $response = json_decode($rawResponse);
         $userId = $response->{'accountId'};
         $userDisplayName = $response->{'displayName'};
         $userEmail = $response->{'email'};
