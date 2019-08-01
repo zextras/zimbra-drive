@@ -1,5 +1,12 @@
-Zimbra Drive
+Open Drive
 ============
+
+Open Drive is not not a fully fledged Zextras product under active support and development, but a contribution provided to the Zimbra Community "as is". 
+
+Anyone is free to download it and to clone the repository to apply any change complying with the project's licensing but there is no official commitment on updates, on the inclusion of features and/or the approval of pull requests. 
+
+---
+ 
 
 Zimbra and Nextcloud / ownCloud integration.
 
@@ -10,7 +17,7 @@ Features:
 - Attach Nextcloud / ownCloud files to email.
 
 Supported Versions:
-- Nextcloud: 9, 10, 11, 12
+- Nextcloud: 9, 10, 11, 12, 13
 - ownCloud: 9, 9.1, 10
 
 ## Install
@@ -123,3 +130,6 @@ mysql -u root --password="${mysql_pwd}" "${occ_db}" -N -s \
             -e "DELETE FROM oc_accounts WHERE uid = '${uid}' LIMIT 1"; \
       done
 ```
+
+## Issues
+Zimbra Drive is an official Zimbra product - support is provided through the official Zimbra channels to both Open Source and Network Edition customers.

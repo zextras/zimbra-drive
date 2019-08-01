@@ -67,6 +67,11 @@ $disableZimbraUsersUrl = $urlGenerator->linkToRoute('zimbradrive.admin_api.disab
         <label for="<?php print(AppSettings::PREAUTH_KEY);?>"><?php p($l->t('Domain Preauth Key')) ?></label>
         <input type="text" name="<?php print(AppSettings::PREAUTH_KEY);?>" id="<?php print(AppSettings::PREAUTH_KEY);?>" value="<?php p($_[AppSettings::PREAUTH_KEY]) ?>">
     </div>
+    <div>
+        <input type="checkbox" class="checkbox" name="<?php print(AppSettings::SET_ZIMBRA_GROUP_TO_USERS);?>" id="<?php print(AppSettings::SET_ZIMBRA_GROUP_TO_USERS);?>"
+           value="1" <?php if ($_[AppSettings::SET_ZIMBRA_GROUP_TO_USERS]) print_unescaped('checked="checked"'); ?>>
+        <label for="<?php print(AppSettings::SET_ZIMBRA_GROUP_TO_USERS);?>"><?php p($l->t('Set Zimbra Group to Users')) ?></label>
+    </div>
     <form action="<?php p($allTestUrl); ?>">
         <input type="submit" value="Test page" />
     </form>

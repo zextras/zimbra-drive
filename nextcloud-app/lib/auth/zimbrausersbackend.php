@@ -41,7 +41,7 @@ class ZimbraUsersBackend extends RetroCompatibleBackend
     private function initializeOcUserZimbraBackend()
     {
         if (class_exists('OC\\User\\Account')) { //ownCloud 10 all user backend will be 'degraded' to authentication backend
-            $this->oc_user_zimbra_backend = new ZimbraUsersBackendPassword();
+            $this->oc_user_zimbra_backend = new ZimbraUsersBackendPassword($this);
         } else {
             $this->oc_user_zimbra_backend = new ZimbraUsersBackendInDb();
         }

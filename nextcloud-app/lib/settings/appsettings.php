@@ -33,6 +33,7 @@ class AppSettings
     const PREAUTH_KEY = "preauth_key";
     const ALLOW_ZIMBRA_USERS_LOGIN = "allow_zimbra_users_login";
     const ENABLE_ZIMBRA_USERS = "enable_zimbra_users";
+    const SET_ZIMBRA_GROUP_TO_USERS = "set_zimbra_group";
 
     /** @var IConfig */
     private $config;
@@ -76,6 +77,11 @@ class AppSettings
     public function allowZimbraUsersLogin()
     {
         return $this->config->getAppValue(App::APP_NAME, self::ALLOW_ZIMBRA_USERS_LOGIN, 'false') === 'true';
+    }
+
+    public function setZimbraGroupToUsers()
+    {
+        return $this->config->getAppValue(App::APP_NAME, self::SET_ZIMBRA_GROUP_TO_USERS, 'true') === 'true';
     }
 
 }

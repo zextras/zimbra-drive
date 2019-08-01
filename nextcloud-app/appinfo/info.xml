@@ -28,7 +28,7 @@
     </description>
     <licence>AGPL</licence>
     <author>ZeXtras</author>
-    <version>0.8.18</version>
+    <version>0.8.23</version>
     <namespace>ZimbraDrive</namespace>
     <category>auth</category>
     <category>integration</category>
@@ -42,7 +42,7 @@
 
     <dependencies>
         <owncloud min-version="9.0" max-version="10.0"/>
-        <nextcloud min-version="9" max-version="13"/>
+        <nextcloud min-version="9" max-version="15"/>
     </dependencies>
     <types>
         <authentication/>
