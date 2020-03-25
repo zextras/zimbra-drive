@@ -1,12 +1,8 @@
-Open Drive
+Zimbra Drive
 ============
 
-Open Drive is not not a fully fledged Zextras product under active support and development, but a contribution provided to the Zimbra Community "as is". 
-
-Anyone is free to download it and to clone the repository to apply any change complying with the project's licensing but there is no official commitment on updates, on the inclusion of features and/or the approval of pull requests. 
-
+This is Forked version from ZeXtras fixed to work with NextCloud 18
 ---
- 
 
 Zimbra and Nextcloud / ownCloud integration.
 
@@ -17,8 +13,7 @@ Features:
 - Attach Nextcloud / ownCloud files to email.
 
 Supported Versions:
-- Nextcloud: 9, 10, 11, 12, 13
-- ownCloud: 9, 9.1, 10
+- Nextcloud: 18
 
 ## Install
 
