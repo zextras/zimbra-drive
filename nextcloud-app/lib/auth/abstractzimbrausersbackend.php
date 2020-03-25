@@ -61,7 +61,7 @@ abstract class AbstractZimbraUsersBackend extends RetroCompatibleBackend
         $this->config = $server->getConfig();
         $this->userManager = $server->getUserManager();
         $this->groupManager = $server->getGroupManager();
-
+/*
         if(class_exists('OC\Accounts\AccountManager')) //Nextcloud >= 11
         {
             $this->accountManager = new AccountManager(
@@ -70,7 +70,7 @@ abstract class AbstractZimbraUsersBackend extends RetroCompatibleBackend
                 $server->getJobList() //Nextcloud >= 12.0.1
             );
         }
-
+*/
         $appSettings = new AppSettings($this->config);
         $this->allow_zimbra_users_login = $appSettings->allowZimbraUsersLogin();
         $this->setZimbraGroupToUsers = $appSettings->setZimbraGroupToUsers();
