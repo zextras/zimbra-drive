@@ -24,6 +24,7 @@ use OC\Accounts\AccountManager;
 use OCA\ZimbraDrive\Settings\AppSettings;
 use OC\User\User;
 use OCP\IServerContainer;
+use Psr\Log\LoggerInterface;
 
 abstract class AbstractZimbraUsersBackend extends RetroCompatibleBackend
 {
@@ -57,7 +58,7 @@ abstract class AbstractZimbraUsersBackend extends RetroCompatibleBackend
             $this->zimbraAuthenticationBackend = $zimbraAuthenticationBackend;
         }
 
-        $this->logger = $server->getLogger();
+        $this->logger = $server->get(LoggerInterface::class);
         $this->config = $server->getConfig();
         $this->userManager = $server->getUserManager();
         $this->groupManager = $server->getGroupManager();
@@ -66,6 +67,7 @@ abstract class AbstractZimbraUsersBackend extends RetroCompatibleBackend
         {
             $this->accountManager = new AccountManager(
                 $server->getDatabaseConnection(),
+                $this->config, // Nextcloud >= 21
                 $server->getEventDispatcher(),
                 $server->getJobList() //Nextcloud >= 12.0.1
             );

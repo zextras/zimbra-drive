@@ -17,8 +17,7 @@ Features:
 - Attach Nextcloud / ownCloud files to email.
 
 Supported Versions:
-- Nextcloud: 9, 10, 11, 12, 13
-- ownCloud: 9, 9.1, 10
+- Nextcloud: 21
 
 ## Install
 
