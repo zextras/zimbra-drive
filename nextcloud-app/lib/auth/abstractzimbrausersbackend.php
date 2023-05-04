@@ -29,6 +29,7 @@ use OCP\Security\VerificationToken\IVerificationToken;
 use OCP\Defaults;
 use OCP\L10N\IFactory;
 use OCP\IURLGenerator;
+use OC\Accounts\Account;
 
 abstract class AbstractZimbraUsersBackend extends RetroCompatibleBackend
 {
@@ -112,7 +113,9 @@ abstract class AbstractZimbraUsersBackend extends RetroCompatibleBackend
             {
                 $this->createUser($zimbraUser->getUid(), $zimbraUser->getDisplayName());
             }
-            $this->setDefaultUserAttributes($zimbraUser);
+            $user = $this->userManager->get($zimbraUser->getUid());
+            $account = $this->accountManager->getAccount($user);
+            $this->setDefaultUserAttributes($zimbraUser, $account);
 
             return $zimbraUser->getUid();
         } catch (\Exception $ignore)
@@ -123,24 +126,32 @@ abstract class AbstractZimbraUsersBackend extends RetroCompatibleBackend
 
     /**
      * @param ZimbraUser $zimbraUser
+     * @param Account $account
      */
-    private function setDefaultUserAttributes($zimbraUser){
-        $user = $this->userManager->get($zimbraUser->getUid());
-        $this->restoreUserEmailIfChanged($user, $zimbraUser->getEmail());
-        $this->restoreUserDisplayNameIfChanged($user, $zimbraUser->getDisplayName());
-        $this->setDefaultGroups($user);
+    private function setDefaultUserAttributes($zimbraUser, $account){
+        $this->restoreUserEmailIfChanged($account, $zimbraUser->getEmail());
+        $this->restoreUserDisplayNameIfChanged($account, $zimbraUser->getDisplayName());
+        $this->setDefaultGroups($account);
     }
 
     /**
-     * @param $user User
+     * @param $account Account
      */
-    private function setDefaultGroups($user)
+    private function setDefaultGroups($account)
     {
+        $user = $account->getUser();
+
+        $accountEmail = '';
+        if(!is_null($account->getProperty(AccountManager::PROPERTY_EMAIL)))
+        {
+            $accountEmail = $account->getProperty(AccountManager::PROPERTY_EMAIL)->getValue();
+        }
+
         if ($this->setZimbraGroupToUsers)
         {
             $this->insertUserInGroup($user, self::ZIMBRA_GROUP);
         }
-        $this->insertUserInGroup($user, $this->getEmailDomain($user->getEMailAddress()));
+        $this->insertUserInGroup($user, $this->getEmailDomain($accountEmail));
     }
 
     private function getEmailDomain($email)
@@ -157,59 +168,42 @@ abstract class AbstractZimbraUsersBackend extends RetroCompatibleBackend
     protected abstract function createUser($userId, $userDisplayName);
 
     /**
-     * @param $user User
+     * @param $account Account
      * @param $userEmail string
      */
-    private function restoreUserEmailIfChanged(User $user, $userEmail)
+    private function restoreUserEmailIfChanged(Account $account, $userEmail)
     {
-        if( $this->getUserEmailAddress($user) !== $userEmail)
+        $accountEmail = '';
+        if(!is_null($account->getProperty(AccountManager::PROPERTY_EMAIL)))
         {
-            $this->setUserEmailAddress($user, $userEmail);
+            $accountEmail = $account->getProperty(AccountManager::PROPERTY_EMAIL)->getValue();
+        }
+        if( $accountEmail !== $userEmail)
+        {
+            $this->setUserEmailAddress($account, $userEmail);
         }
     }
 
-    private function getUserEmailAddress(User $user){
-        if(!is_null($this->accountManager)) //Nextcloud 11
-        {
-            $account = $this->accountManager->getAccount($user);
-            if(!is_null($account->getProperty(AccountManager::PROPERTY_EMAIL)))
-            {
-                $userEmailAddress = $account->getProperty(AccountManager::PROPERTY_EMAIL)->getValue();
-            } else {
-                $userEmailAddress = '';
-            }
-        } else
-        {
-            $userEmailAddress = $user->getEMailAddress();
-        }
-        return $userEmailAddress;
+    private function setUserEmailAddress(Account $account, $userEmail){
+        $account->setProperty(AccountManager::PROPERTY_EMAIL, $userEmail, AccountManager::SCOPE_LOCAL, AccountManager::NOT_VERIFIED);
+        $this->accountManager->updateAccount($account);
     }
 
-    private function setUserEmailAddress(User $user, $userEmail){
-        if(!is_null($this->accountManager)) //Nextcloud 11
-        {
-            $account = $this->accountManager->getAccount($user);
-            $account->setProperty(AccountManager::PROPERTY_EMAIL, $userEmail, AccountManager::SCOPE_LOCAL, AccountManager::NOT_VERIFIED);
-            $this->accountManager->updateAccount($account);
-        } else
-        {
-            $user->setEMailAddress($userEmail);
-        }
+    private function setUserDisplayName(Account $account, $userDisplayName){
+        $account->setProperty(AccountManager::PROPERTY_DISPLAYNAME, $userDisplayName, AccountManager::SCOPE_LOCAL, AccountManager::NOT_VERIFIED);
+        $this->accountManager->updateAccount($account);
     }
 
-    private function restoreUserDisplayNameIfChanged(User $user, $userDisplayName)
+    private function restoreUserDisplayNameIfChanged(Account $account, $userDisplayName)
     {
-        if($user->getDisplayName() !== $userDisplayName)
+        $accountDisplayName = '';
+        if(!is_null($account->getProperty(AccountManager::PROPERTY_DISPLAYNAME)))
         {
-            if(!is_null($this->accountManager)) //Nextcloud 11
-            {
-                $userData = $this->accountManager->getUser($user);
-                $userData[AccountManager::PROPERTY_DISPLAYNAME]['value'] = $userDisplayName;
-                $this->accountManager->updateUser($user, $userData);
-            } else
-            {
-                $user->setDisplayName($userDisplayName);
-            }
+            $accountDisplayName = $account->getProperty(AccountManager::PROPERTY_DISPLAYNAME)->getValue();
+        }
+        if( $accountDisplayName !== $userDisplayName)
+        {
+            $this->setUserDisplayName($account, $userDisplayName);
         }
     }
 
