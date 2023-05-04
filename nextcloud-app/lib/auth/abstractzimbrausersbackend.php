@@ -25,6 +25,10 @@ use OCA\ZimbraDrive\Settings\AppSettings;
 use OC\User\User;
 use OCP\IServerContainer;
 use Psr\Log\LoggerInterface;
+use OCP\Security\VerificationToken\IVerificationToken;
+use OCP\Defaults;
+use OCP\L10N\IFactory;
+use OCP\IURLGenerator;
 
 abstract class AbstractZimbraUsersBackend extends RetroCompatibleBackend
 {
@@ -69,8 +73,14 @@ abstract class AbstractZimbraUsersBackend extends RetroCompatibleBackend
                 $server->getDatabaseConnection(),
                 $this->config, // Nextcloud >= 21
                 $server->getEventDispatcher(),
-                $server->getJobList(), // Nextcloud >= 12.0.1
-                $this->logger // Nexcloud >= 18.0.0
+                $server->getJobList(), //Nextcloud >= 12.0.1
+                $this->logger, // Nexcloud >= 18.0.0
+                $server->get(IVerificationToken::class),
+                $server->getMailer(),
+                $server->get(Defaults::class),
+                $server->get(IFactory::class),
+                $server->get(IURLGenerator::class),
+                $server->getCrypto()
             );
         }
 
