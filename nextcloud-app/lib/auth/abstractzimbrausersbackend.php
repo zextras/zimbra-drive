@@ -171,8 +171,13 @@ abstract class AbstractZimbraUsersBackend extends RetroCompatibleBackend
     private function getUserEmailAddress(User $user){
         if(!is_null($this->accountManager)) //Nextcloud 11
         {
-            $userData = $this->accountManager->getUser($user);
-            $userEmailAddress = $userData[AccountManager::PROPERTY_EMAIL]['value'];
+            $account = $this->accountManager->getAccount($user);
+            if(!is_null($account->getProperty(AccountManager::PROPERTY_EMAIL)))
+            {
+                $userEmailAddress = $account->getProperty(AccountManager::PROPERTY_EMAIL)->getValue();
+            } else {
+                $userEmailAddress = '';
+            }
         } else
         {
             $userEmailAddress = $user->getEMailAddress();
@@ -183,9 +188,9 @@ abstract class AbstractZimbraUsersBackend extends RetroCompatibleBackend
     private function setUserEmailAddress(User $user, $userEmail){
         if(!is_null($this->accountManager)) //Nextcloud 11
         {
-            $userData = $this->accountManager->getUser($user);
-            $userData[AccountManager::PROPERTY_EMAIL]['value'] = $userEmail;
-            $this->accountManager->updateUser($user, $userData);
+            $account = $this->accountManager->getAccount($user);
+            $account->setProperty(AccountManager::PROPERTY_EMAIL, $userEmail, AccountManager::SCOPE_LOCAL, AccountManager::NOT_VERIFIED);
+            $this->accountManager->updateAccount($account);
         } else
         {
             $user->setEMailAddress($userEmail);
