@@ -42,7 +42,7 @@
 
     <dependencies>
         <owncloud min-version="9.0" max-version="10.3"/>
-        <nextcloud min-version="9" max-version="18"/>
+        <nextcloud min-version="24" max-version="26"/>
     </dependencies>
     <types>
         <authentication/>
