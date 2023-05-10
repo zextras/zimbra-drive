@@ -67,7 +67,8 @@ abstract class AbstractZimbraUsersBackend extends RetroCompatibleBackend
             $this->accountManager = new AccountManager(
                 $server->getDatabaseConnection(),
                 $server->getEventDispatcher(),
-                $server->getJobList() //Nextcloud >= 12.0.1
+                $server->getJobList(), // Nextcloud >= 12.0.1
+                $this->logger // Nexcloud >= 18.0.0
             );
         }
 
