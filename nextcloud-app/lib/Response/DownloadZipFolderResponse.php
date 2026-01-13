@@ -40,6 +40,7 @@ class DownloadZipFolderResponse extends Response  implements ICallbackResponse
 
     public function __construct(StorageService $storageService, NodeLockerFactory $nodeLockerFactory, Folder $folder)
     {
+        parent::__construct();
         $this->storageService = $storageService;
         $this->folder = $folder;
 

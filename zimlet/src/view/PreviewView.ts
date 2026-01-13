@@ -63,7 +63,7 @@ export class PreviewView extends DwtComposite {
 
   public _initialize(): void {
     let htmlElId = this.getHTMLElId();
-    this.getHtmlElement().innerHTML = AjxTemplate.expand("com_zextras_drive_open.ZimbraDrive#PreviewView", {id: htmlElId});
+    this.getHtmlElement().innerHTML = AjxTemplate.expand("com_btactic_drive_open.ZimbraDrive#PreviewView", {id: htmlElId});
 
     // Set each element
     this.getElement("header");
@@ -76,7 +76,7 @@ export class PreviewView extends DwtComposite {
       className: "PreviewFrame",
       id: htmlElId + "_iframe",
       hidden: false,
-      html: AjxTemplate.expand("com_zextras_drive_open.ZimbraDrive#NoPreview", {id: htmlElId}),
+      html: AjxTemplate.expand("com_btactic_drive_open.ZimbraDrive#NoPreview", {id: htmlElId}),
       noscroll: false,
       posStyle: DwtControl.STATIC_STYLE
     };

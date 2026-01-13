@@ -68,12 +68,12 @@ build/zimbra-extension/zimbradrive-extension.jar: build/zimbra-extension/zimbrad
 	cp zimbra-extension/dist/zimbradrive-extension.jar build/zimbra-extension/
 
 # Zimlet for Zimbra
-zimlet/dist/com_zextras_drive_open.zip:
-	cd zimlet && make dist/com_zextras_drive_open.zip
+zimlet/dist/com_btactic_drive_open.zip:
+	cd zimlet && make dist/com_btactic_drive_open.zip
 
-build/zimlet/com_zextras_drive_open.zip: zimlet/dist/com_zextras_drive_open.zip
+build/zimlet/com_btactic_drive_open.zip: zimlet/dist/com_btactic_drive_open.zip
 	mkdir -p build/zimlet
-	cp zimlet/dist/com_zextras_drive_open.zip build/zimlet/
+	cp zimlet/dist/com_btactic_drive_open.zip build/zimlet/
 
 # Project package
 build/README.md:
@@ -87,14 +87,14 @@ build/LICENSE:
 build/zimbra_drive.md5: build/README.md \
 						build/LICENSE \
 						build/zimbra-extension/zimbradrive-extension.jar \
-						build/zimlet/com_zextras_drive_open.zip
+						build/zimlet/com_btactic_drive_open.zip
 	mkdir -p build
 	cd build && find . -type f -not -name "zimbra_drive.md5" -exec md5sum "{}" + > zimbra_drive.md5
 
 dist/zimbra_drive.tgz: build/README.md \
 						build/LICENSE \
 						build/zimbra-extension/zimbradrive-extension.jar \
-						build/zimlet/com_zextras_drive_open.zip \
+						build/zimlet/com_btactic_drive_open.zip \
 						build/zimbra_drive.md5
 	mkdir -p build
 	mkdir -p dist

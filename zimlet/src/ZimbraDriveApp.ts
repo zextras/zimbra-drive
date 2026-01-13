@@ -17,7 +17,7 @@
 
 import {ZmZimletApp, ZmZimletAppLaunchParams} from "./zimbra/zimbraMail/share/view/ZmZimletApp";
 import {DwtControl} from "./zimbra/ajax/dwt/widgets/DwtControl";
-import {ZimbraDriveZimlet} from "./com_zextras_drive_open_hdlr";
+import {ZimbraDriveZimlet} from "./com_btactic_drive_open_hdlr";
 import {ZimbraDriveController, ZimbraDriveErrorController, ZimbraDriveMoveParams} from "./ZimbraDriveController";
 import {ZmSearchResult} from "./zimbra/zimbraMail/share/model/ZmSearchResult";
 import {ZmSearchResultsController} from "./zimbra/zimbraMail/share/controller/ZmSearchResultsController";
@@ -62,7 +62,7 @@ import {ZmFolderTree} from "./zimbra/zimbraMail/share/model/ZmFolderTree";
 import {ZmOrganizer} from "./zimbra/zimbraMail/share/model/ZmOrganizer";
 import {ZmId} from "./zimbra/zimbraMail/core/ZmId";
 
-declare let com_zextras_drive_open: {[label: string]: string};
+declare let com_btactic_drive_open: {[label: string]: string};
 
 export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, RegisterItemsApp, ShowSearchResultsApp, GetInitialSearchTypeApp {
 
@@ -429,7 +429,7 @@ export class ZimbraDriveApp extends ZmZimletApp implements DefineApiApp, Registe
 
   public static getMessage(msg: string, substitutions?: string[]): string {
     try {
-      return AjxMessageFormat.format(com_zextras_drive_open[msg], substitutions);
+      return AjxMessageFormat.format(com_btactic_drive_open[msg], substitutions);
     }
     catch (error) {
       return msg;

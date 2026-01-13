@@ -151,7 +151,7 @@ export class ZimbraDriveTabView extends DwtComposite {
     this._folderListId = Dwt.getNextId();
     this.setContent(
       AjxTemplate.expand(
-        "com_zextras_drive_open.ZimbraDrive#AttachDialog",
+        "com_btactic_drive_open.ZimbraDrive#AttachDialog",
         {
           id: this._tableID,
           folderTreeCellId: this._folderTreeCellId,

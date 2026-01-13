@@ -20,14 +20,14 @@
 
 namespace OCA\ZimbraDrive\Service;
 
-use OCP\ILogger;
+use Psr\Log\LoggerInterface;
 
 class LogService
 {
     private $logger;
     private $appName;
 
-    public function __construct(ILogger $logger, $appName)
+    public function __construct(LoggerInterface $logger, $appName)
     {
         $this->logger = $logger;
         $this->appName = $appName;

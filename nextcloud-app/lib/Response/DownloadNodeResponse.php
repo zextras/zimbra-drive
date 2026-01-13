@@ -34,6 +34,7 @@ class DownloadNodeResponse extends Response  implements ICallbackResponse
     private $downloadResponseInstance;
 
     public function __construct(DownloadItemResponseFactory $downloadResponseFactory, Node $node) {
+        parent::__construct();
         if( $node instanceof Folder )
         {
             /** @var Folder $node */

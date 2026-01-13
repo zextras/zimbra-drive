@@ -24,6 +24,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.openzal.zal.Account;
+import org.openzal.zal.AuthProvider;
 import org.openzal.zal.AuthToken;
 import org.openzal.zal.Provisioning;
 import org.openzal.zal.exceptions.NoSuchAccountException;
@@ -72,7 +73,8 @@ public class BackendUtils
   private AuthToken assertAuthToken(HttpServletRequest httpServletRequest) {
     String zmAuthToken = assertZmAuthTokenFromCookies(httpServletRequest);
     try {
-      return AuthToken.getAuthToken(zmAuthToken);
+      AuthProvider authProvider = new AuthProvider();
+      return authProvider.decodeAuthToken(zmAuthToken);
     }
     catch (Exception ex) {
       ZimbraLog.extensions.debug("Unable to create authToken", ex);

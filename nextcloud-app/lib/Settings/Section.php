@@ -20,7 +20,7 @@
 
 namespace OCA\ZimbraDrive\Settings;
 
-use OCA\ZimbraDrive\AppInfo\App;
+use OCA\ZimbraDrive\AppInfo\Application;
 use OCP\Settings\ISection;
 use OCP\Settings\IIconSection;
 use OCP\IURLGenerator;
@@ -39,7 +39,7 @@ if (interface_exists('OCP\\Settings\\IIconSection'))
 
         public function getIcon()
         {
-            return $this->url->imagePath('zimbradrive', 'app-dark.svg');
+            return $this->url->imagePath(Application::APP_ID, 'app-dark.svg');
         }
     }
 }
@@ -49,12 +49,12 @@ else
     {
         public function __construct()
         {
-            \OC_Util::addStyle('zimbradrive', 'style');
+            \OC_Util::addStyle(Application::APP_ID, 'style');
         }
 
         public function getIconName()
         {
-            return 'zimbradrive';
+            return Application::APP_ID;
         }
    }
 }

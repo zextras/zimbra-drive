@@ -38,7 +38,7 @@ public class ZimbraDrive
           .append("Zimbra Drive Zimlet")
           .append("\n");
 
-      File zimletVersionFile = new File("/opt/zimbra/zimlets-deployed/com_zextras_drive_open/VERSION");
+      File zimletVersionFile = new File("/opt/zimbra/zimlets-deployed/com_btactic_drive_open/VERSION");
       if (zimletVersionFile.exists() && zimletVersionFile.canRead())
       {
         BufferedReader reader = new BufferedReader(new FileReader(zimletVersionFile));

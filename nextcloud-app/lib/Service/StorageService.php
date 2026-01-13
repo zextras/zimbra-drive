@@ -28,6 +28,7 @@ use OCP\Files\NotPermittedException;
 use OCP\IServerContainer;
 use OC\Files\Filesystem;
 use OCP\Files\Node;
+use OCP\Share\IShare;
 use OCP\Share\IManager;
 
 class StorageService
@@ -506,7 +507,7 @@ class StorageService
     {
         $shares = $this->shareManager->getSharesBy(
             $owner->getUID(),
-            \OCP\Share::SHARE_TYPE_LINK,
+            IShare::TYPE_LINK,
             $node,
             false,
             1

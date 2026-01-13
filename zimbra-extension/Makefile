@@ -22,32 +22,32 @@ all: dist/zimbradrive-extension.jar
 
 lib/commons-io-1.4.jar:
 	mkdir -p lib
-	wget http://central.maven.org/maven2/commons-io/commons-io/1.4/commons-io-1.4.jar \
+	wget https://repo1.maven.org/maven2/commons-io/commons-io/1.4/commons-io-1.4.jar \
 		-O lib/commons-io-1.4.jar
 
 lib/javax.servlet-api-3.1.0.jar:
 	mkdir -p lib
-	wget http://central.maven.org/maven2/javax/servlet/javax.servlet-api/3.1.0/javax.servlet-api-3.1.0.jar \
+	wget https://repo1.maven.org/maven2/javax/servlet/javax.servlet-api/3.1.0/javax.servlet-api-3.1.0.jar \
 		-O lib/javax.servlet-api-3.1.0.jar
 
 lib/json-20160810.jar:
 	mkdir -p lib
-	wget http://central.maven.org/maven2/org/json/json/20160810/json-20160810.jar \
+	wget https://repo1.maven.org/maven2/org/json/json/20160810/json-20160810.jar \
 		-O lib/json-20160810.jar
 
 lib/httpcore-4.4.6.jar:
 	mkdir -p lib
-	wget http://central.maven.org/maven2/org/apache/httpcomponents/httpcore/4.4.6/httpcore-4.4.6.jar \
+	wget https://repo1.maven.org/maven2/org/apache/httpcomponents/httpcore/4.4.6/httpcore-4.4.6.jar \
 		-O lib/httpcore-4.4.6.jar
 
 lib/httpclient-4.5.2.jar:
 	mkdir -p lib
-	wget http://central.maven.org/maven2/org/apache/httpcomponents/httpclient/4.5.2/httpclient-4.5.2.jar \
+	wget https://repo1.maven.org/maven2/org/apache/httpcomponents/httpclient/4.5.2/httpclient-4.5.2.jar \
 		-O lib/httpclient-4.5.2.jar
 
 lib/zal.jar:
 	mkdir -p lib
-	wget https://openzal.org/${ZAL_VERSION}/zal-${ZAL_VERSION}-${ZAL_ZIMBRA_VERSION}.jar \
+	wget https://github.com/btactic/openzal/releases/download/v${ZAL_VERSION}-${ZAL_ZIMBRA_VERSION}/zal-${ZAL_VERSION}-${ZAL_ZIMBRA_VERSION}.jar \
 		-O lib/zal.jar
 
 dist/zimbradrive-extension.jar: lib/commons-io-1.4.jar \

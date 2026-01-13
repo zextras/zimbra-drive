@@ -45,6 +45,7 @@ class DownloadFileResponse extends Response  implements ICallbackResponse
      */
     public function __construct(StorageService $storageService, NodeLockerFactory $nodeLockerFactory, File $file)
     {
+        parent::__construct();
         $this->storageService = $storageService;
         $this->file = $file;
 

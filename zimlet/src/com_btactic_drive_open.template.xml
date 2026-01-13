@@ -15,15 +15,15 @@
   ~ If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<zimlet name="com_zextras_drive_open"
+<zimlet name="com_btactic_drive_open"
         version="0.0.0"
         label="${msg.zimletLabel}"
         description="${msg.zimletDescription}"
         target="main compose-window view-window">
 
-    <include>com_zextras_drive_open_hdlr.js</include>
+    <include>com_btactic_drive_open_hdlr.js</include>
     <include>ZimbraDrive.template.js</include>
-    <includeCSS>com_zextras_drive_open.css</includeCSS>
-    <handlerObject>com_zextras_drive_open_hdlr</handlerObject>
+    <includeCSS>com_btactic_drive_open.css</includeCSS>
+    <handlerObject>com_btactic_drive_open_hdlr</handlerObject>
 
 </zimlet>

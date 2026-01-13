@@ -56,7 +56,7 @@ export class ZimbraDriveChooseFolderDialog extends ZmChooseFolderDialog {
     this._folderDescDivId = this._htmlElId + "_folderDescDivId";
     this._folderTreeDivId = this._htmlElId + "_folderTreeDivId";
 
-    return AjxTemplate.expand("com_zextras_drive_open.ZimbraDrive#ChooseFolderDialog", {id: this._htmlElId});
+    return AjxTemplate.expand("com_btactic_drive_open.ZimbraDrive#ChooseFolderDialog", {id: this._htmlElId});
   }
 
 

@@ -39,7 +39,7 @@ var cow = "function Cow() {}\nCow.prototype.moo = function() { console.log('Moo!
 
 module.exports = {
   entry: {
-    com_zextras_drive_open_hdlr: "./src/com_zextras_drive_open_hdlr.ts"
+    com_btactic_drive_open_hdlr: "./src/com_btactic_drive_open_hdlr.ts"
   },
   output: {
     path: path.resolve(__dirname, "build"),

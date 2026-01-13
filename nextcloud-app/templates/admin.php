@@ -18,11 +18,11 @@
  * If you require any further information, feel free to contact legal@zextras.com.
  */
 
-use OCA\ZimbraDrive\AppInfo\App;
+use OCA\ZimbraDrive\AppInfo\Application;
 use OCA\ZimbraDrive\Settings\AppSettings;
 
-script(App::APP_NAME, 'admin');
-style(App::APP_NAME, 'style');
+script(Application::APP_ID, 'admin');
+style(Application::APP_ID, 'style');
 $urlGenerator = \OC::$server->getURLGenerator();
 $allTestUrl = $urlGenerator->linkToRoute('zimbradrive.test.all');
 $enableZimbraUsersUrl = $urlGenerator->linkToRoute('zimbradrive.admin_api.enableZimbraAuthentication');
@@ -31,7 +31,7 @@ $disableZimbraUsersUrl = $urlGenerator->linkToRoute('zimbradrive.admin_api.disab
 <div class="section" id="zimbradrive">
     <h2>Zimbra Drive</h2>
     <div>
-        <p><?php p($l->t('Version: ') . $l->t(\OC_App::getAppVersion('zimbradrive'))) ?></p>
+        <p><?php p($l->t('Version: ') . $l->t(\OCP\Server::get(\OCP\App\IAppManager::class)->getAppVersion('zimbradrive'))) ?></p>
     </div>
     <div>
         <input type="checkbox" class="checkbox" name="<?php print(AppSettings::ENABLE_ZIMBRA_USERS);?>" id="<?php print(AppSettings::ENABLE_ZIMBRA_USERS);?>"

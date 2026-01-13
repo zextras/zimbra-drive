@@ -20,7 +20,7 @@
         Build file for the Zimbra Drive Extension.
     </description>
 
-    <property name="required-zal-version" value="1.11.8"/>
+    <property name="required-zal-version" value="2.36.0"/>
 
     <property name="lib"   value="lib/"/>
     <property name="build" value="build/"/>
@@ -31,6 +31,9 @@
     <path id="libraries">
         <fileset dir="${lib}" >
             <include name="*.jar"/>
+        </fileset>
+        <fileset dir="/opt/zimbra/lib/jars/" >
+            <include name="zimbrastore.jar"/>
         </fileset>
     </path>
 

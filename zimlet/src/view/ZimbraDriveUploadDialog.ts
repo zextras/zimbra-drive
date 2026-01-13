@@ -216,7 +216,7 @@ export class ZimbraDriveUploadDialog extends ZmUploadDialog {
   public _createUploadHtml(): void {
     this.setContent(
       AjxTemplate.expand(
-        "com_zextras_drive_open.ZimbraDrive#UploadDialog",
+        "com_btactic_drive_open.ZimbraDrive#UploadDialog",
         {
           id: this._htmlElId,
           url: ZimbraDriveApp.UPLOAD_URL

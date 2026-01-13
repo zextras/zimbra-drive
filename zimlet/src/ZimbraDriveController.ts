@@ -1194,7 +1194,7 @@ export class ZimbraDriveErrorController extends ZmBaseController {
       className: "SplashScreen"
     });
     this._view[view].setContent(
-      AjxTemplate.expand("com_zextras_drive_open.ZimbraDrive#ServerErrorContainer", {id: view, errMsg: ZimbraDriveApp.getMessage("errorSplash")})
+      AjxTemplate.expand("com_btactic_drive_open.ZimbraDrive#ServerErrorContainer", {id: view, errMsg: ZimbraDriveApp.getMessage("errorSplash")})
     );
     this._view[view].getHtmlElement().style.textAlign = "center";
     this._errorMsgElement = document.getElementById(`${view}_title`);

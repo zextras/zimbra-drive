@@ -177,7 +177,7 @@ interface SearchDomainData {
 }
 
 interface ZimletWindow extends Window {
-  com_zextras_drive_open_hdlr: Function;
+  com_btactic_drive_open_hdlr: Function;
   ZmZimbraDriveApp: Function;
   ZmZimbraDriveController: Function;
   ZmZimbraDriveErrorController: Function;
@@ -206,4 +206,4 @@ ZmApp.HIDE_ZIMLETS[ZimbraDriveApp.APP_NAME] = true;
 (<ZimletWindow>window).ZmZimbraDriveItem = ZimbraDriveItem;
 (<ZimletWindow>window).ZmZimbraDriveFolder = ZimbraDriveFolder;
 (<ZimletWindow>window).ZmZimbraDrivePreviewView = PreviewView;
-(<ZimletWindow>window).com_zextras_drive_open_hdlr = ZimbraDriveZimlet;
+(<ZimletWindow>window).com_btactic_drive_open_hdlr = ZimbraDriveZimlet;

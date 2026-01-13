@@ -2,7 +2,7 @@
   "name": "com-zextras-zimbra-drive",
   "version": "2.0.4",
   "description": "A Zimlet for Zimbra",
-  "main": "./src/com_zextras_drive_open_hdlr.ts",
+  "main": "./src/com_btactic_drive_open_hdlr.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

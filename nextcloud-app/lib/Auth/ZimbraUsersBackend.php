@@ -27,13 +27,12 @@ class ZimbraUsersBackend extends RetroCompatibleBackend
     /** @var AbstractZimbraUsersBackend */
     private $oc_user_zimbra_backend;
 
-    /** @var \OCP\ILogger  */
+    /** @var Psr\Log\LoggerInterface  */
     private $logger;
 
     public function __construct()
     {
-        $server = \OC::$server;
-        $this->logger = $server->getLogger();
+        $this->logger = \OCP\Log\logger('zimbradrive');
 
         $this->initializeOcUserZimbraBackend();
     }
